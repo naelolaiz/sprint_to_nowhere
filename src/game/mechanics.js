@@ -14,7 +14,7 @@ export const debtSpeedPenalty = (debt) => {
 
 export const dayFrac = (s) => {
   const d = (s.currentDay || 1) - 1;
-  const dayBudget = s.dayFocus || ((s.sprintCapacity ?? 60) / 5);
+  const dayBudget = s.dayFocus || 9;
   const used = 1 - Math.max(0, Math.min(1, (s.dayFocusRemaining ?? dayBudget) / dayBudget));
   // clamp slightly inside (d, d+1) so end-of-day snapshots don't collide with next-day events
   return d + Math.max(0.001, Math.min(0.999, used));

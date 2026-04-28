@@ -6,12 +6,53 @@ import { TicketCard } from '../common/TicketCard.jsx';
 import { Btn } from '../common/Btn.jsx';
 import { PlanningScene } from '../scene/PlanningScene.jsx';
 
+const PLANNING_QUIPS = [
+  "The points are made up; the deadlines aren't.",
+  "Past you was an optimist.",
+  "Velocity is a vibe.",
+  "Sizing is a feeling, not a fact.",
+  "Whatever you commit to, double it. The PM already has.",
+  "Round down. You always round down.",
+  "Pretend the carryover doesn't exist.",
+  "If it's a 3, it's a 5.",
+  "Estimates are confessions of hope.",
+  "Capacity is theoretical. Burnout is empirical.",
+  "Refactor tickets ship in dreams.",
+  "The retro will not save you.",
+  "Add a buffer. Then add another.",
+  "Story points are a controlled hallucination.",
+  "There are no small tickets, only optimistic ones.",
+  "The backlog is older than you are.",
+  "Definition of done is aspirational.",
+  "Every sprint is a draft.",
+  "The work expands to fill the sprint, then exceeds it.",
+  "If it scares you, it's a 13.",
+];
+
+let _quipDeck = [];
+const _quipBySprint = new Map();
+
+const pickQuip = (sprint) => {
+  if (_quipBySprint.has(sprint)) return _quipBySprint.get(sprint);
+  if (_quipDeck.length === 0) {
+    _quipDeck = [...PLANNING_QUIPS];
+    for (let i = _quipDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [_quipDeck[i], _quipDeck[j]] = [_quipDeck[j], _quipDeck[i]];
+    }
+  }
+  const q = _quipDeck.pop();
+  _quipBySprint.set(sprint, q);
+  return q;
+};
+
 export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
   const planned = s.sprintPlan;
   const capacity = planned.reduce((sum, t) => sum + t.effort, 0);
   const cap = s.sprintCapacity ?? 60;
   const overCapacity = capacity > cap;
   const hasRefactor = planned.some(t => t.type === 'refactor');
+  const quip = pickQuip(s.sprint);
 
   return (
     <div className="flex-1 flex flex-col lg:overflow-hidden">
@@ -30,7 +71,10 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
         <div>
           <div className="text-xs tracking-[0.3em] mb-1" style={{ color: C.amberDim }}>SPRINT {s.sprint} — PLANNING</div>
           <div className="text-base sm:text-lg" style={{ color: C.text }}>
-            Pick tickets for the sprint. {cap}-point capacity. Try not to laugh (or to sleep).
+            Pick tickets for the sprint. {cap}-point team capacity.
+          </div>
+          <div className="text-sm italic mt-1" style={{ color: C.textDim }}>
+            {quip}
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs flex-wrap sm:flex-shrink-0" style={{ color: C.textDim }}>

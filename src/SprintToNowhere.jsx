@@ -6,7 +6,7 @@ import { STRATEGIC_INITIATIVES } from './data/tickets.js';
 import { EVENTS, MELTDOWN_EVENT } from './data/events.js';
 import { generateBacklog, mkTicket } from './game/backlog.js';
 import { sampleEventCast } from './game/cast.js';
-import { initialState, totalRemaining, pickDayEvents } from './game/state.js';
+import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget } from './game/state.js';
 import { applyChoice, workOnTicket } from './game/mechanics.js';
 import { HUD } from './components/common/HUD.jsx';
 import { MenuPhase } from './components/phases/MenuPhase.jsx';
@@ -42,13 +42,14 @@ export default function SprintToNowhere() {
       initialLog.push(`📋 Management added "${init.title}" to your sprint. "It's a top priority."`);
     }
     const startHours = totalRemaining(plan);
-    const dayBudget = (prev.sprintCapacity ?? 60) / 5;
+    const dayBudget = dailyFocusBudget(prev.burnout, prev.badDayStreak);
     const next = {
       ...prev, phase: 'execution', subPhase: 'event',
       currentDay: 1, dayFocus: dayBudget, dayFocusRemaining: dayBudget,
       dayLog: initialLog, sprintShipped: [], sprintBumped: [], sprintCancelled: [],
       debtAtSprintStart: prev.debt,
       sprintPlan: plan,
+      stayedLate: false,
       hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
       dialogNode: 'start',
     };
@@ -170,6 +171,20 @@ export default function SprintToNowhere() {
         s.focus = Math.min(100, s.focus + 18);
         s.dayLog = [...s.dayLog, 'A clean coffee break. The kitchen was empty. You stared out the window for 4 minutes. It helped.'];
       }
+    } else if (kind === 'late') {
+      // Voluntary overtime — push past the workday on a hard ticket.
+      // Costly: burnout, morale, and counts as a bad day (next day's budget shrinks).
+      s.dayFocusRemaining = s.dayFocusRemaining + 2;
+      s.dayFocus = (s.dayFocus || 9) + 2;
+      s.burnout = Math.min(100, s.burnout + 8);
+      s.morale = Math.max(0, s.morale - 2);
+      s.stayedLate = true;
+      const hard = s.sprintPlan.find(t =>
+        !t.shipped && t.progress > 0 && t.progress < t.effort &&
+        (t.type === 'bug' || t.effort >= 5));
+      s.dayLog = [...s.dayLog, hard
+        ? `You stayed late chasing "${hard.title}". The fluorescent lights got worse. +2h, +8 burnout.`
+        : 'You stayed late. The office cleared out. The cleaners came. +2h, +8 burnout.'];
     } else if (kind === 'ask') {
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
       s.capital = Math.max(0, s.capital - 0.5);
@@ -214,14 +229,27 @@ export default function SprintToNowhere() {
       }
       return { ...prev, hourHistory: history, phase: 'retro', sprintsSurvived };
     }
+    // Overnight bookkeeping. Yesterday was "bad" if you stayed late or ended above ~65 burnout.
+    // Bad nights = poor sleep (smaller burnout drop) and the streak grows; calm nights reset it.
+    const wasBadDay = prev.stayedLate || prev.burnout > 65;
+    const sleepRecovery = wasBadDay ? 1 : 4;
+    const newBurnout = Math.max(0, prev.burnout - sleepRecovery);
+    const newStreak = wasBadDay ? (prev.badDayStreak || 0) + 1 : 0;
+    const newBudget = dailyFocusBudget(newBurnout, newStreak);
     const next = {
       ...prev,
       hourHistory: history,
       currentDay: prev.currentDay + 1,
-      dayFocusRemaining: (prev.sprintCapacity ?? 60) / 5, dayLog: [], subPhase: 'event',
+      dayFocus: newBudget,
+      dayFocusRemaining: newBudget,
+      burnout: newBurnout,
+      badDayStreak: newStreak,
+      stayedLate: false,
+      dayLog: [],
+      subPhase: 'event',
       dialogNode: 'start',
       // morning focus ceiling drops as burnout climbs — exhausted devs start the day distracted
-      focus: Math.max(40, 100 - Math.floor(prev.burnout * 0.4)),
+      focus: Math.max(40, 100 - Math.floor(newBurnout * 0.4)),
     };
     const queue = pickDayEvents(next);
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');
@@ -243,7 +271,7 @@ export default function SprintToNowhere() {
         eventCast: {},
       };
     }
-    // weekend recovery — burnout drops, but only partially
+    // weekend recovery — burnout drops, the bad-day streak resets, you stop staying late.
     const recovered = Math.max(0, prev.burnout - 12);
     return {
       ...prev, phase: 'planning',
@@ -251,6 +279,8 @@ export default function SprintToNowhere() {
       backlog: generateBacklog(), sprintPlan: [],
       debtAtSprintStart: prev.debt,
       burnout: recovered,
+      badDayStreak: 0,
+      stayedLate: false,
     };
   });
 

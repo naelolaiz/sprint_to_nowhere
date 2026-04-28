@@ -189,6 +189,31 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               </>
             )}
 
+            {(() => {
+              if (s.stayedLate) return null;
+              const hard = s.sprintPlan.find(t =>
+                !t.shipped && t.progress > 0 && t.progress < t.effort &&
+                (t.type === 'bug' || t.effort >= 5));
+              if (!hard) return null;
+              return (
+                <div className="mb-6">
+                  <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: C.textDimmer }}>
+                    Push past the workday
+                  </div>
+                  <button
+                    onClick={() => onAction('late')}
+                    className="w-full text-left px-3 py-2.5 text-sm transition-colors"
+                    style={{ backgroundColor: C.surface2, color: C.text, border: `1px solid ${C.border}`, fontFamily: FONT }}
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.amber)}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = C.border)}
+                  >
+                    <span style={{ color: C.amber }}>🌙 Stay late on "{hard.title}" </span>
+                    <span style={{ color: C.textDim }}>· +2h tonight · +8 burnout, −2 morale · counts as a bad day</span>
+                  </button>
+                </div>
+              );
+            })()}
+
             {(s.dayFocusRemaining === 0 || workableTickets.length === 0) && (
               <div className="text-sm italic p-4 text-center mb-4" style={{
                 color: C.textDimmer, border: `1px dashed ${C.border}`,
@@ -236,7 +261,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           currentRemaining={s.sprintPlan.reduce((sum, t) => sum + Math.max(0, t.effort - t.progress), 0)}
           currentDay={s.currentDay}
           dayFocusRemaining={s.dayFocusRemaining}
-          dayBudget={s.dayFocus || ((s.sprintCapacity ?? 60) / 5)}
+          dayBudget={s.dayFocus || 9}
         />
         <div className="text-xs tracking-wider uppercase mb-3" style={{ color: C.textDim }}>
           Sprint Plan
