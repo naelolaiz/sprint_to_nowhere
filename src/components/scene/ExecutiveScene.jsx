@@ -2,7 +2,6 @@
 
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
-import { SpeechBubble } from '../common/SpeechBubble.jsx';
 import { Desk } from './Desk.jsx';
 
 export const ExecutiveScene = () => (
@@ -15,8 +14,22 @@ export const ExecutiveScene = () => (
     <line x1="270" y1="71" x2="360" y2="71" stroke={C.borderHi} strokeWidth="0.5"/>
 
     <rect x="60" y="105" width="180" height="6" fill={C.surface2} stroke={C.amber} strokeWidth="0.8"/>
-    <Person x={150} y={130} type="ceo" scale={1.4} label="CEO"/>
-    <SpeechBubble x={170} y={50} text='"We should do THIS!"' w={130}/>
+    <Person x={150} y={130} type="ceo" scale={1.4} label="CEO" mood="phone"/>
+
+    {/* CEO's actual message lives in the dialog body. Here we just show a
+        generic Slack-input placeholder, never a fixed quote. */}
+    <g transform="translate(170 50)">
+      <rect x="0" y="0" width="180" height="44" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.7"/>
+      <rect x="0" y="0" width="180" height="7" fill={C.amberDim}/>
+      <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">SLACK · DRAFT TO #ENGINEERING</text>
+      <text x="4" y="14" fontSize="3" fontFamily={FONT} fill={C.amber}>cursor blinking · CEO is typing…</text>
+      <line x1="4" y1="18" x2="176" y2="18" stroke={C.border} strokeWidth="0.3"/>
+      <rect x="4" y="22" width="142" height="2.2" fill={C.textDim} opacity="0.5"/>
+      <rect x="4" y="26" width="170" height="2.2" fill={C.textDim} opacity="0.5"/>
+      <rect x="4" y="30" width="118" height="2.2" fill={C.textDim} opacity="0.5"/>
+      <rect x="4" y="34" width="76" height="2.2" fill={C.textDim} opacity="0.5"/>
+      <text x="174" y="40" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>by next week 🙏</text>
+    </g>
 
     <text x="30" y="170" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>SLACK PING · NEW IDEA · ROADMAP UPDATING</text>
   </svg>

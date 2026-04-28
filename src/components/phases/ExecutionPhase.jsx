@@ -25,7 +25,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           borderBottom: `1px solid ${C.border}`,
           backgroundImage: `linear-gradient(to bottom, ${C.surface} 0%, ${C.bg} 100%)`,
         }}>
-          <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt}/>
+          <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt} burnout={s.burnout} morale={s.morale}/>
         </div>
 
         {/* Action area (scrollable) */}

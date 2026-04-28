@@ -96,6 +96,9 @@ export const pickEvent = (state, exclude = null) => {
     if (e.id === 'mental_health') w = 1;
     // corporate theater is common background radiation
     if (['ethics_email','town_hall','volunteer_day','values_refresh','engagement_survey','impact_email','inclusion_workshop'].includes(e.id)) w = 2;
+    // ----- COMBINATION EVENTS — multiple pressures at once, weight them like big disruptions -----
+    if (e.id === 'sales_pincer') w = 3;
+    if (e.id === 'ai_initiative_kickoff') w = 3;
     for (let i = 0; i < w; i++) weighted.push(e);
   }
   if (weighted.length === 0) return EVENTS.find(e => e.id === 'quick_sync');

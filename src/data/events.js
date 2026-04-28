@@ -89,34 +89,39 @@ export const EVENTS = [
           { label: '"Fine, but it adds two weeks to the estimate."', effect: { scopeCreep: true, debt: 5, capital: 1 }, log: 'You overstated the cost. Marcus pretended to negotiate. Feature grew by 6 hours but you bought back some respect.' },
         ],
       },
+      // Generic implementation-handwave: works for any of the ~10 pitch openers
+      // (crypto tipping, leaderboard, white-label, voice-activated, MCP, etc.).
       rabbit_hole: {
-        description: 'Marcus: "Oh great question. We\'d use, you know, the blockchain. There\'s this thing called Web3? It\'s actually super easy now."',
+        description: 'Marcus: "Oh great question. We\'d use, you know, the obvious stack. The frameworks are basically there now. It\'s actually super easy."',
         choices: [
-          { label: '"Which chain?"', next: 'which_chain' },
+          { label: '"Which framework, specifically?"', next: 'which_one' },
           { label: '"Have we discussed this with finance?"', next: 'finance' },
           { label: '"It\'s really not super easy."', next: 'pushback_b' },
         ],
       },
-      which_chain: {
-        description: 'Marcus: "Like, the main one? Whichever\'s biggest. Sarah said it would be fine. Sarah was nodding when I described it."',
+      which_one: {
+        description: 'Marcus: "Like, the main one? I figured we\'d pick whichever\'s most popular. Sarah was nodding when I described it."',
         choices: [
           { label: '"Sarah doesn\'t do backend."', next: 'pushback_b' },
-          { label: '"What does the wallet UX look like?"', next: 'wallet' },
+          { label: '"What does the user-side prerequisite story look like?"', next: 'prereqs' },
           { label: '"...fine, I\'ll spike on it."', effect: { scopeCreep: true, debt: 6 }, log: 'You agreed to investigate. The investigation took the rest of the day. The result will be ignored.' },
         ],
       },
-      wallet: {
-        description: 'Marcus: "Wallet? Oh — yeah. I figured users would just have one. Like, they\'d know."',
+      prereqs: {
+        description: 'Marcus: "Prerequisites? Oh — yeah. I figured users would just have them already. Like, the average user is — you know — set up for it."',
         choices: [
-          { label: '"Most users do not have one."', next: 'pushback_b' },
+          { label: '"Most users are not set up for it."', next: 'pushback_b' },
           { label: 'Stare at him in silence', next: 'silence' },
         ],
       },
+      // Generic version of the tweet that drove the ask — the irony is that
+      // the tweet has 11k likes and zero engineering specifics, regardless
+      // of which trend the CEO actually starred.
       tweet: {
-        description: 'Marcus pulls out his phone. "Here." The tweet says: "Web3 is the future of monetization. 🚀" 11k likes. The CEO has starred it.',
+        description: 'Marcus pulls out his phone. "Here." The tweet has 11k likes, three lines of motivational marketing language, and zero engineering specifics. The CEO has starred it. The tweet is the entire requirements document.',
         choices: [
           { label: '"Marcus. This is a tweet."', next: 'pushback_b' },
-          { label: '"Have we discussed this with legal?"', next: 'legal' },
+          { label: '"Have we discussed this with legal?"', next: 'compliance_q' },
           { label: '"OK fine."', effect: { scopeCreep: true, debt: 4 }, log: 'You folded to the tweet. The tweet now drives the roadmap. The roadmap drives the codebase.' },
         ],
       },
@@ -126,14 +131,16 @@ export const EVENTS = [
           { label: 'Watch him leave', effect: { capital: 1 }, log: 'Marcus left to "loop in finance." The scope held. For now.' },
         ],
       },
-      legal: {
-        description: 'Marcus pales. "Oh. Hadn\'t thought about that. There\'s, uh, regulatory stuff with crypto, isn\'t there."',
+      // Renamed from "legal" — generic regulatory/compliance gut-check
+      compliance_q: {
+        description: 'Marcus pales. "Oh. I — yeah. There\'s probably regulatory stuff with that, isn\'t there. Privacy. Audit. The stuff."',
         choices: [
           { label: '"Quite a lot of it, yes."', effect: { capital: 1 }, log: 'Marcus said he\'d "circle back." He won\'t. The scope held.' },
         ],
       },
+      // Generic — CEO\'s indirect signal, regardless of topic
       check_source: {
-        description: 'Marcus: "Well — he didn\'t SAY it explicitly, but he liked a tweet. And in our 1:1 he said the word \'crypto\' twice. That\'s basically a yes."',
+        description: 'Marcus: "Well — he didn\'t SAY it explicitly, but he liked a tweet about it. And in our 1:1 he mentioned it twice. That\'s basically a yes."',
         choices: [
           { label: '"That is not basically a yes."', next: 'pushback_b' },
           { label: '"OK, fine."', effect: { scopeCreep: true, debt: 3 }, log: 'You folded to a vibes-based mandate. The codebase will pay.' },
@@ -180,6 +187,8 @@ export const EVENTS = [
   {
     id: 'all_hands', icon: Users,
     title: 'All-hands meeting',
+    // ~monthly cadence. With ~5 days/sprint, fire roughly every 4 sprints.
+    requires: (s) => s.sprint % 4 === 0 || s.sprint === 1,
     descriptions: [
       'Mandatory. Slide deck. Q&A from the audience. The CEO uses the word "synergy" unironically.',
       'Mandatory all-hands. The CEO is in a fleece vest. He starts with "I want to be transparent with you." The next slide is heavily redacted.',
@@ -195,9 +204,21 @@ export const EVENTS = [
       'All-hands. The CFO presents financials with an "AI-adjusted" view next to the actuals. The AI-adjusted view is the same number, but multiplied. Nobody asks.',
       'All-hands. The CEO has invited a customer to speak. The customer praises the product. The customer\'s contract value is roughly equal to the catering budget.',
       'All-hands. New slide format. Each slide is just a vibe — gradient backgrounds, single phrases like "BETTER, FASTER, KINDER." There are 47 vibes.',
+      'All-hands. The CEO opens with: "I want to apologize." The apology is for "the energy we\'ve been bringing to Mondays." Three slides later he is announcing layoffs but is calling them "intentional reshaping."',
+      'All-hands. Today\'s slide format is hand-drawn on an iPad in real time. The CEO is also Apple-Pencil-ing while talking. He draws a chart. The chart goes up. There are no axes.',
+      'All-hands. The CEO has read a book about "founder mode" on the flight. He references it eleven times in 32 minutes. Once he calls it "fonder mode" and does not correct himself.',
+      'All-hands. The CEO has given his deck to an AI to "sharpen the language." The AI has rewritten "we\'re going to win" as "we will instantiate market dominance via aggressive iteration loops." He reads it aloud.',
+      'All-hands. The new slogan is "FROM ZERO TO ONE TO INFINITY." It is on the wall behind him. It is also his Slack status. It is also the title of the Notion doc, the Loom, and the calendar invite.',
+      'All-hands. The exec team is doing a "musical tribute" to the engineering org. They have rewritten "Don\'t Stop Believin\'" with new lyrics about velocity. The CFO sings "ship-pin\' on and on and on." Nobody knew this was coming.',
+      'All-hands. The CEO has invited his daughter, age 11, to "share what she thinks the company should do." She says "make the app pink." There is real applause. A ticket appears in the backlog by Friday.',
+      'All-hands. The Chief Product Officer presents "the future of our product" using only AI-generated images. Several of the images contain six-fingered hands. One of the executives in a mockup has a sword.',
+      'All-hands. The CEO opens with: "I want to read a Slack message from a customer that really moved me." He reads it. The message is from himself, posted in #general 4 days ago, under a customer\'s account that he was logged into for testing.',
+      'All-hands. New format: "anonymous Q&A via Slido." 47 questions submitted. The CEO answers two. They are the two with the fewest upvotes. The most-upvoted question, "are we profitable?" is "saved for next time."',
     ],
     choices: [
-      { label: 'Attend (multitasking)', effect: { focus: -1.5, burnout: 5 }, log: 'You half-listened while clearing your inbox. Heard "exciting quarter" 11 times.' },
+      { label: 'Attend (multitasking)', effect: { focus: -1.5, burnout: 5 }, log: 'You half-listened while clearing your inbox. Heard "exciting quarter" 11 times. Did not hear the layoff number.' },
+      { label: 'Camera off, mute, do real work', effect: { focus: -0.5, capital: -0.5, burnout: 2, morale: 1 }, log: 'You worked through it. Marcus DM\'d you a 🙃 mid-meeting. You ignored him.' },
+      { label: 'Genuinely listen for once', effect: { focus: -1.5, burnout: 7, morale: -3 }, log: 'You listened. The contradiction with last quarter\'s message was sharper than expected. You are sadder now. The work has not changed.' },
     ],
   },
   {
@@ -590,10 +611,17 @@ export const EVENTS = [
       'On-call. The first alert this morning is a flapping disk-space alert that has been flapping for 3 weeks. Everyone has been muting it. You unmute it. You also do not fix it.',
       'On-call. You inherit a Slack channel called #incidents-active that hasn\'t had a real incident in 4 weeks. It has 47 unread messages. They\'re all bots arguing.',
       'On-call. PagerDuty fires for a service named after a Greek god you have never heard of. There is no readme. The codebase is in a language you don\'t recognize. You ask in #engineering. Three people LOL-react. Nobody knows.',
+      'On-call. The runbook says "page Greg." There is no Greg. There has never been a Greg. The runbook was generated by an LLM in 2024. Half the section names are also fictional.',
+      'On-call. You receive 14 pages between 11 PM and 6 AM. Three are real. Eight are duplicates of the three real ones. Three are from a CRON job that announces it\'s alive every two hours by paging the on-call.',
+      'On-call. The pager fires for "metric anomaly: order-rate dropped 80%." The order rate dropped because it is 4 AM on Sunday. Nobody filed for a quiet-hours suppression. Nobody will.',
+      'On-call. You receive an email from Datadog: "your bill exceeded threshold." The threshold was "$1M/month." The bill is for log lines from a single service that prints the entire request body on every request, including base64\'d images.',
+      'On-call. PagerDuty fires at 4:14 AM for a service called "happiness-svc." It has not been deployed in 11 months. It is also somehow still serving 2% of production traffic. You DM the original author. They are no longer at the company. Their reply is "lol good luck."',
+      'On-call. You join the war room at 3 AM. Six people are on the call. Five of them are managers. The one engineer (you) is on mute trying to read the actual logs. A manager asks "what\'s our blast radius" three times. Each time, in a slightly different way.',
     ],
     choices: [
-      { label: 'Handle each as they come', effect: { focus: -3 }, log: 'Barely got any real work done. But hey, no outage.' },
-      { label: 'Triage hard — only P0', effect: { focus: -1.5, debt: 4 }, log: 'You ignored some warnings. Future-you will figure it out.' },
+      { label: 'Handle each as they come', effect: { focus: -3, burnout: 8 }, log: 'You ate alerts all day. No outage. Also no real work.' },
+      { label: 'Triage hard — only P0', effect: { focus: -1.5, debt: 4, burnout: 4 }, log: 'You ignored some warnings. Future-you will figure it out. Future-you is also you, in two days.' },
+      { label: 'Mute everything, fix the alert routing instead', effect: { focus: -2, debt: -3, burnout: 5, capital: -1 }, log: 'You spent the day fixing the noise. Two real alerts came through. Both were caught. The platform team will, in a 1:1 next sprint, gently note that you "circumvented our rotation contract."' },
     ],
   },
   {
@@ -728,10 +756,16 @@ export const EVENTS = [
       'Snyk popped 47 new high-severity issues. Most are transitive. The fix-version doesn\'t exist yet. The library has been "unmaintained" for six months. The README still says "Contributions welcome!"',
       'A package you depend on has been deprecated. The replacement has a different API surface. The CVE is in the OLD one. The migration is "mostly trivial."',
       'Your supply-chain monitor flagged a typosquatted package was briefly published with the same name as one you use. It\'s been pulled. Your CI ran during the window when it existed. Security wants a "blameless RCA" by EOD.',
+      'Security: "Critical CVE in `event-stream`." It\'s 2026. The fact that you still depend on `event-stream` is its own CVE.',
+      'Security flagged a CVE in a base Docker image you haven\'t rebuilt since 2023. Rebuilding requires the build system, which has been "in transition to Bazel" for 14 months. Bazel is also flagged.',
+      'A CVE in the SSO library used by everything. The patch requires a config flag your prod environment does not support. The flag was added in v8. You are on v3. v3 is unmaintained. v4 broke the API.',
+      'Security: "we\'re seeing typo-squatted packages with names matching your namespace. Have you checked your lockfile?" You check the lockfile. The lockfile is 47k lines. You have not checked your lockfile.',
+      'A CVE on a package the security team\'s OWN tooling depends on. The security team\'s scanner is now flagging the security team\'s scanner. The internal RCA Slack thread is 91 messages long and has descended into philosophy.',
     ],
     choices: [
-      { label: 'Patch it properly', effect: { focus: -3, debt: -2 }, log: 'You took the time to do it right. Slightly less debt, much less sleep tonight.' },
-      { label: 'Pin to old version, defer', effect: { focus: -0.5, debt: 5 }, log: 'You added "TODO: actually fix this." It will outlive you.' },
+      { label: 'Patch it properly', effect: { focus: -3, debt: -2, burnout: 4 }, log: 'You took the time to do it right. Slightly less debt, much less sleep tonight. Two unrelated tests broke.' },
+      { label: 'Pin to old version, defer', effect: { focus: -0.5, debt: 5 }, log: 'You added "TODO: actually fix this." It will outlive you. Future-you will be a different person and still resent it.' },
+      { label: 'Forge a Snyk waiver and move on', effect: { focus: -0.25, capital: -0.5, debt: 7 }, log: 'You filed a "compensating control" justification copied from another team\'s template. It was approved by an automated bot in 11 seconds.' },
     ],
   },
   {
@@ -743,9 +777,18 @@ export const EVENTS = [
       'You\'re subbing for someone who called in sick. You haven\'t read the resume. The candidate has done the take-home. You haven\'t read that either.',
       'Recruiter pings: "Hey! You\'re in the loop for the Senior PM interview at 2! Got a question bank for you." It is 1:54.',
       'Interview at 3 PM. The candidate has already been through 4 rounds. You are the 5th round. You don\'t know what\'s left to evaluate.',
+      'You\'re on a panel for "values alignment." You don\'t know what the values are this quarter. You decide to ask the candidate questions about teamwork and pretend the answers reveal a value.',
+      'You\'re interviewing a senior. They walk through their take-home with confidence. The take-home solution is, you slowly realize, copied verbatim from a Medium article you wrote two years ago.',
+      'You\'re interviewing a junior. They are nervous. They are also better than you were at their level. You feel a complicated thing.',
+      'You\'re a panelist. The candidate is a former coworker the recruiter did not know was a former coworker. Awkward eye contact happens for 4 minutes before either of you addresses it.',
+      'You\'re interviewing for a role on a team that was reorged out of existence two days ago. Nobody told the recruiter. The candidate does not know.',
+      'A "system design" interview. Recruiter brief: "ask them to design Twitter." The candidate worked at Twitter. They wrote the parts you\'re going to ask about. The interview ends 22 minutes early.',
+      'You\'re interviewing the candidate who replaced someone who was laid off two weeks ago. The job description has not been updated. The candidate asks about "the team." You don\'t know what to say.',
     ],
     choices: [
-      { label: 'Conduct the interview', effect: { focus: -2 }, log: 'You asked the standard questions. The candidate was probably fine.' },
+      { label: 'Conduct the interview', effect: { focus: -2, burnout: 3 }, log: 'You asked the standard questions. The candidate was probably fine. The hiring committee will reject them anyway.' },
+      { label: 'Wing it (you trust your gut)', effect: { focus: -1.5, capital: -0.5 }, log: 'You asked unprompted questions. The candidate was charmed. The recruiter was not — your scorecard skipped the rubric.' },
+      { label: '"I have not been briefed, can we reschedule?"', effect: { focus: -0.25, capital: -1, burnout: 1 }, log: 'You bailed cleanly. The recruiter rebooked you for tomorrow at 8:30 AM. The same candidate. The same lack of briefing.' },
     ],
   },
   {
@@ -754,27 +797,41 @@ export const EVENTS = [
     descriptions: [
       'Someone says "quick question" at the end. It is not quick.',
       'Someone screenshares mid-standup: "real quick — is this normal?" The screenshot is a stack trace. The stack trace is yours.',
-      'Standup\'s last 30 seconds: "anyone good with regex?" Eight minutes later, four people are reading the same regex.',
-      'Someone tries to debug a flaky test on the call. Three engineers chime in with conflicting theories. The standup is now 41 minutes in.',
+      'Standup\'s last 30 seconds: "anyone good with regex?" Eight minutes later, four people are reading the same regex. Two of them have backronymed it.',
+      'Someone tries to debug a flaky test on the call. Three engineers chime in with conflicting theories. The standup is now 41 minutes in. The flake is timezone-dependent. Nobody has said this out loud yet.',
       '"Wait, before we go — did anyone hit this CORS error?" You hit it. You did not say so. You are not getting roped into this.',
+      'Someone screenshares VSCode. They have 47 unsaved tabs. They cannot find the file they want to show. They scroll through the tabs for two minutes. Two of them are stack traces.',
+      'Someone: "real quick — does anyone know which env var actually controls auth?" Three people answer. The three answers are mutually exclusive. All three answers are also out of date.',
+      'Someone shares a Datadog dashboard. The dashboard\'s queries are red. The queries are red because the dashboard owner left the company. The dashboard now reports the engineer-of-record\'s outage status.',
+      '"Sorry — last thing — has Production looked weird to anyone today?" Six engineers immediately mute. Two camera-off. One audibly sighs.',
     ],
     choices: [
-      { label: 'Help debug live', effect: { focus: -1.5 }, log: 'Found their typo. They thank you. Standup ran 50 minutes.' },
-      { label: 'Move it to a separate call', effect: { focus: -0.5, capital: -0.5 }, log: 'Standup ended on time. Someone felt brushed off.' },
+      { label: 'Help debug live', effect: { focus: -1.5, burnout: 3, debt: -1 }, log: 'Found their typo. They thank you. Standup ran 50 minutes. The fix is one line. The Slack thread celebrating it is twelve.' },
+      { label: 'Move it to a separate call', effect: { focus: -0.5, capital: -0.5 }, log: 'Standup ended on time. The separate call was scheduled. Three people were added "in case." The bug remained.' },
+      { label: 'Stay muted, eat your breakfast', effect: { focus: -0.5, capital: -0.25, burnout: 1 }, log: 'You let it ride. The bug was eventually found by the most junior engineer, who DM\'d you a question you ignored. They figured it out anyway.' },
     ],
   },
   {
     id: 'compliance', icon: Briefcase,
     title: 'Compliance training due today',
+    // Compliance trainings are mostly annual + ad-hoc. Cap at one per ~3 sprints.
+    requires: (s) => s.sprint % 3 === 0 || s.sprint === 1,
     descriptions: [
-      'A 47-minute video about phishing. There will be a quiz. Skipping is not an option.',
-      'Mandatory: "Information Security Awareness 2026." A 38-slide slide deck with stock footage of laptops. The narrator pronounces SQL as "sequel" half the time and "S-Q-L" the other half.',
-      '"Anti-Bribery & Corruption" — a 22-minute course featuring a fake roleplay between two actors who are very clearly looking off-camera at the script.',
-      'Your annual "Privileged Access Awareness" training. The pass rate is 100%. The fail state does not exist. The training takes 49 minutes.',
-      'Compliance: "Data Handling for Modern Workplaces." Includes a section on USB drives. Your laptop has not had a USB-A port in four years.',
+      'A 47-minute video about phishing. There will be a quiz. Skipping is not an option. The quiz auto-fails if it detects a second tab. The training itself opens in a second tab.',
+      'Mandatory: "Information Security Awareness 2026." A 38-slide deck with stock footage of laptops. The narrator pronounces SQL as "sequel" half the time and "S-Q-L" the other half. Twice he says "squirrel."',
+      '"Anti-Bribery & Corruption" — a 22-minute course featuring a fake roleplay between two actors who are very clearly looking off-camera at the script. The bribe in the roleplay is a single muffin.',
+      'Your annual "Privileged Access Awareness" training. The pass rate is 100%. The fail state does not exist. The training still takes 49 minutes. The "you may proceed" button is greyed out for the full duration.',
+      'Compliance: "Data Handling for Modern Workplaces." Includes a section on USB drives. Your laptop has not had a USB-A port in four years. There is also a section on faxing.',
+      'Mandatory: "GDPR for Engineers (Refreshed for 2026)." It begins: "Imagine your data was a person." Slide 14 is a stock image of a worried person hugging a hard drive.',
+      '"Secure Coding 101" — narrated by a friendly cartoon shield named SHIELDY. SHIELDY has a sidekick: a squirrel named CACHE. CACHE has lines. CACHE\'s lines are about XSS.',
+      'Mandatory: "Conflict Minerals Awareness." Your laptop\'s sourcing is not in scope. The course is 38 minutes. Slide 22 is a flowchart that arrows back into itself.',
+      '"AI Tools at Work" — a new compliance training rolled out yesterday. It begins: "We embrace AI." It ends: "Do not, under any circumstance, use AI." The middle 41 minutes are unclear.',
+      '"Workplace Communication Standards" — featuring a section on how to disagree "in a way that is psychologically safe." Slide 19 includes a sample script for "naming a microaggression at standup." {dev} has used this script. {dev} got DM\'d about tone afterwards.',
     ],
     choices: [
-      { label: 'Watch on 2x in another tab', effect: { focus: -1, burnout: 4 }, log: 'Got 8/10 on the quiz. Good enough.' },
+      { label: 'Watch on 2x in another tab', effect: { focus: -0.5, burnout: 3 }, log: 'Got 8/10 on the quiz. The two you missed were trick questions. The quiz says "good enough."' },
+      { label: 'Actually watch it (you have a renewal coming up)', effect: { focus: -1, burnout: 5 }, log: 'You watched it at 1x. You learned three things you already knew. You aced the quiz. The certificate will be emailed to you in 3-5 business days.' },
+      { label: 'Mark it complete and lie', effect: { focus: -0.1, capital: -0.5, burnout: 1 }, log: 'You clicked through. Compliance dashboards are now satisfied. Your soul slightly less so.' },
     ],
   },
   {
@@ -786,10 +843,17 @@ export const EVENTS = [
       'Your buddy assignment: a junior engineer who joined Monday. Today is Wednesday. They have not been able to push a commit yet because of "an SSO thing."',
       'A new hire pings you: "I tried to read the codebase but I can\'t find where things are. Is there a map?" There is no map. There used to be a Notion page. The Notion page 404s.',
       'New hire onboarding. They\'re sharp. They asked one question that broke your brain. You\'re going to think about it on the drive home.',
+      'New hire DM: "I cloned the repo. README says to run `make bootstrap`. There is no `make bootstrap`. There is no Makefile. There is a Justfile, but `just bootstrap` errors. Where do I look?"',
+      'New hire DM: "I noticed the production database password is in the seed-data fixture. Is that on purpose?" It is not on purpose. It has been like that for two years. Nobody told them not to grep.',
+      'New hire DM: "the onboarding doc says to email Greg about access. Is Greg a person or a role?" Greg is also not a person.',
+      'A new hire pings you their first day: "what does \'velocity\' actually mean here?" You have been at this company three years. You hesitate. You eventually answer: "it depends."',
+      'New hire is in week 3. They send you their first PR. It is small, careful, and well-commented. The CI fails for unrelated reasons. They blame themselves. You spend 20 minutes convincing them it isn\'t their fault.',
+      'New hire DM: "the team\'s coding-style doc references \'Marcus\\\'s preferred linter rules.\' Where is that documented?" It isn\'t. It\'s in Marcus\'s head. Marcus has been here 4 months.',
     ],
     choices: [
-      { label: 'Be a good mentor', effect: { focus: -2, burnout: -1, morale: 5 }, log: 'They\'re less lost. The codebase remains a jungle. Helping someone felt unexpectedly OK.' },
-      { label: 'Send the (outdated) docs', effect: { focus: -0.5, capital: -1, debt: 1, burnout: 2 }, log: 'They figured it out eventually. The docs are even more outdated now.' },
+      { label: 'Be a good mentor', effect: { focus: -2, burnout: -1, morale: 5 }, log: 'They\'re less lost. The codebase remains a jungle. Helping someone felt unexpectedly OK. They thanked you with a 🌟 emoji you will keep thinking about.' },
+      { label: 'Pair on it for an hour', effect: { focus: -1.5, burnout: 0, morale: 6, debt: -1 }, log: 'You paired. They learned three things. You spotted a real bug while explaining a part of the code you wrote two years ago. Both of you came out lighter.' },
+      { label: 'Send the (outdated) docs', effect: { focus: -0.5, capital: -1, debt: 1, burnout: 2 }, log: 'They figured it out eventually. The docs are even more outdated now. They will, in their first 1:1, mention you "weren\'t super available" — gently.' },
     ],
   },
   // ===== CORPORATE THEATER =====
@@ -802,34 +866,51 @@ export const EVENTS = [
       'CEO email: "Standing firm on what matters." It mentions "values" 14 times. It does not mention the contract with the immigration enforcement agency.',
       'All-staff: "Reaffirming our principles." Three execs took turns writing paragraphs. The styles do not match. One paragraph contains the phrase "world-positive impact."',
       'A 9-paragraph "Town Hall Recap" from Comms. The actual town-hall was about three layoff waves. The recap leads with the Volunteer Day photos.',
+      'Email: "On Recent Events." It does not specify which recent events. There have been five categories of recent events. The email\'s sign-off is "Onward — together."',
+      'Subject: "An update on responsible AI." Body: "We continue to be thoughtful about AI, while also moving fast." The contradiction is the body.',
+      'Email: "A message from the Board." Co-signed by all seven board members. Their names are arranged in a 2-3-2 visual hierarchy. The hierarchy is the message.',
+      'Subject: "Reflecting on the moment." 11 paragraphs. The "moment" is, as far as you can tell, the lawsuit, the resignation, the layoffs, AND the FTC. Or possibly the new product. Hard to say.',
+      'Email: "On values, with humility." It is from the CEO. He is not, in this email, humble. He is "humbled." There is a difference. You cannot articulate it but you can feel it.',
     ],
     choices: [
       { label: 'Skim for keywords', effect: { focus: -0.5, burnout: 2 }, log: 'You skimmed. There will be a quiz next quarter, probably.' },
-      { label: 'Read every word ironically', effect: { focus: -1, burnout: 4 }, log: 'You read it. You are now sadder than before.' },
+      { label: 'Read every word ironically', effect: { focus: -1, burnout: 4, morale: -2 }, log: 'You read it. You are now sadder than before. The phrase "we hear you" appeared four times.' },
+      { label: 'Mark unread, archive, move on', effect: { focus: -0.1 }, log: 'You filed it under "Corporate." The folder has 312 unread items. The folder is, in fairness, working.' },
     ],
   },
   {
     id: 'town_hall', icon: Megaphone,
     title: 'Quarterly town hall with the CEO',
+    // Quarterly = every ~3 sprints. Skip sprint 1 (just opened the game with all-hands).
+    requires: (s) => s.sprint > 1 && s.sprint % 3 === 0,
     descriptions: [
       'PowerPoint with a hockey-stick chart. "We\'re disrupting the industry." A slide that says "OUR CUSTOMERS LOVE US" with no data. Q&A is pre-screened.',
       'Town hall. Slide 1: a slogan. Slide 2: a hockey-stick chart with no axis labels. Slide 14: "QUESTIONS?" Q&A is exclusively from a Slido that\'s been heavily moderated.',
       'CEO is on stage in front of a "WE WIN TOGETHER" backdrop. He says "look — I\'m going to be candid with you." He is not.',
-      'Town hall format change: now it\'s a "fireside chat" with the CEO and a VP "interviewing each other." It is rehearsed. It is bad.',
+      'Town hall format change: now it\'s a "fireside chat" with the CEO and a VP "interviewing each other." It is rehearsed. It is bad. The fire is a YouTube video on a TV.',
       'Quarterly town hall. The CEO opens by acknowledging "the difficult moment" without specifying which difficult moment. There have been three.',
       'Town hall held entirely in a metaverse-style "spatial audio" room. Half the company can\'t hear. The other half can\'t see. The recording afterwards has neither audio nor video.',
-      'Town hall. The CEO has been "doing a lot of reading" and now opens with a quote attributed to Steve Jobs. The quote is not from Steve Jobs.',
+      'Town hall. The CEO has been "doing a lot of reading" and now opens with a quote attributed to Steve Jobs. The quote is not from Steve Jobs. The quote is from a fortune cookie. He sourced it from LinkedIn.',
       'Town hall titled "Real Talk." First slide: "I\'m going to take off the CEO hat." Last slide: "Putting the CEO hat back on." Nothing in between was real talk.',
-      'Town hall. The CEO has a new haircut and is "reintroducing himself" with a 9-slide personal mission statement. Slide 4 is a photo of him at age 11 holding a Game Boy. Slide 7 is just the word "BUILD."',
+      'Town hall. The CEO has a new haircut and is "reintroducing himself" with a 9-slide personal mission statement. Slide 4 is a photo of him at age 11 holding a Game Boy. Slide 7 is just the word "BUILD." Slide 9 is the word "BUILD" again, in a different font.',
       'Town hall. The new theme is "FROM ZERO TO ONE." The CEO holds up the book. He has a printed quote on the slide. He misattributes the quote to himself.',
+      'Town hall. The CEO opens with the words "I want to address the rumor head-on" and then does not say which rumor. There are seven candidates. He addresses none of them.',
+      'Town hall. Today\'s format: "Ask Me Anything." There is a Slido. The Slido is moderated by a third-party PR firm. The first question approved is "What\'s your favorite book?" submitted by HR.',
+      'Town hall. The CEO is presenting from a Lake Como rental. The Wi-Fi is bad. He says "the future is hybrid" while a houseboat passes behind him.',
+      'Town hall. The CEO opens with: "I want to admit I made a mistake last quarter." The mistake, it transpires, is that he "didn\'t push us hard enough." The room makes a sound that is not laughter.',
+      'Town hall. New visual identity. Every slide now has a small AI-generated mascot — a friendly raccoon — in the corner. The raccoon is named "RAY." RAY has a backstory.',
+      'Town hall. The CEO has invited an external "futurist" who closes with: "the next decade will reward the bold and punish the slow." The futurist also wrote The Whisper Method, available in the lobby.',
     ],
     choices: [
-      { label: 'Attend (camera off)', effect: { focus: -1.5, burnout: 5 }, log: 'You learned the company is doing both "incredibly well" and "facing headwinds."' },
+      { label: 'Attend (camera off)', effect: { focus: -1.5, burnout: 5 }, log: 'You learned the company is doing both "incredibly well" and "facing headwinds." The slide had both arrows.' },
+      { label: 'Camera on, nod earnestly, let the calendar reclaim it', effect: { focus: -1.5, capital: 0.5, burnout: 6 }, log: 'You performed engagement. The CEO referenced "energy in the room" twice. Yours was the energy he meant. You feel briefly seen and lastingly used.' },
     ],
   },
   {
     id: 'volunteer_day', icon: Heart,
     title: 'Optional Volunteer Day (participation tracked)',
+    // Real-world cadence: once or twice a year. In a 10-sprint game, fire at most twice.
+    requires: (s) => s.sprint >= 3 && s.sprint % 5 === 0,
     descriptions: [
       '"Give back to the community" by sorting cans for 4 hours. Attendance is optional but the photos will appear in a deck.',
       '"Optional" Volunteer Day. The activity is painting a community center. The center has been painted four times by four different companies this year. The photos will go in the impact report.',
@@ -838,13 +919,16 @@ export const EVENTS = [
       'Volunteer Day at the food bank. The food bank told the company they\'re fully staffed already. The company sent everyone anyway.',
     ],
     choices: [
-      { label: 'Attend with a smile', effect: { focus: -3, burnout: 4 }, log: 'You sorted cans. There were photos. You were in some.' },
-      { label: 'Skip — you have actual work', effect: { capital: -1, burnout: 1 }, log: 'Your "low engagement score" was noted somewhere.' },
+      { label: 'Attend with a smile', effect: { focus: -4, burnout: 5 }, log: 'You sorted cans for four hours. There were photos. You were in three of them. Your t-shirt was tucked in for one of them.' },
+      { label: 'Show up for the photo, leave during the lunch', effect: { focus: -1.5, capital: -0.5, burnout: 2 }, log: 'You stayed for the photo and the company-branded sandwich. You were back at your desk by 1:15. The photo is uncropped on the careers page.' },
+      { label: 'Skip — you have actual work', effect: { capital: -1, burnout: 1, morale: -2 }, log: 'Your "low engagement score" was noted somewhere. The next engagement-survey deck will reference it indirectly.' },
     ],
   },
   {
     id: 'values_refresh', icon: Sparkles,
     title: 'Mandatory: Q3 Values Refresh',
+    // Quarterly. Avoid stacking with town hall on the same sprint.
+    requires: (s) => s.sprint > 2 && s.sprint % 4 === 2,
     descriptions: [
       '90-minute training where you learn the company\'s values are now: Bold. Customer-Obsessed. Frugal. Bias for Action. (Last quarter: Innovate. Empower. Trust. Excellence.)',
       'A consultant walks you through the new values. They are: "Move Fast." "Operate with Heart." "Tell the Truth." (Last quarter: Innovate, Empower, Trust, Excellence. The quarter before: Velocity, Boldness, Curiosity, Drive.)',
@@ -859,35 +943,55 @@ export const EVENTS = [
   {
     id: 'engagement_survey', icon: MessageSquare,
     title: 'Anonymous engagement survey',
+    // "Quarterly pulse" — every 3 sprints, off-cycle from the town hall.
+    requires: (s) => s.sprint >= 2 && s.sprint % 3 === 2,
     descriptions: [
       'Strictly anonymous. Please log in with SSO to participate. Last quarter\'s low scores led to "action items" that have not occurred.',
       'Engagement survey. 47 questions. The phrase "this company\'s leadership has my best interests at heart" is one of them. Strongly Agree / Agree / Neutral / Disagree / Strongly Disagree.',
-      'Quarterly pulse survey. "How likely are you to recommend us as an employer to a friend?" appears three times in slightly different wording.',
+      'Quarterly pulse survey. "How likely are you to recommend us as an employer to a friend?" appears three times in slightly different wording. The wording converges, slightly, toward "yes."',
       'Survey: "Engagement & Belonging Pulse." Anonymous. Tracks IP addresses, login timestamp, and team. The aggregate results will be "concerning but stable."',
       'A 4-minute "Sentiment Check" from the People Team. It contains a free-text box. The free-text box is anonymous "but reviewed by HR for safety."',
+      'Survey from the People Team: "Tell us how you really feel." Question 1: "Rate your manager." Question 2: "Are you sure?"',
+      'New format: a single-question pulse survey, sent every Monday. The question is: "How energized are you, on a scale of 1-10?" Last week, you put 3. This week, your manager mentioned in your 1:1 that "energy levels are something to think about."',
+      '"Engagement & Inclusion Compass." 71 questions. Optional free-text. The form\'s URL is on a domain you do not recognize. The footer says "powered by CulturePulse™." CulturePulse™ has had two breaches.',
+      'Survey: "Quarterly Connect." It opens with: "Your voice matters." It then requires you to log in via SSO, identify your team, and select your "tenure cohort" before any anonymous responses begin.',
+      'Anonymous survey distributed via Slack. The Slack message says: "click here to take the anonymous survey." The link includes your Slack user-ID as a query param.',
     ],
     choices: [
-      { label: 'Fill it out honestly', effect: { focus: -0.5, burnout: 2 }, log: 'You said the truth. Aggregate results will say "moderate satisfaction."' },
-      { label: 'Just answer all 5s', effect: { focus: -0.25, burnout: 1 }, log: 'You picked the safe answers. Total time: 4 minutes.' },
+      { label: 'Fill it out honestly', effect: { focus: -0.5, burnout: 2, morale: -1 }, log: 'You said the truth. Aggregate results will say "moderate satisfaction." Your team\'s aggregate will be flagged for "leader development."' },
+      { label: 'Just answer all 5s', effect: { focus: -0.25, burnout: 1 }, log: 'You picked the safe answers. Total time: 4 minutes. The survey thanks you "for your trust."' },
+      { label: 'Fill it with strategic ambiguity (mostly 4s)', effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You picked the answers that say "I am not happy but I am not the problem." A safe craft. The People Team will mark you "engaged but at-risk."' },
+      { label: 'Skip it entirely', effect: { capital: -0.5, burnout: 0, morale: 1 }, log: 'You ignored the survey. Three reminder emails followed. The fourth was from your manager, with the subject "🙏".' },
     ],
   },
   {
     id: 'impact_email', icon: Sparkles,
     title: 'Email: "The impact YOU made this quarter"',
+    // Quarterly impact emails go quarterly.
+    requires: (s) => s.sprint > 1 && s.sprint % 3 === 1,
     descriptions: [
       'A long email celebrating the team\'s achievements. Three of the listed wins were not actually shipped. One was a different team\'s.',
       'A "Q3 Wins!" email from Marketing. It includes a metric you\'ve never heard of. Your team is mentioned. The mention is wrong about what you shipped.',
       'CEO email: "What we accomplished together." A bulleted list of 14 items. Two of the items were the same item, written differently. None mention the layoffs.',
       'A People Team newsletter celebrating "Q3 by the numbers!" The numbers are fine. They are not contextualized.',
       'A Slack post in #general from the CEO: "🚀 What. A. Quarter." Eleven 🔥 reacts. Three of them are from people who were laid off two weeks ago.',
+      'A "Hall of Fame" Slack post. You are in it. The blurb is wrong about which feature shipped, which customer it was for, and the spelling of your name.',
+      'Email subject: "We did it!" Body: a single embedded image, 3MB. The image, when expanded, is a stock photo of confetti with the company logo poorly composited in. There is no text.',
+      '"Our most-read internal blog posts of Q3!" Three of the four were written by the CEO. The fourth was a sympathetic post about layoffs, posted by an engineer. That engineer is no longer at the company.',
+      'Email: "Quarter in Review — auto-generated by our new internal AI." It lists "your" achievements. None of them are yours. One of them is the dishwasher being repaired.',
+      'A "spotlight" email from Comms naming "engineers who went above and beyond." You are not in it. Marcus is. Marcus did not write code this quarter. Marcus knows this.',
     ],
     choices: [
-      { label: 'Forward it to your parents', effect: { focus: -0.25, burnout: 1 }, log: 'They are proud. They do not know what you do.' },
+      { label: 'Forward it to your parents', effect: { focus: -0.25, burnout: 1, morale: 1 }, log: 'They are proud. They do not know what you do. Your dad shows it to a neighbor.' },
+      { label: 'Reply-all with the actual numbers', effect: { focus: -0.5, capital: -2, burnout: 2, morale: 3 }, log: 'You replied with the real velocity, the real RIF count, and the unshipped projects. The thread was muted by Comms 4 minutes later. Three engineers DM\'d you "thank you."' },
+      { label: 'Archive without reading', effect: { focus: -0.05 }, log: 'You did not engage. The quarter is over. The next quarter is also over.' },
     ],
   },
   {
     id: 'inclusion_workshop', icon: Sparkles,
     title: 'Mandatory: "Inclusion Through Action" workshop',
+    // $40k consultants do not visit weekly. Quarterly-ish, off-cycle from values refresh.
+    requires: (s) => s.sprint >= 3 && s.sprint % 4 === 3,
     start: 'open',
     nodes: {
       open: {
@@ -975,91 +1079,186 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
+          // ----- vanilla disaster openers -----
           'Marcus: "Quick refinement! 14 tickets to size, should be done in 30 minutes." It is hour 1 of 1.5. You are on ticket 2. {facilitator} is arguing the first ticket up to an 8 because "we need to be honest about complexity."',
           'Marcus shares his screen — 27 tickets, all unsized. "We\'ve got 30 minutes. Let\'s try to get through as many as we can." {facilitator} is already typing in chat: "before we start, can we align on what a story point even means?"',
-          'Refinement starts with Marcus: "I\'ve pre-sized these to save us time." {objector}: "Wait, who set those numbers?" Marcus: "I did, last night, alone, in a Notion doc." {objector}: "...we should probably re-vote then."',
-          'Refinement. Marcus: "Heads up — leadership is auditing our story points this quarter. So please be intentional about your votes." Six engineers visibly understand they\'re being asked to vote lower.',
-          'Marcus opens refinement with: "Quick reminder of how Planning Poker works." This is his fourth time giving the reminder this quarter. {objector} starts typing a comment in the doc.',
+          'Marcus shares the backlog. The backlog has 312 tickets. Marcus: "Today we\'re going to be aggressive — let\'s try to refine the entire thing." Six people audibly inhale. He means it.',
+          'Refinement starts with Marcus: "I\'ve pre-sized these to save us time." {objector}: "Wait, who set those numbers?" Marcus: "I did, last night, alone, in a Notion doc, on my phone." {objector}: "...we should probably re-vote then."',
           'Refinement. The first ticket on the list is "AS A USER I WANT THE THING TO BE BETTER." Marcus: "OK so — how should we size this?" {objector}: "...what\'s the acceptance criteria?" Marcus, brightly: "TBD!"',
+          'Refinement. The first ticket: "Make the export feature good." Description: "User feedback indicates room for improvement." Acceptance criteria: "User feedback indicates the feature has been improved." {objector} pinches the bridge of his nose.',
+          // ----- leadership-watching openers (the REAL irony — refinement as performance) -----
+          'Refinement. Marcus: "Heads up — leadership is auditing our story points this quarter. So please be intentional about your votes." Six engineers visibly understand they\'re being asked to vote lower.',
+          'Refinement. Marcus: "Real quick — leadership wants us to track velocity per IC now. So please vote based on YOUR effort, not the team\'s." Three people read this twice. Two of them DM the third. The third is you.',
+          'Refinement. Marcus: "small heads-up — the new VP wants velocity to look \'aspirational but credible\' this quarter. So if a ticket feels like a 5, maybe try sitting with whether it could be a 3."',
+          'Refinement. Marcus shares his screen. Visible in his open Notion: a tab called "VELOCITY MASSAGE — DO NOT SHARE." He realizes 4 seconds late. He minimizes it. Nobody mentions it.',
+          // ----- methodology drift openers -----
+          'Marcus opens refinement with: "Quick reminder of how Planning Poker works." This is his fourth time giving the reminder this quarter. {objector} starts typing a comment in the doc.',
           'Refinement. Marcus has migrated the team from Jira to Linear to ClickUp this quarter. The current backlog exists in all three. None of them agree on which tickets are real.',
-          'Refinement. Marcus has introduced a new "story point philosophy" he read about on LinkedIn. Story points are now "in days." But not really. They\'re "vibe days." Sprint capacity is now in vibe-days. {objector} hasn\'t turned camera on.',
-          'Refinement. Marcus: "Real quick — leadership wants us to track velocity per IC now. So please vote based on YOUR effort, not the team\'s." Three people read this twice. Two of them DM the third.',
+          'Refinement. Marcus has introduced a new "story point philosophy" he read about on LinkedIn. Story points are now "in days." But not really. They\'re "vibe days." Sprint capacity is now in vibe-days. {objector} hasn\'t turned his camera on.',
+          'Refinement. Marcus: "I\'ve been reading Reinertsen and I think we should switch to T-shirt sizes." S/M/L/XL. Then immediately: "and S is roughly a 3." It is exactly the same system, with extra steps.',
+          'Refinement. Marcus has read about #NoEstimates and is "experimenting" with sizing tickets in count-only. {facilitator}: "so a 3-month epic and a 5-minute typo are the same?" Marcus: "trust the average."',
+          // ----- AI/automation openers (max irony) -----
           'Refinement. Marcus has invited an "AI scoping co-pilot" to size tickets. The AI is sizing every ticket as a 3. Marcus: "Wow it\'s really decisive!" {objector} mutes himself.',
+          'Refinement. Marcus has piloted Cursor-for-PMs. It auto-writes ticket descriptions from his Slack history. The current ticket\'s description begins: "Hey real quick can we just" and ends mid-sentence.',
+          'Refinement. Marcus, beaming: "good news — I had Claude rewrite all our acceptance criteria last night." The first one reads: "I cannot help with that — let me know how I can be useful." Marcus: "yeah we\'ll workshop those."',
+          // ----- pre-committed work openers -----
           'Refinement. {facilitator} is presenting tickets they wrote yesterday. The titles are 2 words long. The descriptions are blank. The acceptance criteria say "see Slack." {facilitator} is asking for tight estimates.',
+          'Refinement. Marcus: "small thing — Priya from sales told a customer two of these would ship this sprint. So they\'re kind of already committed. We\'re sizing for visibility." It is not for visibility.',
+          'Refinement. The top ticket is titled "[from CEO Slack — 2:14 AM]." It has no description. It has a deadline of "this sprint." Marcus: "let\'s call it a 5 to be safe."',
+          'Refinement. Marcus opens with: "two of these are already in flight — Priya needed them for a deal — so we\'re really just back-filling the points." {objector}: "...we\'re sizing work that\'s done?" Marcus: "for the dashboard."',
         ],
         choices: [
-          { label: 'Try to engage', next: 'engage' },
+          { label: 'Engage on the next ticket', next: 'engage' },
+          { label: 'Push back on the format itself', next: 'format_pushback' },
           { label: 'Stay on mute, camera off', next: 'mute' },
-          { label: 'Multitask through it', effect: { focus: -2, burnout: 4 }, log: 'You answered Slack messages with the meeting on. Three tickets got sized while you weren\'t listening. You will inherit one of them.' },
+          { label: 'Multitask through it', effect: { focus: -2, burnout: 4 }, log: 'You answered Slack messages with the meeting on. Three tickets got sized while you weren\'t listening. You may or may not inherit one of them depending on who\'s asleep less than you.' },
         ],
       },
+      // Engage on a single ticket. Node text is intentionally generic so it
+      // reads coherently after any of the openers (the AI-cursor one, the
+      // leadership-audit one, the pre-committed one, etc.) — the specific
+      // pathology of the sprint is in the opener; this node is the *attempt*
+      // to size something inside that pathology.
       engage: {
-        description: 'Marcus reads the next ticket: "\'Add a button.\' Story points?" {facilitator}: "I think it\'s a 5." {objector}: "It\'s a 1, easy. Just CSS." {facilitator}: "Have you SEEN the styling layer?" Twelve minutes pass.',
+        descriptions: [
+          'Marcus moves to the next ticket. The title is two words. The description is empty. {facilitator}: "I think it\'s an 8." {objector}: "It\'s a 1." {facilitator}: "Have you SEEN the styling layer?" Twelve minutes pass.',
+          'Marcus moves on. The next ticket\'s acceptance criteria is the literal string "see Slack." {facilitator}: "5." {objector}: "Where\'s the slack thread?" Marcus: "I\'ll find it after the meeting."',
+          'Marcus opens the next ticket. {objector}: "wait — is this the same as REF-9847?" Marcus: "...maybe. Let\'s size it as if it\'s not."',
+          'Marcus moves on. {facilitator}: "Quick clarifying question — is this front-end or full-stack?" Marcus: "Yes."',
+        ],
         choices: [
-          { label: '"Just call it a 3 and move on."', next: 'compromise' },
-          { label: '"What\'s the actual scope of the ticket?"', next: 'scope' },
+          { label: '"Call it a 3 and move on."', next: 'compromise' },
+          { label: '"What is the acceptance criteria?"', next: 'scope' },
+          { label: '"I\'ll spike it for two hours — then we\'ll know."', next: 'spike' },
           { label: 'Stay quiet, regret engaging', next: 'mute' },
+        ],
+      },
+      // ----- format pushback: the big new branch that addresses what the
+      // descriptions actually flagged (leadership audit, pre-committed work,
+      // AI sizing, vibes-day-philosophy, etc). Player gets to challenge the
+      // FRAMING instead of fighting one ticket at a time.
+      format_pushback: {
+        description: 'You unmute. "Marcus — what are we sizing FOR? Honestly. If this is a velocity readout for leadership, that\'s a different conversation than capacity planning. If it\'s already-promised work, that\'s a third one."\n\nThe room goes briefly quiet. Two other engineers turn their cameras on for the first time.',
+        choices: [
+          { label: '"Be straight with us about which one it is."', next: 'format_admit' },
+          { label: '"Are these already pre-committed?"', next: 'format_committed' },
+          { label: '"Is leadership grading us on these numbers?"', next: 'format_audit' },
+          { label: 'Lose your nerve, mute again', next: 'mute' },
+        ],
+      },
+      format_admit: {
+        description: 'Marcus, slowly: "Yeah. Honestly? Leadership wants the velocity number to look credible. I\'ve been managing the room toward it. I\'m sorry. Let\'s actually size for capacity."\n\nA real moment. {facilitator} reacts with 🙏. {objector} reacts with 🤝. The chat is silent.',
+        choices: [
+          { label: '"OK. Let\'s do this properly."', effect: { focus: -1, capital: 1.5, morale: 6, burnout: 1 }, log: 'A rare clean win. Two tickets got actually-sized. The velocity readout will be off this quarter. Marcus is not sure he can hold the line, but he holds it for today.' },
+          { label: 'Drive the rest of the meeting yourself', effect: { focus: -1.5, capital: 2, morale: 5, burnout: 3 }, log: 'You took the gavel. The rest of refinement was crisp. Marcus visibly relaxed. He DM\'d you "thank you" three times after.' },
+        ],
+      },
+      format_committed: {
+        description: 'Marcus, after a beat: "Two of them, yeah. The big one is from Priya\'s deal. The other is the CEO Slack thing." {facilitator}, in chat: "so we\'re sizing pre-decided work as if the size matters."',
+        choices: [
+          { label: '"Then size them honestly and flag the over-commit upward."', next: 'flag_upward' },
+          { label: '"Move them to a separate \'committed\' tracker, off the velocity board."', effect: { focus: -1, capital: 1, morale: 3, burnout: 2 }, log: 'You bought a structural fix. Marcus created a new column. Leadership noticed. They will dislike it. The team will love it briefly.' },
+          { label: 'Sigh and rubber-stamp the pre-committed sizes', effect: { focus: -1, scopeCreep: true, addUrgentFeature: true, debt: 3, burnout: 5 }, log: 'You folded. The pre-decided sizes were ratified. A new urgent ticket appeared on your sprint within the hour, also pre-sized.' },
+        ],
+      },
+      flag_upward: {
+        description: 'Marcus winces. "I — yeah. OK. I\'ll send a doc to my manager. I\'ll cc you. It will be poorly-received but I\'ll send it."',
+        choices: [
+          { label: '"I\'ll review the draft tonight."', effect: { focus: -1, capital: 1, morale: 4, burnout: 2 }, log: 'You both put your names on the structural truth. The doc was sent. The reply was a single word: "Thanks." Nobody knows what it meant.' },
+        ],
+      },
+      format_audit: {
+        description: 'Marcus pauses. The room stays silent. Then: "Yeah. They are. The new VP wants \'aspirational but credible\' numbers. So if a ticket feels like a 5, see whether it can be a 3."\n\nHe says it the way someone admits something they already said two weeks ago, hoping nobody noticed.',
+        choices: [
+          { label: '"Then I\'m voting honestly. Mark me down for it."', effect: { focus: -1, capital: -0.5, morale: 4, burnout: 2 }, log: 'You voted honestly all meeting. The aggregate dragged Marcus\'s number up by 14%. He absorbed the political cost. He told you, sincerely, in DM that he respected you.' },
+          { label: '"Fine, I\'ll vote whatever you need."', effect: { focus: -1, capital: 0.5, scopeCreep: true, addUrgentFeature: true, debt: 3, burnout: 4 }, log: 'You voted to the number. The leadership readout looked great. Two tickets you sized as 3s ate the rest of your sprint anyway.' },
+        ],
+      },
+      // ----- spike branch — small, real, no scope-add: the rare process win
+      spike: {
+        description: 'Marcus: "A spike? OK — sure. Who owns it?" {facilitator} starts typing in chat. {objector}: "I\'ll do it." Marcus, awkwardly: "actually — let\'s have you do it, since you raised it."',
+        choices: [
+          { label: '"Sure, I\'ll spike it."', effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You volunteered. A 2-hour spike was added to your sprint — not a feature. Friday\'s estimate will be honest, possibly for the first time this quarter.' },
+          { label: '"Let {dev} do it — they actually own that surface."', effect: { focus: -0.5, capital: -1, burnout: 1 }, log: 'You deflected to {dev}. They accepted gracefully. They will mention this in their next 1:1, gently.' },
         ],
       },
       compromise: {
         description: 'Marcus: "OK, 3? Everyone — 3?" {facilitator} votes 8 because "they\'re trying to slow things down for capacity reasons." {objector} votes 2. The poll has a bimodal distribution. Marcus stares at it.',
         choices: [
           { label: 'Re-vote with discussion', next: 'revote' },
-          { label: 'Move on with the median', effect: { focus: -1.5, burnout: 4 }, log: 'You forced consensus on a 3. The ticket will end up being a 13. You will be the one to discover this.' },
+          { label: 'Move on with the median', effect: { focus: -1.5, burnout: 4, scopeCreep: true }, log: 'You forced consensus on a 3. The ticket grew anyway and you will be the one to discover this on Wednesday.' },
         ],
       },
+      // Generalized: the requirements ARE missing (matches descriptions where
+      // they\'re unwritten, AI-generated, or just "see Slack").
       scope: {
-        description: 'Marcus: "Well, it\'s a button that opens a modal — actually it\'s a panel — that shows recently-viewed items, but only for paid users, and the analytics need to track each click, and the design isn\'t finalized."',
+        description: 'Marcus, brightly: "Great question — there isn\'t a finalized one yet. The customer ask is, you know, real. Could you ballpark it?"\n\n{facilitator}, after a beat: "Then we can\'t actually size it."',
         choices: [
+          { label: '"Then it goes back to the backlog until we have AC."', next: 'scope_principle' },
           { label: '"...so a 13."', next: 'thirteen' },
-          { label: '"That\'s six tickets."', next: 'split' },
-          { label: '"Move it to next sprint?"', next: 'defer' },
+          { label: '"That\'s six tickets, not one."', next: 'split' },
+          { label: '"Move it to next sprint."', next: 'defer' },
+          { label: '"...sure, an 8."', effect: { focus: -1, scopeCreep: true, addUrgentFeature: true, burnout: 4, debt: 3 }, log: 'You ballparked an unwritten ticket. Inevitable. The 8 will be a 21. You will be the one paying for it.' },
+        ],
+      },
+      // ----- principled refusal: rare clean win
+      scope_principle: {
+        description: 'Marcus, after a long beat: "OK. Let\'s skip it. We\'ll bring it back when product has acceptance criteria." {facilitator} reacts with 🙌. The ticket goes back to the backlog. The room — for a single moment — feels like the ceremony was the right size.',
+        choices: [
+          { label: 'Move on to the next ticket', effect: { focus: -1, capital: 1.5, morale: 4 }, log: 'A real win. The unsized ticket went back. It will reappear next sprint with also no acceptance criteria. The principle stood today, briefly.' },
         ],
       },
       thirteen: {
-        description: 'Marcus: "We don\'t do 13s anymore. The exec team flagged the velocity dip. Can we make it a 5?" {objector}: "Or split it." Marcus: "We don\'t have time to split it. Let\'s say 5."',
+        description: 'Marcus: "We don\'t do 13s anymore. The exec team flagged the velocity dip. Can we make it a 5?" {objector}: "Or split it." Marcus: "We don\'t have time to split. Let\'s say 5."',
         choices: [
-          { label: '"Then we\'re lying about velocity."', effect: { focus: -1, capital: -1, burnout: 5, scopeCreep: true, addUrgentFeature: true }, log: 'You called it. The size went down to 5 anyway. The work will be 13. The 8h gap was eventually filed as a separate ticket. On you.' },
-          { label: 'Sigh and accept', effect: { focus: -1, burnout: 4, scopeCreep: true, addUrgentFeature: true }, log: 'You voted 5. The team committed to 5. The ticket grew. A second ticket appeared to track "the rest of it."' },
+          { label: '"Then we\'re lying about velocity."', effect: { focus: -1, capital: -1, burnout: 4, morale: -2 }, log: 'You named the lie out loud. The vote went 5 anyway, but Marcus quietly noted "tracker discrepancy" in his doc. No new ticket forced on you today; the politics will land later.' },
+          { label: '"Split it now, it takes 5 minutes."', next: 'split' },
+          { label: 'Sigh and accept the 5', effect: { focus: -1, burnout: 4, scopeCreep: true, addUrgentFeature: true }, log: 'You voted 5. The team committed to 5. The ticket grew. A second ticket appeared to track "the rest of it." On you.' },
         ],
       },
       split: {
-        description: 'Marcus: "Splitting takes 20 minutes per ticket. We have 12 more tickets to size. We do not have time to split."',
+        description: 'Marcus: "Splitting takes 20 minutes per ticket. We have 12 more to size. We don\'t have time."',
         choices: [
-          { label: '"Then refine async — async refinement?"', next: 'async' },
-          { label: 'Accept the lump', effect: { focus: -1.5, burnout: 5, addUrgentFeature: true }, log: 'You accepted the unsized lump. The lump materialized as a new urgent ticket on your sprint.' },
+          { label: '"Then we should refine fewer tickets, not size them sloppy."', effect: { focus: -0.5, capital: -1, morale: 3, burnout: 2 }, log: 'You named the trade. Marcus didn\'t love it. The room agreed quietly. Three tickets were dropped from the meeting. None of them came back to you.' },
+          { label: '"Splitting offline as a follow-up doc — async."', next: 'async' },
+          { label: 'Accept the lump', effect: { focus: -1.5, burnout: 5, addUrgentFeature: true }, log: 'You accepted the unsized lump. It rematerialized as a new urgent ticket on your sprint by 4 PM.' },
         ],
       },
       async: {
-        description: 'Marcus: "We tried async refinement last quarter. Nobody read the doc. That\'s why we have refinement meetings."',
+        description: 'Marcus: "We tried async last quarter. Nobody read the doc. Honestly — that\'s why we still have refinement meetings."',
         choices: [
-          { label: 'Acknowledge defeat', effect: { focus: -1, burnout: 4, addUrgentFeature: true }, log: 'You stopped pushing. The same problem appeared in two weeks. Sooner, actually — a new ticket landed in this sprint.' },
+          { label: '"Then make ONE doc per sprint, not per meeting."', effect: { focus: -0.5, capital: 0.5, morale: 2, burnout: 2 }, log: 'A small structural improvement. Marcus said he\'d try it. There is now a "Refinement Doc · Sprint N" template. Whether anyone reads it is a question for next quarter.' },
+          { label: 'Acknowledge defeat', effect: { focus: -1, burnout: 3 }, log: 'You stopped pushing. The same problem will reappear. Today, no extra ticket landed on you. That counts as something.' },
         ],
       },
       defer: {
-        description: 'Marcus: "Can\'t — sales committed it for end of quarter. {facilitator} promised a customer."',
+        description: 'Marcus: "Can\'t move it — there\'s a customer expectation on the timing." He does not specify whose expectation it is or who set it.',
         choices: [
-          { label: '"...without checking with us?"', next: 'without_checking' },
-          { label: 'Drop it', effect: { focus: -1, burnout: 5, addUrgentFeature: true }, log: 'You dropped it. The deadline is real. The ticket appeared in your sprint anyway.' },
+          { label: '"Whose expectation, and when did we agree to it?"', next: 'without_checking' },
+          { label: '"Then it\'s a candidate for a fast-follow next sprint, not a full ticket this one."', effect: { focus: -0.5, capital: 0.5, morale: 2, burnout: 2 }, log: 'You re-framed it as a fast-follow. Marcus accepted. The customer expectation was, you suspect, his own.' },
+          { label: 'Drop it', effect: { focus: -1, burnout: 4, addUrgentFeature: true }, log: 'You dropped it. The deadline turned out to be real-ish. The ticket appeared in your sprint anyway.' },
         ],
       },
       without_checking: {
-        description: 'Marcus has the decency to look uncomfortable. "Yeah. I know. I\'m bringing it up at the next sales-eng sync."',
+        description: 'Marcus has the decency to look uncomfortable. "Yeah — uh — Priya promised it on a customer call last week. I\'ll bring it up with her."',
         choices: [
-          { label: '"OK."', effect: { focus: -1, capital: 1, burnout: 4, addUrgentFeature: true }, log: 'You let it go. The sales-eng sync was rescheduled three times. The ticket was added today.' },
+          { label: '"OK — but for now we plan as if it\'s NOT in this sprint."', effect: { focus: -0.5, capital: 1, morale: 3, burnout: 2 }, log: 'You held the line. Marcus actually went and talked to Priya afterward. The ticket landed in next sprint, not this one.' },
+          { label: '"...fine."', effect: { focus: -1, burnout: 4, addUrgentFeature: true }, log: 'You let it go. The follow-up with Priya was rescheduled twice. The ticket landed on you anyway, today.' },
         ],
       },
       revote: {
-        description: '{facilitator}: "Here\'s the thing — if we size everything down, we\'re building unsustainable expectations." Marcus: "{facilitator}, we\'re not in capacity planning. We\'re sizing." {facilitator}: "Right but they\'re related." Eight more minutes pass.',
+        description: '{facilitator}: "Here\'s the thing — if we size everything down, we\'re building unsustainable expectations." Marcus: "We\'re not in capacity planning, we\'re sizing." {facilitator}: "Right, but they\'re related." Eight more minutes pass and the bimodal distribution holds.',
         choices: [
-          { label: 'Wait it out', effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You waited. The vote concluded with the original size. Two more tickets got sized. One of them landed in your sprint.' },
-          { label: 'Leave the meeting silently', effect: { focus: -0.5, capital: -2, burnout: 3 }, log: 'You left. Marcus DM\'d you "everything ok?" Twice.' },
+          { label: 'Wait it out', effect: { focus: -2, burnout: 6 }, log: 'You waited. The vote concluded with the original size. Two more tickets got sized. None landed on you, today.' },
+          { label: 'Propose: "Let\'s vote the 8 honestly, capacity be damned."', effect: { focus: -1, capital: -0.5, morale: 3, burnout: 3 }, log: 'You voted up. {facilitator} thanked you with a private DM. The leadership readout will be off; that is a problem for tomorrow.' },
+          { label: 'Leave the meeting silently', effect: { focus: -0.5, capital: -2, burnout: 3 }, log: 'You left. Marcus DM\'d "everything ok?" Twice. You said you had a doctor\'s appointment. The lie was easy.' },
         ],
       },
       mute: {
-        description: 'You stay on mute. Camera off. Hour 1.5 begins. {objector} says "I\'m gonna respectfully push back on that" for the eleventh time. {facilitator} is now arguing that effort points should be calibrated weekly.',
+        description: 'You stay muted, camera off. Hour 1.5 begins. {objector} says "I\'m gonna respectfully push back on that" for the eleventh time. {facilitator} is arguing that effort points should be re-calibrated weekly. Marcus is in three Slack threads simultaneously.',
         choices: [
-          { label: 'Endure the rest', effect: { focus: -2.5, burnout: 7, addUrgentFeature: true }, log: 'You endured. Meeting ran 45 minutes over. A ticket no one discussed got assigned to you.' },
+          { label: 'Endure the rest', effect: { focus: -2, burnout: 6 }, log: 'You endured. Meeting ran 35 minutes over. The room sized 14 tickets. None of them landed on you today.' },
+          { label: 'Endure, but check Slack on the side', effect: { focus: -2.5, burnout: 7, addUrgentFeature: true }, log: 'You half-listened. While checking Slack, you missed a ticket being assigned to you. It was assigned to you anyway. You\'ll discover it tomorrow.' },
           { label: 'Drop with "lost connection"', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You used the network excuse. Marcus didn\'t buy it. He didn\'t mention it either.' },
         ],
       },
@@ -1067,73 +1266,188 @@ export const EVENTS = [
   },
   {
     id: 'daily_standup', icon: MessageSquare,
-    title: 'Daily standup (running long)',
+    title: 'Daily standup (15 min on the calendar)',
     start: 'open',
     nodes: {
       open: {
         descriptions: [
-          'You are on minute 13 of a 15-minute meeting that has had 2 minutes of actual standups in it. {updater} is currently giving an update that started "I worked on stuff" and is now somehow about a customer call from last quarter.',
-          '{updater} is sharing their screen for a standup. They are showing a Loom they recorded yesterday. The Loom is 9 minutes long. Marcus says "love this, very prepared" and lets it play in full.',
-          'Standup started 6 minutes late because Marcus\'s 9:30 ran over. Now {updater} is mid-update, cross-referencing a Jira ticket they "just need to find — one sec."',
-          'Marcus opens with: "before we start, just want to flag — leadership wants more visibility into our standup. They asked us to do them in #engineering instead of voice from now on. Today we\'ll do both." It is the third today.',
+          // ----- vanilla scope/scope creep openers -----
+          'You are on minute 13 of a 15-minute meeting that has had 2 minutes of actual standups in it. {updater} is mid-update on something that started as "I worked on stuff" and is now somehow about a customer call from last quarter.',
+          'Standup started 6 minutes late because Marcus\'s 9:30 ran over. {updater} is mid-update, cross-referencing a Jira ticket they "just need to find — one sec." The "one sec" is now 90 seconds old.',
           '{updater} began their update with "I\'m going to keep this short" exactly four minutes ago. They are now describing a Slack thread they had with Marketing in 2023.',
-          'Marcus has restructured standup. There is now a "yesterday / today / blockers / vibes" framework. He is asking everyone for a "vibes update" on a 1–5 scale. {updater} is asking what the difference between a 3 and a 4 is.',
-          'Standup is now async-first. It is also still on Zoom every morning. It is also in a Notion doc. It is also in a Slack thread. {updater} is reading their async update aloud while the doc is on screen. Two people are typing in the Slack thread.',
-          'Marcus has added an "agentic AI co-pilot" to the standup that summarizes everyone\'s update. The summary is wrong about three of them. The summary will be sent to leadership.',
-          'Standup just started and Marcus says "real quick — Logan from leadership is dropping in today, just FYI, act normal." Logan has been on mute, camera off, the whole time. Logan\'s status is "Available."',
-          '{updater}: "I want to flag a blocker." Marcus, instantly: "love that — let\'s take that offline." {updater}: "It\'s blocking the whole sprint." Marcus: "totally — let\'s take it offline."',
-          'Standup is on Slack huddle today because the Zoom license got "rationalized." The huddle has no video. Three people are clearly walking somewhere. One is on a treadmill. {updater} is at the dentist.',
-          'Marcus opens with "I want to celebrate a win." The win is that {dev} closed 14 tickets. 11 of them were duplicates. Marcus knows this. Marcus is celebrating anyway.',
-          'Standup. {updater} joins from the airport, on cellular, in motion. Their video keeps freezing on a slightly unflattering expression. They are giving an update. They are also clearly going through security.',
-          'Marcus, sharing his screen: "small format change — I added an icebreaker question." Today\'s icebreaker: "what\'s your spirit animal as a Jira ticket type?" {updater} answers seriously.',
+          'Marcus opens with "before we start — Logan from leadership is dropping in today, just FYI, act normal." Logan has been on mute, camera off, the whole time. Logan\'s status is "Available." Logan posted a 🎯 in the chat 90 seconds ago and you do not know what it means.',
           'Standup runs into Marcus\'s next meeting. Marcus: "let\'s do a lightning round." The lightning round takes 19 minutes because Marcus interrupts each update with "love that — quick follow-up."',
-          'Standup. Marcus: "before we start, leadership has asked us to track our standups against velocity. So I\'m going to be timing each update. Just so we have data." {updater}\'s update is 9 seconds long. Marcus says "that felt rushed."',
+          'Marcus, sharing his screen: "small format change — I added an icebreaker question." Today\'s icebreaker: "what\'s your spirit animal as a Jira ticket type?" {updater} answers seriously. {updater}\'s answer is "an Epic."',
+          'Marcus opens with "I want to celebrate a win." The win is that {dev} closed 14 tickets. 11 of them were duplicates. Marcus knows this. Marcus is celebrating anyway, with a 🎉 emoji bot he installed yesterday that fires for everyone in the call.',
+          // ----- Loom replay branch (no real "offline" applies — just absurdity) -----
+          '{updater} is sharing their screen for a standup. They are showing a Loom they recorded yesterday. The Loom is 9 minutes long. Marcus says "love this, very prepared" and lets it play in full. The Loom is also playing at 0.85x because {updater} forgot to bump the speed.',
+          'Marcus, brightly: "{updater} pre-recorded their update! Async-first, baby." It plays. {updater} is also live on the call. Live-{updater} watches Recorded-{updater} and visibly disagrees with their own past self.',
+          // ----- "vibes update" format branch -----
+          'Marcus has restructured standup. There is now a "yesterday / today / blockers / vibes" framework. He is asking everyone for a "vibes update" on a 1–5 scale. {updater} is asking what the difference between a 3 and a 4 is.',
+          'Marcus: "I want to try a new format — instead of yesterday/today/blockers, we go yesterday/today/blockers/blockers we MADE for ourselves. So we own it." {updater}: "I made a typo." Marcus: "love the vulnerability."',
+          'Marcus has read a new book and standups now end with "one thing I\'m grateful for." {updater}\'s gratitude is "the espresso machine working again." Marcus types it into a doc.',
+          // ----- AI summary co-pilot branch -----
+          'Marcus has added an "agentic AI co-pilot" to the standup that summarizes everyone\'s update. The summary is wrong about three of them. The summary will be sent to leadership. Logan reacts to it with 🚀.',
+          'Marcus has piloted a new tool: every standup is auto-transcribed by an AI and turned into a Notion page nobody reads. The AI has misheard "I shipped the auth fix" as "I shipped the off-ramp."',
+          // ----- async/multi-channel chaos -----
+          'Standup is now async-first. It is also still on Zoom every morning. It is also in a Notion doc. It is also in a Slack thread. {updater} is reading their async update aloud while the doc is on screen. Two people are typing in the Slack thread. The doc has 31 unread comments.',
+          'Standup is on Slack huddle today because the Zoom license got "rationalized." The huddle has no video. Three people are clearly walking somewhere. One is on a treadmill. {updater} is at the dentist and giving updates between rinse-and-spits.',
+          'Standup. {updater} joins from the airport, on cellular, in motion. Their video keeps freezing on a slightly unflattering expression. They are giving an update. They are also clearly going through security. A TSA agent\'s arm appears in frame.',
+          // ----- leadership theatre -----
+          'Marcus: "before we start, leadership has asked us to track our standups against velocity. So I\'m going to be timing each update. Just so we have data." {updater}\'s update is 9 seconds long. Marcus says "that felt rushed."',
+          'Marcus, in a tone that is almost a whisper: "small heads-up — Logan asked for a Loom of today\'s standup for the leadership readout. So if you could each \'do your update like Logan is watching\' that\'d be great." Logan, who is on the call: 🎯',
+          'Standup. Marcus: "small thing — leadership has asked that we use this time to also talk about \'what unblocked you yesterday.\' It\'s a wins-orientation thing. So please come prepared with that going forward." Yesterday you were blocked by Marcus\'s scope creep. You will not be saying this.',
+          // ----- the "let\'s take that offline" boss-deflect (the central irony) -----
+          '{updater}: "I want to flag a blocker." Marcus, instantly: "love that — let\'s take that offline." {updater}: "It\'s blocking the whole sprint." Marcus: "totally — let\'s take it offline." Marcus has not opened a doc. There will be no offline.',
+          'Marcus opened standup by saying "I\'m going to be intentional today about what we take offline." He has now sent every blocker, every dependency call-out, and {dev}\'s genuine cry for help to the same Notion doc titled "PARKING LOT." The doc has 412 unaddressed entries.',
+          // ----- the surprise-debug derail (legitimate, "offline" doesn\'t apply — this IS the work) -----
+          'Standup\'s last 60 seconds. {dev}: "wait — quick — is anyone else seeing 500s on the dashboard right now?" Three people check. Three people see them. Marcus: "let\'s take that offline." Customers cannot see the dashboard.',
+          // ----- Marcus is, somehow, double-booked AT his own standup -----
+          'Marcus is running standup from his car. He is in a parking garage. The audio echoes. He is also clearly on a different call on his phone — you can hear someone else\'s voice say "you\'re still on mute, Marcus." He is on mute on the other call.',
+          'Marcus has a hard out at 9:30 for a 9:30 he booked himself. He has been saying "real quick — last update, real quick" since 9:22. He has gotten through one person.',
+          // ----- the "no Marcus today" rare branch -----
+          'Marcus is OOO. {dev} is "facilitating." {dev} has not facilitated before. {dev}: "ok so — should I just like — go in alphabetical?" Six people have unmuted to suggest different orderings. Nobody has given an update.',
         ],
         choices: [
-          { label: 'Wait for it to end', next: 'wait' },
-          { label: 'Suggest taking it offline', next: 'offline' },
-          { label: 'Give your own update first', next: 'your_update' },
+          { label: 'Mute, camera off, eat a granola bar', next: 'glazed' },
+          { label: 'Give a crisp 30-second update first', next: 'your_update' },
+          { label: 'Fake a connection issue and bail', next: 'fake_drop' },
+          { label: '"Marcus, can we wrap? I\'m at 12 minutes."', next: 'wrap_attempt' },
         ],
       },
-      wait: {
-        description: 'Marcus: "Cool, cool, cool. {dev}, what about you?" {dev}: "Yesterday I shipped X. Today I\'ll work on Y. No blockers." This took 6 seconds. Marcus: "Awesome. {offliner}?"',
+      // ----- glazed: you check out, the meeting unfolds — branches by what kind of derail it is -----
+      glazed: {
+        descriptions: [
+          'You disengage. The next 6 minutes happen at you. Then {offliner} says: "real quick — kind of a question for the group, not really an update —" Marcus, brightly: "love an open thread."',
+          'You disengage. Then Marcus says "{offliner}, your turn." {offliner}: "yeah so — this isn\'t really an update either, but —"',
+          'You disengage. Marcus: "OK, before we wrap — {offliner} flagged something in DM, want to surface it?" Surfacing has begun. There is no taking this offline.',
+        ],
         choices: [
-          { label: 'Brace for impact', next: 'offliner' },
+          { label: 'Listen — what\'s {offliner} actually saying?', next: 'derail_router' },
+          { label: 'Stay muted, eyes glazed, ride it out', effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You waited it out. {offliner}\'s "quick question" became a new ticket somewhere mid-monologue. It is on you. You don\'t remember which one.' },
+          { label: 'Drop off ("oh no my Wi-Fi")', effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You used the Wi-Fi excuse. Marcus didn\'t notice. {offliner} continued. The ticket landed on someone else.' },
         ],
       },
-      offliner: {
-        description: '{offliner}: "Yeah I — well, before I get to my update, I have a quick question for the group. It\'s about — well, it kind of touches on what {updater} was saying but —"',
+      // Routes the player to the actual nature of the derail. Each sub-branch is internally consistent.
+      derail_router: {
+        descriptions: [
+          '{offliner}: "I want to walk through the dashboard 500s with the group, on screen. Five minutes."',
+          '{offliner}: "{updater} mentioned the auth flow — I had a thought. Hear me out — what if it ALSO did SSO with the legacy IdP?"',
+          '{offliner}: "I have a quick philosophical question — what counts as \'shipped\'?"',
+          '{offliner}: "Just flagging — I\'m blocked on the platform team. Like, real-blocked. Not vibes-blocked. The thing-doesn\'t-load blocked."',
+          '{offliner}: "Sorry — I have to share this — Stefan from the offsite reached out and he had FEEDBACK on our roadmap."',
+        ],
         choices: [
-          { label: '"Take it offline?"', next: 'take_offline' },
-          { label: 'Mute and pretend to listen', effect: { focus: -1.5, burnout: 5, addUrgentFeature: true }, log: 'You waited. {offliner} talked for 6 minutes. The "quick question" turned into a new ticket on your plate.' },
+          { label: '"Marcus — that one\'s legitimately blocking, not offline material."', next: 'real_blocker' },
+          { label: '"That\'s a scope discussion, not a standup."', next: 'scope_pushback' },
+          { label: '"Take it offline — for real, not the Marcus version of offline."', next: 'real_offline' },
+          { label: 'Mute and watch it unfold', effect: { focus: -2, burnout: 7, addUrgentFeature: true }, log: 'You watched. The conversation went somewhere only Marcus could love. A new ticket appeared. It is now yours.' },
         ],
       },
-      take_offline: {
-        description: '{offliner}: "Yeah totally, totally. Just real quick though — and I know we should take this offline, but —" Marcus is nodding. Marcus is also visibly checking Slack on the side.',
+      // Real blocker — the IRONIC version of "take it offline" was Marcus\'s deflection in the openers
+      real_blocker: {
+        description: 'Marcus: "totally — and that\'s exactly the kind of thing we should — uh — take offline?" {dev}: "It\'s the dashboard. Customers can\'t see it. Right now." Marcus, recalibrating in real time: "OK so — quick exception today — let\'s actually surface it."',
         choices: [
-          { label: '"Seriously, offline."', effect: { focus: -1, capital: -0.5, burnout: 4 }, log: 'You stopped it. {offliner} was hurt. Marcus DM\'d you a thumbs-up.' },
-          { label: 'Give up', effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You let it continue. Standup ran 11 minutes over. A scope discovery happened. A new ticket appeared on your sprint. It is now yours.' },
+          { label: 'Volunteer to look at it now', effect: { focus: -3, burnout: 5, debt: -2, capital: 1 }, log: 'You took the dashboard fire. You shipped a real fix. Marcus posted in #wins. He spelled your name wrong.' },
+          { label: '"It\'s the platform team\'s service. Page them."', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You held the line. The platform team eventually got paged. Marcus felt you "weren\'t a team player today" and will say so in your 1:1, gently.' },
+          { label: 'Suggest the on-call rotation', effect: { focus: -1, capital: -0.5, burnout: 2 }, log: 'You found the right person. They were already on it. The only damage was 6 minutes of your morning.' },
         ],
       },
-      offline: {
-        description: 'Marcus: "Yeah, can we take this offline?" {updater}: "Sure, yeah, just one more thing —" The thing takes 4 minutes. The thing is unrelated.',
+      // Scope pushback path — Marcus + the offliner try to grow your sprint live on the call
+      scope_pushback: {
+        description: 'Marcus, slowly: "I hear you, but — small thought — {offliner}\'s idea is actually kind of in scope? It\'s sort of an extension of what we\'re already doing." It is not an extension. It is a new feature.',
         choices: [
-          { label: 'Wait it out', effect: { focus: -1.5, burnout: 4, addUrgentFeature: true }, log: 'You waited. Meeting ran 8 minutes over. The "one more thing" added itself to your sprint as a new ticket.' },
-          { label: '"Marcus, can we wrap?"', next: 'wrap' },
+          { label: '"It is a new feature."', next: 'new_feature' },
+          { label: '"OK, file a ticket and we\'ll triage."', effect: { focus: -1, capital: 0.5, burnout: 3 }, log: 'You pushed it to triage. Marcus noted it. It will appear in next planning labeled URGENT.' },
+          { label: '"Sure, I\'ll think about it."', effect: { focus: -1, scopeCreep: true, burnout: 5 }, log: 'You said "sure" out loud. The feature you\'re building grew by 6 hours before standup ended.' },
         ],
       },
-      wrap: {
-        description: 'Marcus: "Yeah, wrapping. {offliner}, any blockers?" {offliner}: "Well, sort of — there\'s this thing with the API — actually maybe I\'ll bring it up here because everyone\'s on —" Ten more minutes.',
+      new_feature: {
+        description: 'Marcus pauses. "OK — but is it though? Like, philosophically." {offliner} nods sagely. "I think it\'s the same thing in a different — energy."',
         choices: [
-          { label: 'Just leave', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You left. Three other people followed. Marcus continued running the meeting to himself.' },
-          { label: 'Stay (you\'re a saint)', effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You stayed. The blocker WAS a blocker. It is now your ticket.' },
+          { label: '"Energetically and technically: no."', effect: { focus: -1, capital: -1, burnout: 4 }, log: 'You held the line on physics. {offliner} was visibly hurt. The feature died. The respect did not survive standup.' },
+          { label: 'Give up and absorb the scope', effect: { focus: -1, scopeCreep: true, burnout: 6 }, log: 'You folded after 4 minutes of philosophy. Your feature grew 6 hours, mostly in a part you hadn\'t designed yet.' },
         ],
       },
+      // Real offline — distinguishes from Marcus's fake "offline"
+      real_offline: {
+        description: 'Marcus: "totally totally — let\'s take that — offline." Then, 4 seconds later: "actually, since everyone\'s here, super quick — could you just walk us through it now?" Six minutes pass. Nothing has been taken offline.',
+        choices: [
+          { label: '"Marcus, you literally just said offline."', effect: { focus: -1, capital: -1, burnout: 3 }, log: 'You held him to his own words. Marcus did the "totally fair" thing. The conversation continued anyway, slightly muted, for 4 more minutes.' },
+          { label: 'Drop off and DM the right people directly', effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You bailed and resolved the actual issue async in 8 minutes. Marcus DM\'d you "great hustle today!"' },
+        ],
+      },
+      // ----- your_update path: branches by what happens AFTER you give a clean update -----
       your_update: {
-        description: 'You give a clean 30-second update. Marcus: "Cool, thanks." Then to {offliner}: "What about you?" {offliner}: "Well, building on what you said —"',
+        descriptions: [
+          'You give a clean 30-second update. Marcus: "love that — quick question for you, real quick — could you also look at the export thing this week?" The export thing is not on your sprint.',
+          'You give a clean 30-second update. {offliner}: "Building on what they just said — I think there\'s actually a bigger question here, which is — what does success look like?"',
+          'You give a clean 30-second update. Logan, who has been silent on mute, unmutes for the first time and says: "🎯 — quick one — could you write that up in a doc by EOD? Just a one-pager. For my readout." Logan re-mutes.',
+          'You give a clean 30-second update. Marcus, immediately: "amazing — and totally aligned with what we discussed in our 1:1." You did not have a 1:1 about this.',
+        ],
         choices: [
-          { label: 'Mute and pretend to listen', effect: { focus: -1.5, burnout: 5, addUrgentFeature: true }, log: '{offliner} spent 7 minutes "building on" your update. They built a new requirement onto it that became its own ticket. On you.' },
-          { label: 'Drop off (Zoom acted up)', effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You dropped. Marcus didn\'t notice. {offliner} continued.' },
+          { label: '"Sure, I\'ll add it to the sprint."', effect: { addUrgentFeature: true, capital: 0.5, burnout: 4 }, log: 'You absorbed the new ticket and thanked them for it. Marcus celebrated your "energy."' },
+          { label: '"Can we triage that in planning?"', next: 'triage_attempt' },
+          { label: '"Happy to look — what should we drop?"', next: 'what_drop' },
+          { label: 'Drop off (Zoom acted up)', effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You dropped. Marcus did not notice. The ask was repeated to {dev}, who absorbed it.' },
+        ],
+      },
+      triage_attempt: {
+        description: 'Marcus: "totally — but it\'s coming from a customer ask, so realistically we have to do it this sprint? Triage feels like — a process answer to a customer question."',
+        choices: [
+          { label: '"Process exists for a reason."', effect: { focus: -1, capital: -1, burnout: 4 }, log: 'You held. Marcus called you "principled" in a tone he uses when he means "difficult."' },
+          { label: 'Sigh and absorb it', effect: { addUrgentFeature: true, burnout: 5 }, log: 'You folded. The feature was added. The customer is, as ever, a friend of the CEO\'s from college.' },
+        ],
+      },
+      what_drop: {
+        description: 'Marcus, blinking: "...drop? oh — I mean — could you maybe just — fit it in? I think it\'s small."',
+        choices: [
+          { label: '"Then it goes in next sprint."', next: 'formally_protect' },
+          { label: '"Fine."', effect: { addUrgentFeature: true, scopeCreep: true, burnout: 5, capital: -0.5 }, log: 'You agreed to "fit it in." It will not fit. The thing you were already building grew, and a new ticket appeared next to it.' },
+        ],
+      },
+      formally_protect: {
+        description: 'Marcus: "Sure, I\'ll put it on the next sprint candidate list." The list has 47 things on it. Two of them have been on it for a year.',
+        choices: [
+          { label: '"OK."', effect: { capital: 1, focus: -0.5 }, log: 'You traded a ticket for a place on a list. The list is, in functional terms, a graveyard. You bought yourself today.' },
+        ],
+      },
+      // ----- fake_drop: low-cost escape, slight political tax -----
+      fake_drop: {
+        descriptions: [
+          'You announce: "guys my Wi-Fi is dying, dropping" — and bail. Marcus: "sounds good, catch up async!" Your Wi-Fi is fine. Marcus knows your Wi-Fi is fine. You both let it slide.',
+          'You hit "leave meeting." Slack instantly: Marcus: "oh no — was it the Zoom thing again?" You reply with three letters: "yep" and close the laptop lid.',
+          'You unplug your laptop\'s ethernet under the desk and rejoin once. The reconnection looks credible. You drop again, audibly this time. Marcus moves on.',
+        ],
+        choices: [
+          { label: 'Get back to work', effect: { focus: -0.5, capital: -0.5, burnout: 1 }, log: 'A clean escape with a small political tab. You bought back ~10 minutes of morning.' },
+          { label: 'Marcus DMs you a calendar invite to "sync"', next: 'fake_drop_followup' },
+        ],
+      },
+      fake_drop_followup: {
+        description: 'A 30-minute "sync" appears on your calendar for 4:30 PM today. The title is "[catch-up — should be quick]." There is no agenda. The other invitee is {offliner}.',
+        choices: [
+          { label: 'Accept', effect: { focus: -1.5, capital: 0.5, burnout: 5, addUrgentFeature: true }, log: 'The 4:30 ran 50 minutes. Marcus and {offliner} used it to add a ticket to your sprint that they couldn\'t add at standup.' },
+          { label: 'Decline with "conflict"', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You declined. Marcus rebooked it twice. The third invite has "[REQUIRED]" in the title.' },
+        ],
+      },
+      // ----- wrap_attempt: you try to be the adult in the room -----
+      wrap_attempt: {
+        descriptions: [
+          'Marcus: "yeah — totally — wrapping. {offliner}, real quick, blockers?" {offliner}: "Well — sort of — there\'s this thing with the API — actually maybe I\'ll bring it up here because everyone\'s on —" Ten more minutes.',
+          'Marcus: "great point — let\'s wrap. Last thing: {dev}, wins?" {dev} starts listing wins. They have prepared a list. The list is 11 items long. The first 9 are duplicates.',
+          'Marcus: "love that — wrapping it up, just one tiny ask — can we do round-the-room \'one thing you\'re proud of\' real quick? Logan asked for it." Logan reacts with 🎯 immediately.',
+        ],
+        choices: [
+          { label: 'Just leave', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You left. Three other people followed. Marcus continued running the meeting to himself. He may or may not have noticed.' },
+          { label: 'Stay (you\'re a saint)', effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You stayed for the wrap. The "real quick" was 14 minutes. A blocker turned into a ticket. It is now yours.' },
+          { label: '"Marcus. We are 22 minutes into a 15-minute meeting."', next: 'call_it_out' },
+        ],
+      },
+      call_it_out: {
+        description: 'Marcus pauses. "...you\'re right. You\'re right. Sorry — I lose track. Can someone time-keep next time?" Three people volunteer. None of them will. The meeting ends 90 seconds later.',
+        choices: [
+          { label: 'Accept the small win', effect: { focus: -1, capital: 0.5, burnout: 2, morale: 3 }, log: 'A rare clean ending. Marcus DM\'d you "thanks for keeping us honest." He will do this again tomorrow.' },
         ],
       },
     },
@@ -1141,6 +1455,8 @@ export const EVENTS = [
   {
     id: 'mental_health', icon: Heart,
     title: 'Mandatory: "Resilience & Wellbeing" workshop',
+    // Wellness consultants are also expensive. Fire it once-ish per quarter, off-cycle from inclusion.
+    requires: (s) => s.sprint >= 4 && s.sprint % 5 === 4 && s.burnout > 30,
     start: 'open',
     nodes: {
       open: {
@@ -2056,6 +2372,569 @@ export const EVENTS = [
         choices: [
           { label: 'Power through anyway', effect: { focus: -2, burnout: 6 }, log: 'You powered through. You smell. Your knees hurt. You used 1.4GB of personal data. Your work was fine.' },
           { label: 'Give up, go home', next: 'home' },
+        ],
+      },
+    },
+  },
+  // ===== COMBINATION EVENTS — multiple pressures stacking with logical handoff =====
+  {
+    // Marcus + Priya (sales) corner you about the SAME feature, in the SAME meeting.
+    // Combines: scope_change pressure + addUrgentFeature + capital tax.
+    id: 'sales_pincer', icon: Users,
+    title: 'Marcus and Priya have "a quick chat" with you',
+    requires: (s) => s.sprint >= 2 && s.currentDay >= 2 && s.sprintPlan.length >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Marcus and Priya from sales corner you in the kitchen. They are doing the thing where they look at each other before speaking — the rehearsed thing. Marcus opens. "So — Priya and I were just talking, and we wanted to come to you together because we feel like alignment is so important here."',
+          'A calendar invite, no agenda: "Quick alignment — Marcus / Priya / you." 15 minutes. The room they booked is the small one with no whiteboard. Marcus and Priya are both there when you arrive. Both are smiling.',
+          'Marcus DMs: "got 10? Priya and i want to brainstorm something with you — collaboratively." The Slack DM has both of them in it. The DM is named "Team You 🚀."',
+          'Priya rolls her chair to your desk. Marcus appears 14 seconds later. They have clearly walked separately to make this look unplanned. Priya: "OK so — Marcus and I had an idea." Marcus, immediately: "well, Priya had the idea. I love it."',
+        ],
+        choices: [
+          { label: '"What\'s the idea?"', next: 'idea' },
+          { label: '"Why are you both here?"', next: 'why_both' },
+          { label: '"This feels like an ambush."', next: 'ambush' },
+        ],
+      },
+      idea: {
+        descriptions: [
+          'Marcus: "So — Priya has a customer who is — uh — \'on the fence\' about renewing." Priya: "On a knife\'s edge. Like, this week." Marcus: "And the thing they need is something we — we believe is on the roadmap anyway. Right Priya?" Priya: "Definitely on the roadmap." It is not on the roadmap.',
+          'Priya: "OK so — Greenfield Holdings is asking for a CSV export. Specifically, with custom columns. Specifically, by Friday. Marcus tells me your team can probably squeeze it in?"',
+          'Marcus: "We were thinking — the analytics page you\'re building? What if it ALSO had a print-friendly view? Priya\'s customer asked. They print things. They\'re a print-things company."',
+        ],
+        choices: [
+          { label: '"What did you commit to and when?"', next: 'committed' },
+          { label: '"That\'s a separate ticket. Let\'s triage in planning."', next: 'triage' },
+          { label: '"Sure, I\'ll squeeze it in."', effect: { addUrgentFeature: true, scopeCreep: true, debt: 4, capital: 0.5, burnout: 6 }, log: 'You agreed in front of both of them. The feature was added. Priya immediately Slacked the customer. The customer immediately had three more requests.' },
+        ],
+      },
+      why_both: {
+        description: 'Marcus, slightly defensive: "We just felt — alignment is — important. And, you know, when sales and product are aligned, engineering can really —" Priya cuts in: "We didn\'t want to triangulate."',
+        choices: [
+          { label: '"Triangulating is exactly what this is."', next: 'ambush' },
+          { label: '"OK. Tell me about the ask."', next: 'idea' },
+        ],
+      },
+      ambush: {
+        description: 'Marcus and Priya look at each other. Priya, recovering: "I — I hear you. That wasn\'t our intention." Marcus, doubling down: "I think \'ambush\' is a strong word. We\'re here in good faith." Both still smiling.',
+        choices: [
+          { label: '"Then let\'s do this 1:1, with the actual stakeholder."', effect: { focus: -0.5, capital: 1.5, burnout: 3 }, log: 'You broke the pincer move. Marcus rebooked the conversation as three separate 1:1s. Two of them never happened.' },
+          { label: '"Fine. Tell me the ask."', next: 'idea' },
+        ],
+      },
+      committed: {
+        description: 'Priya: "I — I told them \'soon.\'" Marcus: "Which we\'d translate as — late this week, end of next at the latest. Realistically."',
+        choices: [
+          { label: '"You committed without engineering. That\'s the bug."', next: 'process_bug' },
+          { label: '"Fine, but it goes in next sprint."', next: 'next_sprint' },
+          { label: '"OK, I\'ll do it."', effect: { addUrgentFeature: true, debt: 5, capital: 1, burnout: 7 }, log: 'You took the ticket. Priya thanked you in #wins. Marcus called you "a great partner." The customer asked for two more features inside an hour.' },
+        ],
+      },
+      process_bug: {
+        description: 'Marcus: "I hear you. Honestly. But the deal closes Friday." Priya: "And we don\'t have time to fix the process before Friday."',
+        choices: [
+          { label: '"Then this is on you two, not on me."', effect: { focus: -0.5, capital: -1.5, burnout: 4, morale: 2 }, log: 'You held the line. Marcus and Priya jointly Slacked your manager. Your manager DM\'d you "u up?" 90 minutes later.' },
+          { label: '"Fine — but ONLY this once."', effect: { addUrgentFeature: true, debt: 3, capital: 0.5, burnout: 5 }, log: 'You folded with a moral footnote. The "only this once" was used 3 sprints ago. It will be used again.' },
+        ],
+      },
+      next_sprint: {
+        description: 'Priya pales. "Next sprint is — too late. The CFO is going to be on the call Tuesday." Marcus: "Could you — you know — start it tonight? Just the spike?"',
+        choices: [
+          { label: '"No."', effect: { focus: -0.25, capital: -1.5, burnout: 2, morale: 3 }, log: 'You said no. Priya looked at Marcus. Marcus looked at the floor. The customer churned. The renewal was, it turned out, going to churn anyway.' },
+          { label: '"...Fine, the spike."', effect: { addUrgentFeature: true, debt: 4, capital: 1, burnout: 8, focusPct: -10 }, log: 'You agreed to "the spike." The spike became the feature. The feature shipped Friday. The customer churned anyway, three weeks later.' },
+        ],
+      },
+      triage: {
+        description: 'Marcus and Priya look at each other. Priya: "Triage means — what, exactly?" Marcus: "It means like a process — it means we — uh — Priya it means we put it on the list."',
+        choices: [
+          { label: 'Walk them through how triage actually works', effect: { focus: -1, capital: 1, burnout: 4 }, log: 'You spent ten minutes teaching two senior employees how planning works. They nodded. The triage document was filed. The customer ask was prioritized at the top of it.' },
+        ],
+      },
+    },
+  },
+  {
+    // CEO + Marcus + a vendor demo + a deadline. The "AI strategy" all-in.
+    // Combines: ceo_idea momentum + addUrgentFeature + addLegacy + scopeCreep risk.
+    id: 'ai_initiative_kickoff', icon: Zap,
+    title: 'Mandatory: "Agentic AI Strategy Kickoff"',
+    requires: (s) => s.sprint >= 3 && s.currentDay >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A calendar invite drops at 8:47 AM titled "[CEO + Eng] Agentic AI Kickoff — MANDATORY." It is at 9. The location is the boardroom. The CEO is "personally invested" per Marcus. There is no agenda.',
+          'CEO Slack to #engineering: "🚨 BIG ONE 🚨 — AI strategy kickoff at 10. Drop everything. Logan and the founder of an AI startup will be there. We\'re going to MOVE on this." The startup\'s name is "Synapsai." It was founded yesterday.',
+          'You walk into the office. There is catering. There is catering on a Tuesday. The CEO is holding a printed deck titled "AGENTIC EVERYTHING." Marcus is wearing a blazer over a hoodie.',
+          'A Loom from the CEO at 6:14 AM: "I want to share what I have been thinking." The Loom is 22 minutes. It is mostly him pacing in front of a whiteboard with the word "AGENTIC" written 14 times in different fonts.',
+        ],
+        choices: [
+          { label: 'Show up and listen', next: 'pitch' },
+          { label: 'Decline the invite ("conflict")', next: 'declined' },
+          { label: '"What does \'agentic\' mean here?"', next: 'definition' },
+        ],
+      },
+      pitch: {
+        descriptions: [
+          'CEO opens with: "I want our entire product to be an agent. Not a feature WITH agents. The product IS the agent." He has not said what the agent does. Logan reacts in the room with 🎯.',
+          'CEO: "By Q-end I want a working MCP server. I want partner integrations. I want the demo. I want it on Hacker News." Slide 2 is a rocket emoji at 200pt. Marcus is nodding along while typing.',
+          'CEO presents three slides: "AGENTIC NOW," "AGENTIC EVERYWHERE," "AGENTIC FOREVER." Slide 3 has a small footnote that reads "*subject to change."',
+          'CEO: "I had drinks with the Synapsai founder Saturday. He has a framework. We bought the framework. It\'s implementing itself." The framework is a Notion template.',
+        ],
+        choices: [
+          { label: '"What\'s the actual scope?"', next: 'scope_q' },
+          { label: '"Can we see the customer ask behind this?"', next: 'customer_ask' },
+          { label: '"We\'re still on the auth migration. Where does this fit?"', next: 'fit' },
+          { label: '"Sounds great, count me in."', effect: { addUrgentFeature: true, addLegacy: true, debt: 8, capital: 2, burnout: 9 }, log: 'You said yes. The CEO loved your energy. Two new tickets appeared on your sprint: "[AI] MCP Server (MVP)" and "[AI] Agentic Inbox Feature Spike." They are both, technically, two-week projects each.' },
+        ],
+      },
+      scope_q: {
+        description: 'CEO: "Scope is what slows companies down. I want us to operate in clouds, not boxes." Marcus, helpfully: "I think what the CEO means is — let\'s start with a spike and see where it goes."',
+        choices: [
+          { label: '"A spike that ships, you mean?"', next: 'spike_that_ships' },
+          { label: '"Sure, I\'ll lead a 2-week spike."', effect: { addUrgentFeature: true, debt: 4, capital: 1, burnout: 6 }, log: 'You agreed to lead a 2-week spike. The 2 weeks will become 6. The spike will become the roadmap. You will lead it whether you want to or not.' },
+        ],
+      },
+      spike_that_ships: {
+        description: 'CEO: "Exactly! You GET it." Marcus, brightly: "we\'re calling those \'shipikes\' now." (He just made that up. He will use it again. It will appear in a deck.)',
+        choices: [
+          { label: '"\'Shipikes\' is not a word."', effect: { focus: -0.5, capital: -1, burnout: 3, morale: 2 }, log: 'You named the language crime. The CEO laughed. Marcus was wounded. The word "shipike" was used three more times in the next hour.' },
+          { label: 'Ride it out', effect: { addUrgentFeature: true, debt: 5, capital: 1, burnout: 7 }, log: 'You agreed to a "shipike." It is on your sprint. It is, of course, a full feature with a deadline.' },
+        ],
+      },
+      customer_ask: {
+        description: 'CEO: "Customers? Customers are downstream of vision. We are creating the demand. Anduril doesn\'t do customer research, you think?" Marcus is nodding, but slower, like he\'s also unsure.',
+        choices: [
+          { label: '"Anduril sells to the Pentagon. We sell SaaS dashboards."', next: 'pentagon' },
+          { label: '"OK, I\'ll prototype something."', effect: { addUrgentFeature: true, debt: 4, capital: 0.5, burnout: 6 }, log: 'You agreed to prototype "the vision." The prototype was demoed at the next all-hands. It went into production unmodified.' },
+        ],
+      },
+      pentagon: {
+        description: 'CEO laughs. He\'s not actually angry. "I love that. That\'s the kind of pushback I need." Then, instantly: "But also — no — let\'s build it."',
+        choices: [
+          { label: 'Sigh and accept', effect: { addUrgentFeature: true, debt: 6, capital: 1, burnout: 8 }, log: 'You held the line, briefly, and then it broke. The MVP was added to your sprint. The CEO told three separate people he "loves how this team pushes back." You are one of those people.' },
+          { label: '"I am not the right person for this."', next: 'not_right_person' },
+        ],
+      },
+      not_right_person: {
+        description: 'CEO: "Of course you are. That\'s why I\'m asking you." Marcus, behind him, is nodding. Logan has reacted with 🎯 again. Logan reacts to everything with 🎯.',
+        choices: [
+          { label: '"OK, I\'ll do it."', effect: { addUrgentFeature: true, addLegacy: true, debt: 9, capital: 2, burnout: 10 }, log: 'You took it. The legacy "AngularJS dashboard" came along with it because "we can host the agent there." Two tickets joined your sprint.' },
+          { label: 'Stand firm', effect: { focus: -0.5, capital: -2, burnout: 5, morale: 3 }, log: 'You said no. The CEO did not say no back. He just looked at you a moment too long and then moved on. Your name is now on a list. The list is in his head.' },
+        ],
+      },
+      fit: {
+        description: 'Marcus jumps in: "Great question — we\'ll re-prioritize the auth migration to make room. Or the auth migration is part of the agentic story now? Or — yeah we\'ll figure it out async."',
+        choices: [
+          { label: '"Async means \'never,\' Marcus."', effect: { focus: -0.5, capital: -1, burnout: 4 }, log: 'You named the dynamic. Marcus went red. The CEO said "I love the candor." Marcus did not.' },
+          { label: 'Just absorb it', effect: { addUrgentFeature: true, debt: 5, burnout: 7 }, log: 'You let it go. The auth migration was indefinitely re-scoped. The agentic feature was added on top.' },
+        ],
+      },
+      definition: {
+        description: 'CEO: "Agentic means — it does things. On its own. With agency. Like, the thing — like, agentically." Marcus: "I think the customer-facing way to say it is: \'magic, but you trust it.\'" Marcus has been working on this line.',
+        choices: [
+          { label: '"That is not a definition."', next: 'pentagon' },
+          { label: 'Sigh, listen to the pitch', next: 'pitch' },
+        ],
+      },
+      declined: {
+        description: 'You decline the invite citing "conflict." Marcus DMs you 4 minutes later: "hey — saw the decline. it\'s really important to be visible at this one. CEO is looking around."',
+        choices: [
+          { label: 'Hold the decline', effect: { focus: -0.25, capital: -2, burnout: 2, morale: 4 }, log: 'You held. Marcus marked you "non-collaborative" in his private notes doc. The kickoff happened without you. Two tickets came onto your sprint anyway. Marcus assigned them.' },
+          { label: 'Cave and join late', next: 'pitch' },
+        ],
+      },
+    },
+  },
+  // ===== CREDIBLE-BUT-RIDICULOUS — second-pass dialogs =====
+  {
+    // Engineering leadership has set OKRs for AI-tool adoption.
+    // Combines hype-driven mandates with measurement theatre.
+    id: 'copilot_mandate', icon: Zap,
+    title: 'Engineering OKR: "AI-tool adoption rate"',
+    requires: (s) => s.sprint >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Email from your skip-level: "Per the new OKRs, every IC must show >40% AI-assisted code in commits this quarter. Dashboards live next week. Usage will be reviewed in calibration." The signature ends with "shipped with Copilot 🚀."',
+          'A new Slack bot named "AICoach" DM\'s you: "Hi Jared! I noticed only 12% of your last 47 commits had AI-tool fingerprints. Goal: 40%. Tips inside!" The DM has a 600-word "tips" link.',
+          'All-hands segment: "From now on, AI tooling adoption is one of our company-wide OKRs. Engineering is targeting 40% AI-assist on all PRs. We\'ll be tracking via a new internal metric called CAR — Copilot Adoption Rate." Brad reacts 🚀. Marcus reacts 🎯.',
+          'A new merge-bot has appeared on your team\'s repo. It tags every PR with the percentage of "AI-assist confidence." Your most recent PR is 4%. The bot has commented: "Could this be improved with Copilot? 🤔"',
+          'Engineering leadership Slack: "We\'re piloting a tool that scans your IDE keystrokes for AI-generated regions. It\'s opt-in but everyone is opted in by default. Please leave it on. We\'re a community."',
+          'Skip-level email: "I\'d like to start each 1:1 with a quick walkthrough of your CAR metric trend. It\'s a forcing function for adoption. Looking forward to the conversation."',
+        ],
+        choices: [
+          { label: 'Comply: paste real PRs through Copilot to bump the metric', next: 'comply' },
+          { label: '"How do you measure something that\'s not measurable?"', next: 'measure' },
+          { label: 'Quietly disable the IDE plugin', next: 'disable' },
+          { label: 'Reply-all with a link to the AI-coding-quality literature', next: 'reply_all' },
+        ],
+      },
+      comply: {
+        description: 'You spend 90 minutes pasting working PRs into Cursor and re-accepting the suggestions. Three of them get worse. One introduces a regression you don\'t spot until next sprint. Your CAR jumps to 47%. Skip-level reacts with 🎯.',
+        choices: [
+          { label: 'Move on', effect: { focus: -1.5, capital: 1, burnout: 5, debt: 6, morale: -4 }, log: 'You hit the metric. The codebase paid. The dashboard is now green.' },
+        ],
+      },
+      measure: {
+        description: 'Skip-level, helpfully: "Great question — there\'s a vendor that classifies AST regions by typing-rhythm signatures and flags them as AI-assisted. They have a 71% confidence rating. We\'re going with it for Q3."',
+        choices: [
+          { label: '"71% confidence is also 29% wrong."', next: 'wrong' },
+          { label: '"OK, I\'ll use the tools."', next: 'comply' },
+        ],
+      },
+      wrong: {
+        description: 'Skip-level: "Right, but the BOARD wants a number. The number doesn\'t need to be perfect. It needs to be improving."',
+        choices: [
+          { label: '"Then improving the number is the OKR, not the work."', effect: { focus: -0.5, capital: -1, morale: 3, burnout: 2 }, log: 'You named the inversion out loud. Skip-level didn\'t disagree. Your CAR will be flagged as "underperforming" in calibration. You will not care.' },
+          { label: '"Fine. I\'ll improve the number."', effect: { focus: -1, capital: 1, debt: 4, burnout: 4, morale: -3 }, log: 'You agreed to improve the number, not the work. The number went up 21% within a week. The codebase did not.' },
+        ],
+      },
+      disable: {
+        description: 'You uninstall the IDE plugin. Two days later, an automated email from Engineering Ops: "We\'ve noticed your AI-tooling integration is offline. Please re-enable it within 5 business days for compliance." It is co-signed by a person you have never heard of.',
+        choices: [
+          { label: 'Re-enable it, leave it idle', effect: { focus: -0.25, capital: 0.5, burnout: 2 }, log: 'A clean malicious-compliance victory. The plugin is on. It is also doing nothing. The CAR metric will report what it reports.' },
+          { label: 'Reply: "What is this in service of?"', effect: { focus: -0.5, capital: -1.5, morale: 4, burnout: 3 }, log: 'You named the question. The reply was a 4-paragraph corporate non-answer with the words "we\'re a community" twice.' },
+        ],
+      },
+      reply_all: {
+        description: 'You reply-all with the GitClear study, the Stanford "10x productivity but more bugs" paper, and a polite three-sentence summary. Two engineers DM you "🙏" within ten minutes. Skip-level does not reply.',
+        choices: [
+          { label: 'Hold the line', effect: { focus: -0.5, capital: -2, morale: 5, burnout: 3 }, log: 'You burned political capital for an honest position. The study links were never engaged with. Three new hires now know who you are.' },
+        ],
+      },
+    },
+  },
+  {
+    // Quarterly OKR calibration where 0.7 is the goal but is also the expectation.
+    id: 'okr_calibration', icon: Briefcase,
+    title: 'Quarterly OKR calibration ("be ambitious!")',
+    requires: (s) => s.sprint > 2 && s.sprint % 3 === 0,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Manager DM: "got 30 for OKR calibration? want to make sure your goals are stretch but credible." You jump on. They open with: "remember — 0.7 is the target, not 1.0. We\'re not robots." Then, immediately: "everyone hit 1.0 last quarter. Calibrate accordingly."',
+          '"Quick OKR sync." Manager: "I want you to set goals that are AMBITIOUS. We grade 0.7 as success." They paste in last quarter\'s goals. You hit 0.95 on three of them. They were marked "underperforming."',
+          'OKR calibration meeting. Six engineers, one PowerPoint, and the CHRO\'s framework: "Stretch goals are non-binding aspirations." The next slide reads: "Failure to meet stretch goals will be reflected in performance ratings."',
+          'Manager: "I want to set you up for success — let\'s make your OKR a 1.5x target. Stretch is energizing. Anyway, you need to hit at least 1.0 for a strong rating."',
+        ],
+        choices: [
+          { label: '"So is 0.7 a success or a failure?"', next: 'is_07' },
+          { label: 'Set the goal as 1.5x what you actually expect to hit', next: 'inflate' },
+          { label: '"What did people who hit 0.7 last quarter get rated?"', next: 'last_quarter' },
+          { label: 'Sigh, accept whatever they propose', effect: { focus: -1, capital: 0.5, morale: -3, burnout: 4 }, log: 'You signed off on a 1.5x stretch goal you have no path to hit. The doc was archived in a folder named "Q3 Aspirations."' },
+        ],
+      },
+      is_07: {
+        description: 'Manager: "It\'s — both. It\'s aspirational and graded. The 0.7 is the floor of the stretch, not the ceiling of acceptable. Does that make sense?" It does not.',
+        choices: [
+          { label: '"...no."', next: 'last_quarter' },
+          { label: 'Pretend it makes sense', effect: { focus: -0.5, capital: 0.5, morale: -3, burnout: 3 }, log: 'You nodded. The goal was set at 1.5x. You will hit 1.0 and be told you "missed the stretch."' },
+        ],
+      },
+      last_quarter: {
+        description: 'Manager pauses. "Honestly? They didn\'t get great ratings. The framework says one thing. Calibration meetings say another. I — yeah."',
+        choices: [
+          { label: '"Then I\'m setting goals I can hit at 1.0."', effect: { focus: -0.5, capital: -1, morale: 3, burnout: 1 }, log: 'You set realistic goals. Your manager DM\'d "respect" privately. In calibration they will be flagged as "non-aspirational."' },
+          { label: 'Set the inflated goal anyway, hope to be promoted before grading', effect: { focus: -1, capital: 1, morale: -2, burnout: 5 }, log: 'You optimized for the chance of a promo before grading. The promo did not come in time. You hit 0.95 of the inflated goal and were rated meets-not-exceeds.' },
+        ],
+      },
+      inflate: {
+        description: 'Manager: "Beautiful. That\'s exactly the kind of energy we want." They paste your inflated goal into the doc. The doc is shared with leadership. Your name is on it.',
+        choices: [
+          { label: 'Accept it', effect: { focus: -1, capital: 1, morale: -3, burnout: 5 }, log: 'You committed to a target you both knew was theatrical. It will be graded as if it were real.' },
+        ],
+      },
+    },
+  },
+  {
+    // The product is renamed mid-quarter. Everything internal must be re-labeled.
+    id: 'rebrand', icon: Sparkles,
+    title: 'Surprise rebrand: the product has a new name',
+    requires: (s) => s.sprint >= 4 && s.sprint % 5 === 4,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Slack #announcements at 9:14 AM: "🎉 BIG NEWS — we\'re excited to announce that effective today, the product is now called \'Sparkflow.\' (Formerly: Synergyse.) Comms will follow up with brand guidelines. Please update everything by Friday." Friday is in two days.',
+          'A 23-page brand guidelines PDF lands in your inbox. The new name is "Lumen." (Two competitors are also named Lumen.) You are asked to "update all internal references" by EOQ. There are 4,200 internal references.',
+          'Email from the CMO: "We\'re sunsetting the Synergyse name in favor of \'Mosaic.\' Please update all docs, code references, customer-facing strings, and internal Slack channels. The new logo is attached. (.fig only.)"',
+          'CEO Slack: "team — i had a vision on the peloton. we\'re renaming. \'Vibe.\' that\'s it. that\'s the product. branding is doing assets. eng team please go through the codebase. should be quick 🚀"',
+        ],
+        choices: [
+          { label: 'Audit how deep the old name goes in the codebase', next: 'audit' },
+          { label: '"Quick" rename = dedicated sprint task', next: 'dedicated' },
+          { label: 'Use sed across the repo and hope', next: 'sed' },
+          { label: 'Reply-all asking about customer-facing impact', next: 'customer_q' },
+        ],
+      },
+      audit: {
+        description: 'You grep. The old name appears 4,200 times. 600 of those are in user-facing strings. 200 are in API responses. 47 are in DB schema names. Three are in the Stripe billing-product ID, which is not renameable without legal.',
+        choices: [
+          { label: 'File a "Rename Audit" doc, send up the chain', effect: { focus: -1.5, capital: 1, burnout: 4 }, log: 'You documented the truth. The Friday deadline shifted to EOQ. The CMO was annoyed. The team was relieved. The Stripe ID is still the old name.' },
+          { label: 'Just do the rename and let the bills break', effect: { focus: -3, debt: 8, addUrgentFeature: true, burnout: 9 }, log: 'You pushed the rename through. Stripe billing broke for one customer for 6 hours. The hotfix ticket is yours. Two API consumers stopped responding entirely.' },
+        ],
+      },
+      dedicated: {
+        description: 'You email back: "this is a sprint, not a Friday." Marcus replies in DM: "yeah uhhh — well — try to fit it in this sprint? part-time? like, half a sprint?"',
+        choices: [
+          { label: '"We\'re reframing this as a project. I\'ll write the proposal."', effect: { focus: -1, capital: 1, morale: 2, burnout: 3 }, log: 'You named the work as work. The proposal added the rename to the *next* sprint as a real ticket. This sprint stayed honest.' },
+          { label: '"...fine, half a sprint."', effect: { focus: -2, addUrgentFeature: true, scopeCreep: true, debt: 5, burnout: 7 }, log: 'You agreed to "half a sprint." A half-renamed codebase shipped. Three components were on the new name, two were still on the old, and one had been renamed to an emoji by an AI tool nobody owns.' },
+        ],
+      },
+      sed: {
+        description: 'You run `sed -i` across the repo. CI explodes immediately — turns out the old product name was also a substring in three unrelated identifiers (and the test fixtures, and one of your migration filenames). Tests fail in 14 services. Your name is on the broken commit.',
+        choices: [
+          { label: 'Revert and do it properly', effect: { focus: -2, debt: 2, burnout: 6 }, log: 'You reverted. The proper rename will take 2 sprints. The sed commit lives on in git history forever.' },
+          { label: 'Push through the failures, fix downstream', effect: { focus: -3, debt: 9, addUrgentFeature: true, burnout: 10 }, log: 'You pushed. CI was red for 36 hours. Two services were briefly returning HTML errors with the new product name in them. A new ticket: "[hotfix] Rename fallout."' },
+        ],
+      },
+      customer_q: {
+        description: 'CMO replies-all: "Customer-facing impact is — well — they\'ll love it! It\'s a story. Roadmap update next week will have the talking points. Engineering, please don\'t delay on this. Velocity is everything." Three customers reply-all asking what\'s happening.',
+        choices: [
+          { label: 'DM the CMO offline', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You took it offline. The CMO\'s reply was "I really need engineering to be a partner here." You went and renamed the strings.' },
+          { label: 'Audit the codebase first', next: 'audit' },
+        ],
+      },
+    },
+  },
+  {
+    // Surprise 1:1 with the CTO (a skip-skip-level). High-stakes, low-information.
+    id: 'cto_skiplevel', icon: Coffee,
+    title: 'Surprise: 30-min "coffee" with the CTO',
+    requires: (s) => s.sprint >= 3 && s.sprint % 4 === 3,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A calendar invite drops from the CTO\'s EA. Title: "Coffee chat — Jared / [CTO name]." 30 minutes, no agenda, tomorrow at 3 PM. The location is the executive wing. You have never been to the executive wing.',
+          'The CTO Slacks you directly: "hey — heard your name come up in a few conversations. would love to chat. 15? no agenda just want to listen 👂" There is always an agenda.',
+          'Your manager pulls you aside: "the CTO wants to grab coffee with you. don\'t worry about it — they do this with everyone. ... actually, prepare a few things."',
+          'You arrive at your desk to find a hand-written note: "Stop by my office whenever — [CTO name]." The note is on company stationery. Nobody has hand-written notes anymore.',
+        ],
+        choices: [
+          { label: 'Prepare three "talking points" the way you prep for a customer call', next: 'prep' },
+          { label: '"Just be yourself" — go in cold', next: 'cold' },
+          { label: 'DM your manager: "what is this about?"', next: 'ask_manager' },
+          { label: 'Decline politely', next: 'decline_cto' },
+        ],
+      },
+      prep: {
+        description: 'You spend 90 minutes preparing. Three crisp talking points: (1) the auth migration impact, (2) AI-tooling concerns, (3) the codebase health metrics. The CTO opens the meeting with: "tell me about your hobbies."',
+        choices: [
+          { label: 'Pivot to your prep anyway', next: 'cto_real' },
+          { label: 'Talk about your hobbies', next: 'cto_hobbies' },
+          { label: '"Was there a specific topic you wanted to discuss?"', next: 'cto_topic' },
+        ],
+      },
+      cold: {
+        description: 'You walk in cold. The CTO has prepared. They have a printed sheet. The first question is: "where do you see the codebase in 18 months?" You did not anticipate this question.',
+        choices: [
+          { label: 'Improvise honestly — "depends on what we stop adding."', next: 'cto_real' },
+          { label: 'Improvise corporately — "scaled, AI-native, hyper-collaborative."', next: 'cto_corp' },
+          { label: '"I — I\'d like to think about that and follow up."', next: 'cto_followup' },
+        ],
+      },
+      ask_manager: {
+        description: 'Manager: "honestly? not sure. could be skip-level listening tour. could be re-org related. could be a stretch project. they\'ve been doing more of these. just be honest."',
+        choices: [
+          { label: 'Continue prep', next: 'prep' },
+          { label: 'Walk in cold', next: 'cold' },
+        ],
+      },
+      decline_cto: {
+        description: 'You decline citing "scheduling conflict." The EA reschedules. The new slot is on a Friday at 4:45 PM. The new slot is also unmoveable.',
+        choices: [
+          { label: 'Accept the new slot', next: 'cold' },
+          { label: 'Decline a second time', effect: { focus: -0.25, capital: -3, burnout: 3, morale: 2 }, log: 'You declined twice. The CTO\'s EA stopped trying. Your manager mentioned it in your next 1:1, with concern.' },
+        ],
+      },
+      cto_real: {
+        description: 'The CTO leans in. "Honest answer: the codebase is fine, but it\'s drifting. We\'re adding AI features faster than we\'re consolidating the platform. I think you see this. I want to see if you\'d lead a six-month consolidation effort. It would mean stepping off the AI initiative."',
+        choices: [
+          { label: '"...yes."', effect: { focus: -1, capital: 3, morale: 8, debt: -8, clearPromise: true }, log: 'A real opportunity. The CTO put their political capital on it. The consolidation effort begins next sprint. Your debt drops materially. You will, briefly, feel like an engineer again.' },
+          { label: '"Let me think about it overnight."', effect: { focus: -0.5, capital: 1, morale: 3 }, log: 'You bought 24 hours. The CTO respected the answer. You will say yes by Friday.' },
+          { label: '"I\'m not the right person."', effect: { focus: -0.25, capital: 0.5, morale: -2 }, log: 'You declined gracefully. The CTO offered it to {dev} the next day. {dev} took it. {dev} will be promoted within a year.' },
+        ],
+      },
+      cto_corp: {
+        description: 'You say the words "AI-native, hyper-collaborative." The CTO\'s eyes glaze for a microsecond — small, but visible. They write something on the printed sheet. The conversation politely ends 12 minutes early.',
+        choices: [
+          { label: 'Walk out, replay it on the drive home', effect: { focus: -1, capital: -1, morale: -3, burnout: 4 }, log: 'A small career setback. The CTO will not request another coffee. You will rehearse the conversation in your head for two weeks.' },
+        ],
+      },
+      cto_topic: {
+        description: 'CTO: "Honestly? I wanted to listen. I\'ve been hearing your name in a few conversations. About — pushback. Specifically." The CTO smiles. The smile is hard to read.',
+        choices: [
+          { label: '"Pushback is part of my job, sir."', effect: { focus: -0.5, capital: 1, morale: 4, burnout: 1 }, log: 'You held the position. The CTO nodded once and moved on. Your name will be in their notes. The notes will be helpful in 8 months when something complicated comes up.' },
+          { label: '"I — I can dial it back if needed."', effect: { focus: -0.5, capital: -1, morale: -4, burnout: 3 }, log: 'You apologized for being good at your job. The CTO took the apology with grace. You\'ll lie awake about it.' },
+        ],
+      },
+      cto_hobbies: {
+        description: 'You talk about your hobbies. The CTO is genuinely engaged. You spend 22 minutes on it. At minute 23, the CTO says: "I really appreciate this. I\'ll cut us short — I want to be respectful of your time." The meeting ends. You have no idea what just happened.',
+        choices: [
+          { label: 'Walk out, slightly destabilized', effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'A surreal coffee. The CTO followed up the next day with a Slack DM: "really enjoyed our chat 🙏" You will reread the message four times trying to extract meaning.' },
+        ],
+      },
+      cto_followup: {
+        description: 'CTO: "Of course. Send me a doc. One pager — what would you change about engineering, in your honest opinion?" The CTO says it warmly. The CTO is also testing.',
+        choices: [
+          { label: 'Send the honest doc', effect: { focus: -1.5, capital: 2, morale: 4, burnout: 3 }, log: 'You wrote the doc. It was sharp and specific. The CTO replied within the day. Your manager was looped in. Three things in the doc will, eventually, change.' },
+          { label: 'Send a polite doc that says nothing', effect: { focus: -0.5, capital: -0.5, morale: -3, burnout: 2 }, log: 'You sent the corporate version. The CTO read it once and never replied. The opportunity, whatever it was, closed.' },
+        ],
+      },
+    },
+  },
+  {
+    // A partner is on a call asking about a feature you don\'t have. Sales told them you do.
+    id: 'partner_demo_panic', icon: AlertTriangle,
+    title: 'Surprise: you\'re on a partner demo right now',
+    requires: (s) => s.sprint >= 2 && s.currentDay >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Slack DM from {bro}: "yo can u jump on a call rn 🙏 partner is asking specifics about the API and i\'m drowning. they\'re on screen-share." The DM was sent 2 minutes ago. The call has been going 18.',
+          'A calendar invite arrives 4 minutes after the meeting started. Title: "[INTERNAL ONLY] partner deep dive — [vendor name]." You are not "internal only." You have no context. {bro} is muted on the call typing aggressively.',
+          'A frantic DM from Marcus: "we need an engineer on the partner call rn. they\'re asking about the agent SDK. we said we have one. we don\'t. can u jump?"',
+          'You\'re tagged in a Slack thread. Last message, 90 seconds old, from a sales engineer: "can someone from eng confirm we support webhook retries with exponential backoff for the partner integration? customer is on screen now."',
+        ],
+        choices: [
+          { label: 'Jump on the call cold', next: 'jump' },
+          { label: 'DM back: "what does the partner already think we have?"', next: 'context' },
+          { label: '"I\'m not the right person — page on-call architect."', next: 'deflect' },
+          { label: 'Ignore it for 10 minutes, see if it resolves', next: 'ignore' },
+        ],
+      },
+      jump: {
+        description: 'You join. The partner is on screen-share showing a slide titled "Capabilities expected from [your company]." It lists six features. You have two. {bro} is making intense eye contact with the camera.',
+        choices: [
+          { label: 'Improvise: "those are on the roadmap, here\'s the rough timeline."', next: 'roadmap' },
+          { label: 'Be honest: "we have two of those today, four are not on the roadmap."', next: 'honest' },
+          { label: '"Let\'s schedule a follow-up with our PM."', next: 'reschedule' },
+        ],
+      },
+      context: {
+        description: '{bro} replies in 14 seconds: "they think we have webhook retries, the agent SDK, the events firehose, multi-tenant SSO, the audit log, and the custom-prompt UI. we have. uh. some of those." {bro} sends 🙏 four times.',
+        choices: [
+          { label: 'Jump on the call', next: 'jump' },
+          { label: '"Those are 3 quarters of work. I won\'t go on the call without an honest brief."', next: 'firm' },
+        ],
+      },
+      deflect: {
+        description: 'You suggest paging the on-call architect. {bro}: "the on-call is in london, it\'s 2 AM there." Marcus, in another DM: "you ARE the architect for this surface, just jump."',
+        choices: [
+          { label: 'Sigh, jump on the call', next: 'jump' },
+          { label: 'Hold: "this needs a real meeting with prep, not a panic drop-in."', effect: { focus: -0.5, capital: -1.5, morale: 3, burnout: 3 }, log: 'You held. The partner call ended without engineering. {bro} was, briefly, livid. The partner asked for a follow-up "with the right people," which was scheduled for two weeks out.' },
+        ],
+      },
+      ignore: {
+        description: '14 minutes later, three more pings, then a calendar invite for a "follow-up to align" tomorrow morning at 8 AM. You ignored the wrong fire.',
+        choices: [
+          { label: 'Accept the 8 AM', effect: { focus: -1, capital: -1, burnout: 5, addUrgentFeature: true }, log: 'You traded a panic for a 8 AM. The 8 AM became a 90-minute scoping session. A new ticket appeared: "[partner] webhook retry parity."' },
+          { label: 'Decline the 8 AM too', effect: { focus: -0.25, capital: -2.5, burnout: 2, morale: 3 }, log: 'You declined twice. {bro} took the loss internally. The deal stalled. You will hear about it in calibration.' },
+        ],
+      },
+      roadmap: {
+        description: 'You improvise timelines on the fly. The partner takes notes. They circle three of the items. They are now "committed dates" in a Notion doc shared between sales and the partner. You did not commit to dates.',
+        choices: [
+          { label: 'Email Marcus immediately to flag the misunderstanding', effect: { focus: -1, capital: 0.5, burnout: 4 }, log: 'You flagged it. Marcus rebooked a "scoping call" with the partner and quietly walked back two of the dates. The third stuck. The third is on your sprint.' },
+          { label: 'Just let it be — see what survives next quarter', effect: { focus: -0.5, addUrgentFeature: true, scopeCreep: true, debt: 7, burnout: 6 }, log: 'You let the misunderstanding ride. Three "committed dates" became three urgent tickets. One of them is now strategic.' },
+        ],
+      },
+      honest: {
+        description: 'The partner pauses, then nods. "OK. That\'s actually what I needed. We can\'t buy a roadmap promise — we need clarity on what exists today. Can you send a one-pager on what\'s actually shipped?"\n\n{bro} unmutes. "Of — of course! Jared will send that today."',
+        choices: [
+          { label: '"I\'ll send it within 2 days."', effect: { focus: -1.5, capital: 1.5, morale: 4, burnout: 3 }, log: 'You bought trust with honesty. The partner stayed engaged. The deal closed at a smaller scope but it actually closed. {bro} took credit. You will not take it back.' },
+          { label: 'Volunteer to write it AND lead the integration', effect: { focus: -1, capital: 2, morale: 3, addUrgentFeature: true, burnout: 5 }, log: 'You went all-in. Marcus was thrilled. Your sprint absorbed the integration ticket. {bro} added you to a shared Notion doc named "Team Win 🚀."' },
+        ],
+      },
+      reschedule: {
+        description: '{bro}, on the call, while smiling: "actually I think we can get into specifics now while we\'re here? Jared is one of our top engineers." {bro} is throwing you under the bus while smiling.',
+        choices: [
+          { label: 'Accept the throw', next: 'jump' },
+          { label: '"Actually no — let\'s reschedule with a written brief."', next: 'firm' },
+        ],
+      },
+      firm: {
+        description: '{bro} stares at you through the camera. The partner says: "honestly, that\'s reasonable. Send me a brief. I\'ll come prepared. I appreciate not being sold on a roadmap." {bro}\'s smile flattens.',
+        choices: [
+          { label: 'Hold the line', effect: { focus: -0.5, capital: 1, morale: 5, burnout: 1 }, log: 'You held. The partner respected it. {bro} did not. Marcus DM\'d "we need to chat" 9 minutes later. The "chat" was constructive but tense.' },
+        ],
+      },
+    },
+  },
+  {
+    // A platform team is sunsetting your critical dependency on a 30-day timeline.
+    id: 'platform_deprecation', icon: Archive,
+    title: 'Platform team: "we\'re sunsetting [your dependency] in 30 days"',
+    requires: (s) => s.sprint >= 3 && s.currentDay >= 1,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A 14-paragraph email from the platform team lands in your inbox: "Notice: @company/auth-sdk v2 is being sunset on [date 30 days out]. v3 has a different API surface. Migration guide attached. Please confirm you\'re on the new version by EOD on [date]." Your service uses v2 for everything.',
+          'Slack #platform-announcements: "🚨 DEPRECATION 🚨 the events-firehose package is end-of-life on [date 30 days out]. Replacement is a Kafka-based system you have not been onboarded to. Migration support: read the docs and good luck." 47 people 😢-react. None of them are on the platform team.',
+          'Email from the platform-team lead, you, and 14 other consumers: "small heads-up — we\'re sunsetting v2 of the data-client. Yes, we know we said it would be supported through Q4. Yes, we know we said the same thing two quarters ago. The timeline is now 30 days. We appreciate your flexibility."',
+          'The platform team\'s deprecation bot opens a PR against your repo titled: "[automated] Migrate to data-client v3." The PR has 1,400 lines, no description, and breaks 41 tests. The CI build is red. The PR is set to "auto-merge after 30 days unless blocked." It is signed by a bot named "Migrator-9000."',
+        ],
+        choices: [
+          { label: 'Read the migration guide', next: 'guide' },
+          { label: 'Reply: "this timeline isn\'t feasible — we have 14 services on v2."', next: 'pushback_dep' },
+          { label: 'Block Migrator-9000\'s PR until further notice', next: 'block_pr' },
+          { label: 'Quietly do the migration before the deadline', next: 'just_do_it' },
+        ],
+      },
+      guide: {
+        description: 'The migration guide is 47 pages. Step 1 references a config flag that does not exist in v3. Step 7 references a method that has been renamed in v3. The "common gotchas" section has one bullet: "if you encounter issues, please file a ticket."',
+        choices: [
+          { label: 'File a ticket about the bad guide', next: 'file_ticket' },
+          { label: 'Reply-all with the inaccuracies', next: 'pushback_dep' },
+          { label: 'Just do the migration and figure out the gaps', next: 'just_do_it' },
+        ],
+      },
+      pushback_dep: {
+        description: 'The platform-team lead replies-all 4 hours later: "we hear you. unfortunately the timeline is set by leadership. v3 has security improvements that v2 does not. we\'d love to push the date but we cannot." {dev} from another team replies: "+1 — we have similar concerns." Six other +1s land in the next 20 minutes.',
+        choices: [
+          { label: 'Organize the consumers — propose a 90-day timeline', next: 'organize' },
+          { label: 'Sigh, accept the 30 days', next: 'just_do_it' },
+          { label: 'Escalate to your manager', next: 'escalate_dep' },
+        ],
+      },
+      organize: {
+        description: 'You start a "v2 Sunset — Cross-Team Concern" doc. 11 engineers from 7 teams sign on within an hour. The platform-team lead joins the doc and reads silently for 14 minutes. Then they post: "OK. We\'ll go to 60 days. With phased rollout. Thank you for the doc."',
+        choices: [
+          { label: 'Accept the win, plan a real migration', effect: { focus: -1.5, capital: 2, morale: 5, burnout: 3, debt: -2 }, log: 'A rare cross-team win. The migration was real, paced, and clean. The platform team noted you in their post-mortem as "constructive." Your manager mentioned it in calibration.' },
+        ],
+      },
+      escalate_dep: {
+        description: 'Your manager talks to the platform team\'s manager. Two days of meeting-tag. The result: a "phased migration" with the same 30-day deadline but a "softer enforcement." Nobody knows what "softer enforcement" means.',
+        choices: [
+          { label: 'Just do the migration', next: 'just_do_it' },
+          { label: 'Wait out "softer enforcement"', effect: { focus: -1, capital: -1, debt: 5, burnout: 5, addUrgentFeature: true }, log: 'You waited. On day 31, your service started 502\'ing. The "soft enforcement" turned out to be a sunset. A new ticket: "[hotfix] Auth SDK v2 EOL." On you.' },
+        ],
+      },
+      block_pr: {
+        description: 'You block the auto-merge PR. Migrator-9000 opens a new PR 4 hours later with the same content and a slightly different title. Migrator-9000 is a tool from a startup the platform team is piloting. It is paid by usage.',
+        choices: [
+          { label: 'Block the new PR too', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You played whack-a-bot for two days. The platform team eventually disabled Migrator-9000 for your repo. The migration is still on you. The deadline is still 30 days.' },
+          { label: 'Email the startup directly', effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You emailed the founders. They replied within an hour. They were genuinely apologetic and disabled the bot for your org. The platform team was annoyed at you for "going around the process."' },
+        ],
+      },
+      just_do_it: {
+        description: 'You spend the next two weeks migrating. You hit four undocumented gotchas. You file three tickets. You write a real migration guide for the next team to do this. The deadline is met by 4 hours.',
+        choices: [
+          { label: 'Ship it', effect: { focus: -3.5, capital: 1, debt: -2, burnout: 8 }, log: 'You ate the migration. The codebase is on v3. The platform team thanked you in passing. Three other teams used your guide. Their managers do not know you exist.' },
+        ],
+      },
+      file_ticket: {
+        description: 'You file PLAT-9876 about the inaccurate guide. The reply, 6 hours later: "Thanks for flagging — please feel free to submit a PR to the docs. We don\'t have capacity to update them this quarter."',
+        choices: [
+          { label: 'Submit the PR yourself', effect: { focus: -1, capital: 0.5, debt: -1, burnout: 4 }, log: 'You wrote real docs for someone else\'s team. It was merged in a week. The platform team\'s OKR for "documentation quality" was hit, partly because of you.' },
+          { label: 'Walk away', next: 'just_do_it' },
         ],
       },
     },
