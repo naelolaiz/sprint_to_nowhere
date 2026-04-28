@@ -30,7 +30,7 @@ const REGRESSION_TITLES = [
 ];
 
 const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
-  if (Math.random() > 0.25) return;
+  if (Math.random() > 0.4) return;
 
   const inProg = plan.filter(t => !t.shipped && t.progress < t.effort);
   const inProgWithWork = inProg.filter(t => t.progress > 0);
@@ -42,14 +42,23 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
     events.push({ id: 'drive_by_refactor', weight: 3 });
     events.push({ id: 'sarah_jin_pair_win', weight: 3 });
     events.push({ id: 'scope_meeting', weight: 3 });
+    events.push({ id: 'review_nitpick_spiral', weight: 5 });
+    events.push({ id: 'dependency_pin_drama', weight: 3 });
   }
   if (inProgWithWork.length > 0) {
     events.push({ id: 'sarah_force_push', weight: 2 });
   }
   events.push({ id: 'broken_build', weight: 5 });
   events.push({ id: 'doug_milk_macros', weight: 2 });
-  events.push({ id: 'qa_reopen', weight: 4 });
-  events.push({ id: 'pr_review_war', weight: 3 });
+  events.push({ id: 'qa_reopen', weight: 6 });
+  events.push({ id: 'pr_review_war', weight: 6 });
+  events.push({ id: 'stale_pr_block', weight: 5 });
+  events.push({ id: 'qa_tickets_stuck', weight: 5 });
+  events.push({ id: 'flaky_test_quarantine', weight: 4 });
+  events.push({ id: 'cherry_pick_chaos', weight: 3 });
+  events.push({ id: 'wrong_branch_merge', weight: 3 });
+  events.push({ id: 'lint_war', weight: 3 });
+  events.push({ id: 'rebase_conflict_marathon', weight: 4 });
   events.push({ id: 'slack_war', weight: 4 });
   events.push({ id: 'donuts', weight: 4 });
   events.push({ id: 'innovation_hour', weight: 3 });
@@ -263,6 +272,106 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
         urgent: true,
       });
       log.push('Overnight: Jin\'s homelab caught fire. He\'s "fine" but his rack is "less fine." He will be on PTO Tuesday-Thursday. A cleanup ticket will land next sprint to pick up his work.');
+      break;
+    }
+    case 'stale_pr_block': {
+      // Sarah's PR has been "ready for review" for days. Nobody's looking.
+      pendingCleanups.push({
+        title: 'Push Sarah\'s 5-day-old PR over the line (it\'s "ready for review")',
+        effort: 4,
+        debt: 0,
+        type: 'bug',
+        urgent: true,
+      });
+      deltas.morale -= 3;
+      log.push('Overnight: Sarah\'s PR has been "ready for review" for 5 days. Nobody has looked at it. The auto-reminder bot is now muted in #engineering. A follow-up ticket will land next sprint.');
+      break;
+    }
+    case 'review_nitpick_spiral': {
+      // Endless review comments grow scope on an in-progress ticket.
+      const t = pick(inProg);
+      const idx = plan.findIndex(p => p.id === t.id);
+      plan[idx] = {
+        ...plan[idx],
+        effort: plan[idx].effort + 2,
+        scopeCreep: (plan[idx].scopeCreep || 0) + 1,
+      };
+      deltas.morale -= 5;
+      log.push(`Overnight: Jin left 23 review comments on the PR for "${t.title}" — half about variable naming, three about a function the PR doesn't even touch. Effort +2h. −5 morale.`);
+      break;
+    }
+    case 'qa_tickets_stuck': {
+      // QA backlog grows; you have to triage.
+      pendingCleanups.push({
+        title: 'Triage the 14 tickets stuck in QA "Awaiting Validation"',
+        effort: 6,
+        debt: 0,
+        type: 'bug',
+        urgent: false,
+      });
+      log.push('Overnight: 14 tickets are stuck in QA "Awaiting Validation". Three are from last quarter. Nobody knows who owns the column. A triage ticket will land next sprint.');
+      break;
+    }
+    case 'flaky_test_quarantine': {
+      // Tests get skipped instead of fixed. Debt grows now.
+      deltas.debt += 5;
+      log.push('Overnight: three integration tests started failing intermittently. The team agreed to "skip them for now." The skip list is now 31 tests long. Debt +5.');
+      break;
+    }
+    case 'cherry_pick_chaos': {
+      // Hotfix landed on release branch but not main; bug returns later.
+      pendingCleanups.push({
+        title: 'Re-apply the hotfix that was cherry-picked to release but never to main',
+        effort: 3 + Math.floor(Math.random() * 3),
+        debt: 1,
+        type: 'bug',
+        urgent: true,
+      });
+      log.push('Overnight: Marcus cherry-picked a hotfix to the release branch and forgot main. The bug will return on Monday. A regression ticket will land next sprint.');
+      break;
+    }
+    case 'wrong_branch_merge': {
+      // Someone merged into the wrong branch.
+      deltas.burnout += 3;
+      deltas.morale -= 4;
+      log.push('Overnight: someone merged a feature branch into staging instead of main. Half a day will be spent reverting. The git log will be quietly massaged. +3 burnout, −4 morale.');
+      break;
+    }
+    case 'lint_war': {
+      // Lint config change forces everyone to rebase 200 files.
+      deltas.morale -= 3;
+      deltas.burnout += 2;
+      log.push('Overnight: Sarah merged a lint config change. 217 files were auto-formatted. Everyone has to rebase. The diff for tomorrow\'s standup will be "noisy." −3 morale, +2 burnout.');
+      break;
+    }
+    case 'rebase_conflict_marathon': {
+      // A long-open branch had a rebase that "got creative."
+      pendingCleanups.push({
+        title: 'Validate Sarah\'s 4-hour rebase didn\'t silently drop changes',
+        effort: 5,
+        debt: 0,
+        type: 'bug',
+        urgent: false,
+      });
+      deltas.morale -= 2;
+      log.push('Overnight: Sarah\'s 3-week-old branch needed a rebase. It took 4 hours. She is "really sorry, the conflict resolution got creative." A validation ticket will land next sprint.');
+      break;
+    }
+    case 'dependency_pin_drama': {
+      // Half the team upgraded a lib, half didn't. Two tickets lose progress.
+      const candidates = inProg.filter(t => t.progress > 0);
+      const sorted = [...candidates].sort(() => Math.random() - 0.5);
+      const targets = sorted.slice(0, Math.min(2, sorted.length));
+      const lost = [];
+      for (const tt of targets) {
+        const idx = plan.findIndex(p => p.id === tt.id);
+        const drop = Math.min(2, plan[idx].progress);
+        plan[idx] = { ...plan[idx], progress: Math.max(0, plan[idx].progress - drop) };
+        lost.push(`"${tt.title}" (-${drop.toFixed(1)}h)`);
+      }
+      deltas.morale -= 4;
+      const note = lost.length > 0 ? lost.join(' and ') + '.' : 'No tickets had progress to lose.';
+      log.push(`Overnight: half the team upgraded react-router, half didn't. Two builds broke. ${note} −4 morale.`);
       break;
     }
   }
