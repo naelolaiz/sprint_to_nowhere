@@ -2,7 +2,7 @@
 
 import { C, FONT } from '../../data/theme.js';
 
-export const personColors = {
+const personColors = {
   you: C.text, ceo: C.amber, manager: C.blue,
   brad: C.rust, marcus: C.sage, generic: C.textDim,
   doug: C.amberDim, engineer: C.blue, karen: C.burnout,

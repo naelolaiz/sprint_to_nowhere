@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { EVENTS } from '../data/events.js';
-import { generateBacklog, resetTicketId } from './backlog.js';
-import { sampleEventCast } from './cast.js';
+import { resetTicketId } from './backlog.js';
 
 export const totalRemaining = (plan) => plan.reduce(
   (sum, t) => sum + Math.max(0, t.effort - t.progress),

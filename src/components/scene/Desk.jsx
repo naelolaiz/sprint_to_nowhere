@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { C, FONT } from '../../data/theme.js';
-import { Person } from './Person.jsx';
 import { ScreenContent } from './ScreenContent.jsx';
 
 export const Desk = ({ x, y, screen = 'code', label, you, accent }) => (

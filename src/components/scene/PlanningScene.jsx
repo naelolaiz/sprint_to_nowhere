@@ -3,7 +3,6 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { SpeechBubble } from '../common/SpeechBubble.jsx';
-import { Desk } from './Desk.jsx';
 
 export const PlanningScene = ({ sprint }) => {
   const marcusLines = [

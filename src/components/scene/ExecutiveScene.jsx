@@ -2,7 +2,6 @@
 
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
-import { Desk } from './Desk.jsx';
 
 export const ExecutiveScene = () => (
   <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>

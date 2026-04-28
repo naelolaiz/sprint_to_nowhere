@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Play } from 'lucide-react';
-import { C, FONT } from '../../data/theme.js';
+import { C } from '../../data/theme.js';
 import { Btn } from '../common/Btn.jsx';
 
 export const MenuPhase = ({ onStart }) => (
-  <div className="flex-1 flex items-center justify-center p-12">
+  <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
     <div className="max-w-xl text-center">
       <div className="text-xs tracking-[0.4em] mb-4" style={{ color: C.amberDim }}>A ROGUELIKE OFFICE SIMULATOR</div>
-      <h1 className="text-5xl font-bold mb-3 leading-none" style={{ color: C.text, letterSpacing: '-0.02em' }}>
+      <h1 className="text-3xl sm:text-5xl font-bold mb-3 leading-none" style={{ color: C.text, letterSpacing: '-0.02em' }}>
         Sprint to Nowhere
       </h1>
-      <div className="text-sm mb-10" style={{ color: C.textDim, lineHeight: 1.6 }}>
+      <div className="text-sm mb-8 sm:mb-10" style={{ color: C.textDim, lineHeight: 1.6 }}>
         You are a developer. You will plan a sprint.<br/>
         Reality will intrude. You will adapt.<br/>
         The codebase will rot. This is the natural order.
       </div>
-      <div className="text-left mb-10 p-5 text-xs leading-relaxed" style={{
+      <div className="text-left mb-8 sm:mb-10 p-4 sm:p-5 text-xs leading-relaxed" style={{
         backgroundColor: C.surface, border: `1px solid ${C.border}`, color: C.textDim,
       }}>
         <div className="mb-3" style={{ color: C.amber }}>// HOW TO PLAY</div>

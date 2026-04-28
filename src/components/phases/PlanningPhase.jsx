@@ -14,10 +14,10 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
   const hasRefactor = planned.some(t => t.type === 'refactor');
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col lg:overflow-hidden">
       {/* Sprint planning scene — the team is here, mostly */}
-      <div style={{
-        height: 220, backgroundColor: C.bg,
+      <div className="h-44 sm:h-52 lg:h-56 shrink-0" style={{
+        backgroundColor: C.bg,
         borderBottom: `1px solid ${C.border}`,
         backgroundImage: `linear-gradient(to bottom, ${C.surface} 0%, ${C.bg} 100%)`,
       }}>
@@ -25,15 +25,15 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
       </div>
 
       {/* Existing planning interactions */}
-      <div className="flex-1 flex flex-col p-6 gap-6 overflow-auto">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex-1 flex flex-col p-3 sm:p-6 gap-4 sm:gap-6 lg:overflow-auto">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div>
           <div className="text-xs tracking-[0.3em] mb-1" style={{ color: C.amberDim }}>SPRINT {s.sprint} — PLANNING</div>
-          <div className="text-lg" style={{ color: C.text }}>
+          <div className="text-base sm:text-lg" style={{ color: C.text }}>
             Pick tickets for the sprint. {cap}-point capacity. Try not to laugh (or to sleep).
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs flex-shrink-0" style={{ color: C.textDim }}>
+        <div className="flex items-center gap-2 text-xs flex-wrap sm:flex-shrink-0" style={{ color: C.textDim }}>
           <span className="tracking-wider uppercase">Capacity</span>
           {[40, 50, 60, 70, 80].map(c => (
             <button
@@ -53,7 +53,29 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-6 flex-1">
+      {/* Mobile-only sticky summary so the points sum stays visible while scrolling the backlog */}
+      <div
+        className="lg:hidden sticky top-0 z-10 -mx-3 px-3 py-2 flex items-center gap-3 text-xs"
+        style={{
+          backgroundColor: C.surface,
+          borderBottom: `1px solid ${C.border}`,
+          color: C.textDim,
+        }}
+      >
+        <span className="tracking-wider uppercase whitespace-nowrap">
+          Plan · {planned.length}
+        </span>
+        <div className="flex-1 h-1" style={{ backgroundColor: C.surface2, border: `1px solid ${C.border}` }}>
+          <div className="h-full transition-all" style={{
+            width: `${Math.min(100, (capacity / cap) * 100)}%`,
+            backgroundColor: overCapacity ? C.rust : capacity > cap * 0.8 ? C.amber : C.sage,
+          }} />
+        </div>
+        <span className="whitespace-nowrap" style={{ color: overCapacity ? C.rust : C.text, fontVariantNumeric: 'tabular-nums' }}>
+          {capacity}/{cap}pt
+        </span>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1">
         <div>
           <div className="text-xs tracking-wider uppercase mb-3" style={{ color: C.textDim }}>
             Backlog ({s.backlog.length})

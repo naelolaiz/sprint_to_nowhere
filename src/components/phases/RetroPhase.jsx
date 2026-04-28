@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { CheckCircle2, XCircle, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
-import { C, FONT } from '../../data/theme.js';
+import { C } from '../../data/theme.js';
 import { TicketIcon } from '../common/TicketIcon.jsx';
 import { Btn } from '../common/Btn.jsx';
 
@@ -17,12 +17,12 @@ export const RetroPhase = ({ s, onNext }) => {
     "A normal sprint. The codebase is slightly worse than before.";
 
   return (
-    <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
+    <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-auto">
       <div className="max-w-2xl w-full">
         <div className="text-xs tracking-[0.3em] mb-1" style={{ color: C.amberDim }}>SPRINT {s.sprint} — RETROSPECTIVE</div>
-        <div className="text-2xl mb-6" style={{ color: C.text }}>What went well? What didn't?</div>
+        <div className="text-xl sm:text-2xl mb-6" style={{ color: C.text }}>What went well? What didn't?</div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, padding: 16 }}>
             <div className="text-xs tracking-wider uppercase mb-3 flex items-center gap-2" style={{ color: C.sage }}>
               <CheckCircle2 size={12}/>SHIPPED ({s.sprintShipped.length})
