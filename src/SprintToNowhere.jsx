@@ -35,6 +35,18 @@ export default function SprintToNowhere() {
   const startSprint = () => setS(prev => {
     let plan = prev.sprintPlan.map(t => ({ ...t }));
     const initialLog = [];
+    // Drain any cleanup tickets that previous sprints' chaos events queued
+    if (prev.pendingCleanups && prev.pendingCleanups.length > 0) {
+      for (const c of prev.pendingCleanups) {
+        const t = mkTicket(
+          { title: c.title, effort: c.effort, debt: c.debt },
+          c.type || 'refactor',
+          { urgent: !!c.urgent, legacy: c.type === 'legacy' },
+        );
+        plan = [...plan, t];
+        initialLog.push(`📋 Carry-over from a previous sprint: "${t.title}" (${t.effort}h). Forced into the sprint.`);
+      }
+    }
     // 35% chance management forces a strategic initiative into the sprint
     if (Math.random() < 0.35) {
       const tpl = STRATEGIC_INITIATIVES[Math.floor(Math.random() * STRATEGIC_INITIATIVES.length)];
@@ -51,6 +63,7 @@ export default function SprintToNowhere() {
       debtAtSprintStart: prev.debt,
       sprintPlan: plan,
       stayedLate: false,
+      pendingCleanups: [],
       hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
       dialogNode: 'start',
     };
@@ -234,12 +247,17 @@ export default function SprintToNowhere() {
     // Bad nights = poor sleep (smaller burnout drop) and the streak grows; calm nights reset it.
     const wasBadDay = prev.stayedLate || prev.burnout > 65;
     const sleepRecovery = wasBadDay ? 1 : 4;
-    const newBurnout = Math.max(0, prev.burnout - sleepRecovery);
+    // The team also worked overnight (allegedly). They can finish tickets;
+    // the player wakes up to find them shipped (and inherits the debt). Some
+    // nights also produce a CHAOS event — broken builds, AI-pilot pushes,
+    // QA reopening old tickets — which can bump burnout and queue cleanup
+    // tickets for future sprints.
+    const team = applyTeammateContributions(prev);
+    const newBurnout = Math.max(0, Math.min(100,
+      prev.burnout - sleepRecovery + (team.burnoutDelta || 0)
+    ));
     const newStreak = wasBadDay ? (prev.badDayStreak || 0) + 1 : 0;
     const newBudget = dailyFocusBudget(newBurnout, newStreak);
-    // The team also worked overnight (allegedly). They can finish tickets;
-    // the player wakes up to find them shipped (and inherits the debt).
-    const team = applyTeammateContributions(prev);
     const next = {
       ...prev,
       hourHistory: history,
@@ -249,6 +267,7 @@ export default function SprintToNowhere() {
       totalShipped: prev.totalShipped + team.shipped.length,
       debt: Math.max(0, prev.debt + team.debtDelta),
       morale: Math.max(0, Math.min(100, prev.morale + team.moraleDelta)),
+      pendingCleanups: [...(prev.pendingCleanups || []), ...(team.pendingCleanups || [])],
       dayFocus: newBudget,
       dayFocusRemaining: newBudget,
       burnout: newBurnout,

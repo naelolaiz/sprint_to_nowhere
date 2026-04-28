@@ -67,6 +67,7 @@ export const initialState = () => {
     morale: 70,                    // motivation / engagement / will-to-build
     badDayStreak: 0,               // consecutive bad days; erodes next-day focus budget
     stayedLate: false,             // worked overtime today; counts as a bad day
+    pendingCleanups: [],           // ticket templates queued by chaos events; forced into next sprint
     eventCast: {},
     eventQueue: [],
   };
