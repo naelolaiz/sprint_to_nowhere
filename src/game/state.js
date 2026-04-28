@@ -71,12 +71,17 @@ export const initialState = () => {
     lastChaosFlavor: null,         // one-line chaos summary surfaced in the next morning's standup
     eventCast: {},
     eventQueue: [],
+    atHome: false,                 // true once the player has bailed home for the day; resets each morning
   };
 };
 
 export const pickEvent = (state, exclude = null) => {
   const eligible = EVENTS.filter(e => {
     if (exclude && exclude.has(e.id)) return false;
+    // Once the player has gone home for the day, in-office disruptions
+    // (badge readers, fire drills, Doug at the espresso machine) no longer
+    // make narrative sense.
+    if (state.atHome && e.inOffice) return false;
     if (e.requires && !e.requires(state)) return false;
     return true;
   });

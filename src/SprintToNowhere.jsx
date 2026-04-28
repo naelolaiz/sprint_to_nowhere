@@ -66,6 +66,7 @@ export default function SprintToNowhere() {
       pendingCleanups: [],
       hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
       dialogNode: 'start',
+      atHome: false,
     };
     const queue = pickDayEvents(next);
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');
@@ -159,6 +160,13 @@ export default function SprintToNowhere() {
       s.dayLog = [...s.dayLog, walkFlavors[Math.floor(Math.random() * walkFlavors.length)]];
     } else if (kind === 'coffee') {
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
+      if (s.atHome) {
+        // Coffee in your own kitchen — no Doug, no Brad, no spreadsheet.
+        s.burnout = Math.max(0, s.burnout - 3);
+        s.focus = Math.min(100, s.focus + 18);
+        s.dayLog = [...s.dayLog, 'You made coffee in your own kitchen. Nobody had a theory about the milk. The window faced a tree. The ten minutes were yours.'];
+        return s;
+      }
       s.dayLog = [...s.dayLog, 'You head to the kitchen for coffee.'];
       const r = Math.random();
       if (r < 0.35) {
@@ -276,6 +284,7 @@ export default function SprintToNowhere() {
       burnout: newBurnout,
       badDayStreak: newStreak,
       stayedLate: false,
+      atHome: false,
       dayLog: team.log,
       subPhase: 'event',
       dialogNode: 'start',

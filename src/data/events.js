@@ -224,6 +224,7 @@ export const EVENTS = [
   {
     id: 'shoulder_tap', icon: Coffee,
     title: "{person} wants to tell you about his weekend",
+    inOffice: true,
     start: 'open',
     nodes: {
       open: {
@@ -319,6 +320,7 @@ export const EVENTS = [
   {
     id: 'kitchen_karen', icon: Coffee,
     title: 'Kitchen ambush',
+    inOffice: true,
     start: 'enter',
     nodes: {
       enter: {
@@ -415,6 +417,7 @@ export const EVENTS = [
   {
     id: 'loud_sales_call', icon: Megaphone,
     title: 'Open-plan symphony',
+    inOffice: true,
     start: 'overhear',
     nodes: {
       overhear: {
@@ -2064,7 +2067,7 @@ export const EVENTS = [
     },
   },
   {
-    id: 'network_down', icon: Wrench,
+    id: 'network_down', icon: Wrench, inOffice: true,
     title: 'Blocker: office network is down',
     start: 'open',
     nodes: {
@@ -2079,7 +2082,7 @@ export const EVENTS = [
         choices: [
           { label: 'Tether and grind through it', next: 'tether' },
           { label: 'Walk to the coffee shop across the street', next: 'coffee_shop' },
-          { label: 'Use it as an excuse to go home', next: 'go_home' },
+          { label: 'Use it as an excuse to go home', next: 'go_home', effect: { goHome: true } },
           { label: 'Just wait it out', next: 'wait' },
         ],
       },
@@ -2094,7 +2097,7 @@ export const EVENTS = [
         description: 'They\'ve put up a sign: "WiFi password rotates daily. Ask staff." The barista looks tired. There are no outlets. Your laptop is at 23%. A man at the next table is on a video call about "synergy."',
         choices: [
           { label: 'Stay until your laptop dies', effect: { focus: -1.5, burnout: 5 }, log: 'You worked on a 23% battery charge for 45 minutes. You shipped one small thing. The man\'s call lasted longer than yours.' },
-          { label: 'Give up and go home', next: 'go_home' },
+          { label: 'Give up and go home', next: 'go_home', effect: { goHome: true } },
         ],
       },
       go_home: {
@@ -2119,14 +2122,14 @@ export const EVENTS = [
       wait: {
         description: 'You refresh the IT status page. You read the Hacker News thread about your IT vendor\'s outage. You realize 90 minutes have passed. You have not done any of your work.',
         choices: [
-          { label: 'Snap out of it', effect: { focus: -3, focusPct: -25, burnout: 8 }, log: 'You snapped out of it after 2 hours. The network was still down. You went home.' },
+          { label: 'Snap out of it', effect: { focus: -3, focusPct: -25, burnout: 8, goHome: true }, log: 'You snapped out of it after 2 hours. The network was still down. You went home.' },
         ],
       },
     },
   },
   // ===== INTERRUPTIONS — physical/environmental =====
   {
-    id: 'fire_drill', icon: Flame,
+    id: 'fire_drill', icon: Flame, inOffice: true,
     title: 'Interruption: mandatory fire drill',
     start: 'open',
     nodes: {
@@ -2295,7 +2298,7 @@ export const EVENTS = [
   },
   // ===== MORNING ARRIVAL — only fires at the very start of a day =====
   {
-    id: 'morning_arrival', icon: Wrench,
+    id: 'morning_arrival', icon: Wrench, inOffice: true,
     title: 'Morning arrival',
     descriptions: [
       'Your badge stopped working at the front door. The receptionist is on PTO. The backup receptionist is also on PTO. There is a sign that says "in case of emergency, call IT" with no number.',
@@ -2312,14 +2315,14 @@ export const EVENTS = [
         choices: [
           { label: 'Find a workaround and get in', effect: { focus: -0.5, burnout: 1 }, log: 'You got in. It cost ten minutes you needed.' },
           { label: 'Wait it out in the lobby', effect: { focus: -1, burnout: 2 }, log: 'You waited. Twenty minutes. Marcus pinged you "just checking in."' },
-          { label: 'Just go home and remote', effect: { focus: 0, capital: -0.5, morale: 1, burnout: -1 }, log: 'You drove home. WiFi is faster. Nobody noticed for an hour.' },
+          { label: 'Just go home and remote', effect: { focus: 0, capital: -0.5, morale: 1, burnout: -1, goHome: true }, log: 'You drove home. WiFi is faster. Nobody noticed for an hour.' },
         ],
       },
     },
   },
   // ===== BUILDING ISSUES — facilities crap that steals time =====
   {
-    id: 'building_issue', icon: Wrench,
+    id: 'building_issue', icon: Wrench, inOffice: true,
     title: 'Building issue',
     // Multiple description variants so it doesn't read identical each time.
     descriptions: [
@@ -2337,7 +2340,7 @@ export const EVENTS = [
         choices: [
           { label: 'Try to file a Facilities ticket', next: 'ticket' },
           { label: 'Slack #building-issues', next: 'slack' },
-          { label: 'Just go home and work remote', next: 'home' },
+          { label: 'Just go home and work remote', next: 'home', effect: { goHome: true } },
           { label: 'Ignore it, work around it', next: 'workaround' },
         ],
       },
@@ -2380,7 +2383,7 @@ export const EVENTS = [
         description: 'You pack up. Marcus DMs immediately: "are you in office today? want to grab a quick coffee with stakeholder Y at 2pm." You realize you\'re always pinged the moment you leave.',
         choices: [
           { label: '"Working from home today, building issue."', next: 'wfh_excuse' },
-          { label: 'Say yes, come back', effect: { focus: -3, capital: 0.5, burnout: 9 }, log: 'You came back. The building issue was not resolved. The coffee with stakeholder Y was unproductive.' },
+          { label: 'Say yes, come back', effect: { focus: -3, capital: 0.5, burnout: 9, returnOffice: true }, log: 'You came back. The building issue was not resolved. The coffee with stakeholder Y was unproductive.' },
         ],
       },
       wfh_excuse: {
@@ -2394,7 +2397,7 @@ export const EVENTS = [
         description: 'You decide to work around the issue. Specifically: stairs / different bathroom / personal hotspot / sweat through it. You start. After 30 minutes you realize the workaround is actually quite annoying.',
         choices: [
           { label: 'Power through anyway', effect: { focus: -2, burnout: 6 }, log: 'You powered through. You smell. Your knees hurt. You used 1.4GB of personal data. Your work was fine.' },
-          { label: 'Give up, go home', next: 'home' },
+          { label: 'Give up, go home', next: 'home', effect: { goHome: true } },
         ],
       },
     },
@@ -2405,6 +2408,7 @@ export const EVENTS = [
     // Combines: scope_change pressure + addUrgentFeature + capital tax.
     id: 'sales_pincer', icon: Users,
     title: 'Marcus and Priya have "a quick chat" with you',
+    inOffice: true,
     requires: (s) => s.sprint >= 2 && s.currentDay >= 2 && s.sprintPlan.length >= 2,
     start: 'open',
     nodes: {

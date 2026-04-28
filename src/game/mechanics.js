@@ -163,6 +163,17 @@ export const applyChoice = (state, choice) => {
   if (e.promise) s.promise = e.promise;
   if (e.clearPromise) s.promise = null;
 
+  // Going home flips the day to "remote" — drop any in-office disruptions
+  // still queued for today so the narrative stays coherent (no fire drill
+  // after you've already driven home).
+  if (e.goHome) {
+    s.atHome = true;
+    if (s.eventQueue && s.eventQueue.length > 0) {
+      s.eventQueue = s.eventQueue.filter(ev => !ev.inOffice);
+    }
+  }
+  if (e.returnOffice) s.atHome = false;
+
   // Auto-deduct morale based on what the choice did. Throwing out work hurts the most.
   // These stack with any explicit `e.morale` value so events can tune up or down further.
   let auto = 0;
