@@ -267,7 +267,9 @@ export default function SprintToNowhere() {
       totalShipped: prev.totalShipped + team.shipped.length,
       debt: Math.max(0, prev.debt + team.debtDelta),
       morale: Math.max(0, Math.min(100, prev.morale + team.moraleDelta)),
+      capital: Math.max(0, Math.min(5, prev.capital + (team.capitalDelta || 0))),
       pendingCleanups: [...(prev.pendingCleanups || []), ...(team.pendingCleanups || [])],
+      lastChaosFlavor: team.chaosFlavor || null,
       dayFocus: newBudget,
       dayFocusRemaining: newBudget,
       burnout: newBurnout,
@@ -276,8 +278,11 @@ export default function SprintToNowhere() {
       dayLog: team.log,
       subPhase: 'event',
       dialogNode: 'start',
-      // morning focus ceiling drops as burnout climbs — exhausted devs start the day distracted
-      focus: Math.max(40, 100 - Math.floor(newBurnout * 0.4)),
+      // morning focus ceiling drops as burnout climbs — exhausted devs start the day
+      // distracted. Chaos events can knock that ceiling further down.
+      focus: Math.max(0, Math.min(100,
+        Math.max(40, 100 - Math.floor(newBurnout * 0.4)) + (team.focusDelta || 0)
+      )),
     };
     const queue = pickDayEvents(next);
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');
