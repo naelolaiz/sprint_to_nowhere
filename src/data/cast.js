@@ -17,11 +17,16 @@ export const EVENT_CAST_RULES = {
   shoulder_tap:       { person: 'bros' },
   kitchen_karen:      { person: 'dougs' },     // event id is legacy; person is now Doug-archetype
   loud_sales_call:    { person: 'bros' },
-  backlog_refinement: { facilitator: 'bros', objector: 'dougs' },
+  backlog_refinement: { facilitator: 'bros', objector: 'dougs', dev: 'engineers' },
   daily_standup:      { offliner: 'bros', updater: 'dougs', dev: 'engineers' },
   mental_health:      { facilitator: 'engineers' },
   broken_package:     { dev: 'engineers' },    // platform-team person
   fire_drill:         { sales: 'bros' },       // the sales-bro at the cluster
   meeting_cascade:    { bro: 'bros' },         // the person who has to leave
   building_issue:     { complainer: 'dougs' }, // the channel-spammer
+  // ----- newer events -----
+  compliance:           { dev: 'engineers' },  // colleague who used the script
+  cto_skiplevel:        { dev: 'engineers' },  // alternate candidate the CTO offers it to
+  partner_demo_panic:   { bro: 'bros' },       // sales engineer drowning on the call
+  platform_deprecation: { dev: 'engineers' },  // platform-team person + cross-team ally
 };

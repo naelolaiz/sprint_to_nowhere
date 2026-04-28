@@ -6,24 +6,30 @@ import { AuditoriumScene } from './AuditoriumScene.jsx';
 import { OutdoorScene } from './OutdoorScene.jsx';
 import { ExecutiveScene } from './ExecutiveScene.jsx';
 import { KitchenScene } from './KitchenScene.jsx';
+import { BoardroomScene } from './BoardroomScene.jsx';
 import { OfficeOverview } from './OfficeOverview.jsx';
 
-export const Stage = ({ subPhase, currentEvent, debt }) => {
+export const Stage = ({ subPhase, currentEvent, debt, burnout, morale }) => {
   const eid = currentEvent?.id;
   if (subPhase === 'event' && currentEvent) {
-    if (['quick_sync','one_on_one','initiative_cancelled','standup_debug','interview','new_hire','backlog_refinement','daily_standup','meeting_cascade'].includes(eid)) {
+    if (eid === 'ai_initiative_kickoff' || eid === 'sales_pincer') {
+      return <BoardroomScene event={currentEvent}/>;
+    }
+    if (['quick_sync','one_on_one','initiative_cancelled','standup_debug','interview','new_hire','backlog_refinement','daily_standup','meeting_cascade','requirements_changed'].includes(eid)) {
       return <MeetingScene event={currentEvent}/>;
     }
-    if (['town_hall','all_hands','values_refresh','compliance','inclusion_workshop','mental_health','reorg'].includes(eid)) {
+    if (['town_hall','all_hands','values_refresh','compliance','inclusion_workshop','mental_health','reorg','engagement_survey','volunteer_day'].includes(eid)) {
+      // engagement_survey is paper-and-link, not a stage event, but its slide deck makes it auditorium-coded
+      if (eid === 'volunteer_day') return <OutdoorScene event={currentEvent}/>;
       return <AuditoriumScene event={currentEvent}/>;
     }
-    if (eid === 'volunteer_day' || eid === 'fire_drill') return <OutdoorScene event={currentEvent}/>;
+    if (eid === 'fire_drill') return <OutdoorScene event={currentEvent}/>;
     if (eid === 'ceo_idea') return <ExecutiveScene/>;
     if (eid === 'kitchen_karen') return <KitchenScene/>;
-    return <DeskScene event={currentEvent} debt={debt}/>;
+    return <DeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale}/>;
   }
   if (subPhase === 'work' || subPhase === 'day-summary') {
-    return <DeskScene event={null} debt={debt}/>;
+    return <DeskScene event={null} debt={debt} burnout={burnout} morale={morale}/>;
   }
-  return <OfficeOverview/>;
+  return <OfficeOverview burnout={burnout}/>;
 };
