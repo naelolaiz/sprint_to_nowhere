@@ -5,9 +5,24 @@ import { C } from '../../data/theme.js';
 import { ticketLabel, ticketColor } from '../../game/ticketDisplay.js';
 import { TicketIcon } from './TicketIcon.jsx';
 
+const statusOf = (t) => {
+  if (t.shipped) return 'done';
+  if (t.progress > 0) return 'in-progress';
+  return 'open';
+};
+
+const STATUS_STYLE = {
+  open:          { label: 'OPEN',        fg: C.textDim, border: C.border },
+  'in-progress': { label: 'IN PROGRESS', fg: C.amber,   border: C.amberDim },
+  done:          { label: 'DONE',        fg: C.sage,    border: C.sage },
+};
+
 export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
   const pct = (t.progress / t.effort) * 100;
   const typeColor = ticketColor(t);
+  const status = statusOf(t);
+  const statusStyle = STATUS_STYLE[status];
+  const assignee = t.shipped ? t.shippedBy : t.assignedTo;
   return (
     <div
       onClick={!disabled ? onClick : undefined}
@@ -27,6 +42,9 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
           <TicketIcon type={t.type} t={t} />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: typeColor }}>
             {ticketLabel(t)}
+          </span>
+          <span className="text-[10px] px-1.5 py-0.5 tracking-wider" style={{ color: statusStyle.fg, border: `1px solid ${statusStyle.border}` }}>
+            {statusStyle.label}{assignee ? ` · @${assignee}` : ''}
           </span>
           {t.urgent && !t.strategic && !t.legacy && (
             <span className="text-[10px] px-1.5 py-0.5" style={{ color: C.rust, border: `1px solid ${C.rustDim}` }}>

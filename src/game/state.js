@@ -8,6 +8,18 @@ export const totalRemaining = (plan) => plan.reduce(
   0,
 );
 
+// 9-hour workday baseline (8h focus + 1h lunch). Independent of sprint capacity.
+// Erodes with current burnout AND a streak of bad days — sleep restores partially,
+// but consecutive grind days compound into a lower ceiling the next morning.
+//   burnout penalty: floor(burnout/25) — up to 3h
+//   streak penalty: floor(streak/2), capped at 2 — up to 2h
+//   floor: 5h (you're still alive)
+export const dailyFocusBudget = (burnout = 0, badDayStreak = 0) => {
+  const burnoutPenalty = Math.floor(burnout / 25);
+  const streakPenalty = Math.min(2, Math.floor(badDayStreak / 2));
+  return Math.max(5, 9 - burnoutPenalty - streakPenalty);
+};
+
 export const getEventNode = (event, dialogNode) => {
   if (!event) return null;
   if (event.nodes) {
@@ -30,10 +42,10 @@ export const initialState = () => {
     capital: 5,
     backlog: [],
     sprintPlan: [],
-    sprintCapacity: 60,             // points/hours per 5-day sprint, configurable in planning
+    sprintCapacity: 60,             // points committed per 5-day sprint, configurable in planning
     currentDay: 1,
-    dayFocus: 12,                   // 60 / 5 = 12 hours per day
-    dayFocusRemaining: 12,
+    dayFocus: 9,                    // 9h workday (8h focus + 1h lunch); burnout erodes it
+    dayFocusRemaining: 9,
     subPhase: null,
     currentEvent: null,
     dayLog: [],
@@ -53,6 +65,9 @@ export const initialState = () => {
     burnout: 0,
     focus: 100,
     morale: 70,                    // motivation / engagement / will-to-build
+    badDayStreak: 0,               // consecutive bad days; erodes next-day focus budget
+    stayedLate: false,             // worked overtime today; counts as a bad day
+    pendingCleanups: [],           // ticket templates queued by chaos events; forced into next sprint
     eventCast: {},
     eventQueue: [],
   };

@@ -45,7 +45,7 @@ export const PlanningScene = ({ sprint }) => {
 
         <rect x="88" y="17" width="34" height="26" fill={C.sage} opacity="0.7"/>
         <text x="105" y="27" textAnchor="middle" fontSize="3" fontFamily={FONT} fill="#000" fontWeight="700">REF-3</text>
-        <text x="105" y="35" textAnchor="middle" fontSize="2.5" fontFamily={FONT} fill="#000">12h</text>
+        <text x="105" y="35" textAnchor="middle" fontSize="2.5" fontFamily={FONT} fill="#000">9h</text>
 
         <rect x="126" y="17" width="34" height="26" fill={C.amber} opacity="0.7"/>
         <text x="143" y="27" textAnchor="middle" fontSize="3" fontFamily={FONT} fill="#000" fontWeight="700">FEAT-9</text>

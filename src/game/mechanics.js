@@ -14,7 +14,7 @@ export const debtSpeedPenalty = (debt) => {
 
 export const dayFrac = (s) => {
   const d = (s.currentDay || 1) - 1;
-  const dayBudget = s.dayFocus || ((s.sprintCapacity ?? 60) / 5);
+  const dayBudget = s.dayFocus || 9;
   const used = 1 - Math.max(0, Math.min(1, (s.dayFocusRemaining ?? dayBudget) / dayBudget));
   // clamp slightly inside (d, d+1) so end-of-day snapshots don't collide with next-day events
   return d + Math.max(0.001, Math.min(0.999, used));
@@ -214,6 +214,7 @@ export const workOnTicket = (state, ticketId) => {
   const hoursWorked = Math.min(hoursAvailable, Math.ceil(hoursNeeded / Math.max(0.1, speed)));
   const effective = hoursWorked * speed;
   t.progress = Math.min(t.effort, t.progress + effective);
+  t.assignedTo = 'you';
   s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - hoursWorked);
   // grinding adds a small amount of burnout — more if the codebase fights you
   s.burnout = Math.min(100, s.burnout + (hoursWorked * (s.debt > 70 ? 0.6 : 0.3)));
@@ -232,6 +233,7 @@ export const workOnTicket = (state, ticketId) => {
 
   if (t.progress >= t.effort) {
     t.shipped = true;
+    t.shippedBy = 'you';
     let debtChange = t.debtImpact;
     if (t.scopeCreep > 0 && t.type === 'feature') debtChange += t.scopeCreep * 2;
     s.debt = Math.max(0, s.debt + debtChange);
