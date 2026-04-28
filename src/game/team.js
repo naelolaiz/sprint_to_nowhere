@@ -33,16 +33,30 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
   if (Math.random() > 0.25) return;
 
   const inProg = plan.filter(t => !t.shipped && t.progress < t.effort);
+  const inProgWithWork = inProg.filter(t => t.progress > 0);
   const events = [];
   if (shipped.length > 0) events.push({ id: 'debt_disaster', weight: 4 });
   if (inProg.length > 0) {
     events.push({ id: 'marcus_rewrite', weight: 4 });
     events.push({ id: 'ai_pilot', weight: 3 });
     events.push({ id: 'drive_by_refactor', weight: 3 });
+    events.push({ id: 'sarah_jin_pair_win', weight: 3 });
+    events.push({ id: 'scope_meeting', weight: 3 });
+  }
+  if (inProgWithWork.length > 0) {
+    events.push({ id: 'sarah_force_push', weight: 2 });
   }
   events.push({ id: 'broken_build', weight: 5 });
   events.push({ id: 'doug_milk_macros', weight: 2 });
   events.push({ id: 'qa_reopen', weight: 4 });
+  events.push({ id: 'pr_review_war', weight: 3 });
+  events.push({ id: 'slack_war', weight: 4 });
+  events.push({ id: 'donuts', weight: 4 });
+  events.push({ id: 'innovation_hour', weight: 3 });
+  events.push({ id: 'doug_ambush', weight: 3 });
+  events.push({ id: 'junior_questions', weight: 3 });
+  events.push({ id: 'vendor_outage', weight: 3 });
+  events.push({ id: 'jin_homelab_fire', weight: 1 });
 
   const total = events.reduce((s, e) => s + e.weight, 0);
   let r = Math.random() * total;
@@ -136,6 +150,119 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
         urgent: true,
       });
       log.push(`Overnight: QA finished testing something you shipped sprints ago. They found a problem. The ticket is back, with a regression fix queued for next sprint. ("${title}")`);
+      break;
+    }
+    case 'sarah_jin_pair_win': {
+      // Sarah and Jin pair on a ticket and ship it cleanly. Rare positive event.
+      const target = pick(inProg);
+      const idx = plan.findIndex(p => p.id === target.id);
+      const t = plan[idx];
+      let debtChange = t.debtImpact;
+      if (t.scopeCreep > 0 && t.type === 'feature') debtChange += t.scopeCreep * 2;
+      const finished = {
+        ...t, progress: t.effort, shipped: true,
+        assignedTo: 'Sarah & Jin', shippedBy: 'Sarah & Jin', debtChange,
+      };
+      plan[idx] = finished;
+      shipped.push(finished);
+      deltas.debt += debtChange;
+      deltas.morale += teamMoraleForShip(t) + 4;
+      log.push(`Overnight: Sarah and Jin paired on "${t.title}" until 6pm and shipped it. The diff was clean. Both got credit. Suspicious.`);
+      break;
+    }
+    case 'pr_review_war': {
+      // Two teammates feud in PR review. A regression-feedback ticket lands next sprint.
+      pendingCleanups.push({
+        title: 'Address PR review feedback from a heated thread',
+        effort: 3 + Math.floor(Math.random() * 3),  // 3-5h
+        debt: 0,
+        type: 'bug',
+        urgent: false,
+      });
+      deltas.morale -= 6;
+      log.push('Overnight: Sarah and Jin spent 47 comments arguing about a function name on Marcus\'s PR. The thread is locked. A follow-up ticket will land next sprint.');
+      break;
+    }
+    case 'slack_war': {
+      deltas.morale -= 8;
+      deltas.burnout += 3;
+      log.push('Overnight: Jin and Sarah fought in #engineering about tabs vs spaces. Three other people weighed in. The conversation drifted to monorepos. Two emoji reactions were retracted.');
+      break;
+    }
+    case 'sarah_force_push': {
+      // Halve progress on up to 2 in-progress tickets that have actual progress.
+      const sorted = [...inProgWithWork].sort(() => Math.random() - 0.5);
+      const targets = sorted.slice(0, Math.min(2, sorted.length));
+      let titles = [];
+      for (const tt of targets) {
+        const idx = plan.findIndex(p => p.id === tt.id);
+        plan[idx] = { ...plan[idx], progress: Math.floor(plan[idx].progress / 2) };
+        titles.push(`"${tt.title}"`);
+      }
+      deltas.morale -= 10;
+      log.push(`Overnight: Sarah force-pushed to main. ${titles.length === 1 ? titles[0] : titles.join(' and ')} lost half their progress. She is "really sorry, the rebase got weird." −10 morale.`);
+      break;
+    }
+    case 'scope_meeting': {
+      // A "quick sync" grew the scope of 1-3 tickets.
+      const sorted = [...inProg].sort(() => Math.random() - 0.5);
+      const targets = sorted.slice(0, Math.min(3, sorted.length));
+      for (const tt of targets) {
+        const idx = plan.findIndex(p => p.id === tt.id);
+        plan[idx] = {
+          ...plan[idx],
+          effort: plan[idx].effort + 1,
+          scopeCreep: (plan[idx].scopeCreep || 0) + 1,
+        };
+      }
+      deltas.morale -= 3;
+      log.push(`Overnight: Marcus and Brad had a "quick sync" that ran 90 minutes over. ${targets.length} ticket${targets.length > 1 ? 's' : ''} grew by 1h each. Marcus called it "alignment."`);
+      break;
+    }
+    case 'donuts': {
+      // The rare positive event.
+      deltas.morale += 6;
+      log.push('Overnight: Sarah brought donuts. The good ones from the place across the highway. The box was empty by 9:30am. +6 morale.');
+      break;
+    }
+    case 'innovation_hour': {
+      deltas.morale -= 3;
+      deltas.burnout += 3;
+      log.push('Overnight: Marcus organized "Innovation Hour" for tomorrow. Voluntary, mandatory. Themes will be "blue-sky." −3 morale, +3 burnout.');
+      break;
+    }
+    case 'doug_ambush': {
+      deltas.morale -= 3;
+      deltas.burnout += 2;
+      log.push('Overnight: Doug from Infra cornered Sarah at the espresso machine for 40 minutes about milk_v48.xlsx. She is "fine." She is not fine. −3 morale.');
+      break;
+    }
+    case 'junior_questions': {
+      // Helping a junior is good but exhausting.
+      deltas.morale += 1;
+      deltas.burnout += 3;
+      log.push('Overnight: Tyler the junior asked thoughtful questions for three hours. You\'re glad someone is, even if it cost the day. +1 morale, +3 burnout.');
+      break;
+    }
+    case 'vendor_outage': {
+      deltas.morale -= 2;
+      deltas.burnout += 2;
+      const vendors = ['Linear', 'Notion', 'CircleCI', 'GitHub', 'Slack', 'the artifact registry'];
+      const v = pick(vendors);
+      log.push(`Overnight: ${v} was down for 90 minutes. Marcus had to walk over and ask people what they were working on. He looked uncomfortable. −2 morale.`);
+      break;
+    }
+    case 'jin_homelab_fire': {
+      // The rare absurd event. Jin is OUT for a while.
+      deltas.morale -= 4;
+      pendingCleanups.push({
+        title: 'Pick up Jin\'s in-flight refactor while he reinstalls Proxmox',
+        effort: 10,
+        debt: -2,
+        type: 'refactor',
+        urgent: true,
+      });
+      log.push('Overnight: Jin\'s homelab caught fire. He\'s "fine" but his rack is "less fine." He will be on PTO Tuesday-Thursday. A cleanup ticket will land next sprint to pick up his work.');
       break;
     }
   }
