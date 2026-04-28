@@ -9,6 +9,23 @@ import { BurnDown } from '../common/BurnDown.jsx';
 import { Btn } from '../common/Btn.jsx';
 import { Stage } from '../scene/Stage.jsx';
 
+const CHARACTER_NAMES = [
+  'Doug', 'Greg', 'Larry', 'Steve', 'Frank', 'Hank', 'Gary',
+  'Karen', 'Linda', 'Pat', 'Rhonda', 'Carol', 'Sue',
+  'Brad', 'Chad', 'Brock', 'Tanner', 'Trevor', 'Hunter', 'Skyler',
+  'Sarah', 'Priya', 'Jamal', 'Wei', 'Maya', 'Yusuf', 'Ana', 'Devon',
+  'Jin', 'Alex', 'Sam', 'Kit', 'Riley', 'Avery', 'Morgan',
+  'Marcus',
+];
+const NAME_RE = new RegExp(`\\b(${CHARACTER_NAMES.join('|')})\\b`, 'g');
+const emphasizeNames = (text) => {
+  if (typeof text !== 'string') return text;
+  const parts = text.split(NAME_RE);
+  return parts.map((p, i) => (
+    i % 2 === 1 ? <em key={i} className="italic">{p}</em> : p
+  ));
+};
+
 export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onAction }) => {
   const Ev = s.currentEvent;
   const EvIcon = Ev?.icon;
@@ -61,7 +78,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
             {isStartNode && (
               <div className="flex items-center gap-3 mb-3">
                 {EvIcon && <EvIcon size={20} style={{ color: C.amber }}/>}
-                <div className="text-base font-semibold" style={{ color: C.text }}>{renderCast(Ev.title, s.eventCast)}</div>
+                <div className="text-base font-semibold" style={{ color: C.text }}>{emphasizeNames(renderCast(Ev.title, s.eventCast))}</div>
               </div>
             )}
             {!isStartNode && (
@@ -70,7 +87,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               </div>
             )}
             <div className="text-sm mb-6 leading-relaxed" style={{ color: C.textDim }}>
-              {desc}
+              {emphasizeNames(desc)}
             </div>
             <div className="space-y-2">
               {node.choices.map((c, i) => (
@@ -83,7 +100,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.amber; e.currentTarget.style.backgroundColor = C.surface; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = C.surface2; }}
                 >
-                  → {renderCast(c.label, s.eventCast)}{c.next ? ' …' : ''}
+                  → {emphasizeNames(renderCast(c.label, s.eventCast))}{c.next ? ' …' : ''}
                 </button>
               ))}
             </div>
@@ -244,9 +261,17 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               <div className="text-xs tracking-wider uppercase mb-3" style={{ color: C.textDim }}>
                 Day {s.currentDay} log
               </div>
-              <div className="space-y-2 text-sm" style={{ color: C.text }}>
-                {s.dayLog.map((l, i) => <div key={i} className="leading-relaxed">{l}</div>)}
-              </div>
+              <ul className="text-sm space-y-3" style={{ color: C.text }}>
+                {s.dayLog.map((l, i) => {
+                  const stripped = typeof l === 'string' ? l.replace(/^—\s+/, '') : l;
+                  return (
+                    <li key={i} className="flex gap-2 leading-relaxed">
+                      <span className="shrink-0 select-none" style={{ color: C.amberDim }}>▸</span>
+                      <span className="flex-1">{emphasizeNames(stripped)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
             <Btn onClick={onNextDay} full>
               <span className="flex items-center justify-center gap-2">
