@@ -23,9 +23,16 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
   const status = statusOf(t);
   const statusStyle = STATUS_STYLE[status];
   const assignee = t.shipped ? t.shippedBy : t.assignedTo;
+  const isTeammateOwned = !t.shipped && assignee && assignee !== 'you';
+  const badgeFg = isTeammateOwned ? C.rust : statusStyle.fg;
+  const badgeBorder = isTeammateOwned ? C.rustDim : statusStyle.border;
+  const stealHint = isTeammateOwned && onClick && !disabled
+    ? `Working this would mean taking it from @${assignee}. Costs morale.`
+    : undefined;
   return (
     <div
       onClick={!disabled ? onClick : undefined}
+      title={stealHint}
       className={`${onClick && !disabled ? 'cursor-pointer' : ''} transition-all`}
       style={{
         backgroundColor: selected ? C.surface2 : C.surface,
@@ -43,9 +50,14 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
           <span className="text-[10px] tracking-widest uppercase" style={{ color: typeColor }}>
             {ticketLabel(t)}
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 tracking-wider" style={{ color: statusStyle.fg, border: `1px solid ${statusStyle.border}` }}>
+          <span className="text-[10px] px-1.5 py-0.5 tracking-wider" style={{ color: badgeFg, border: `1px solid ${badgeBorder}` }}>
             {statusStyle.label}{assignee ? ` · @${assignee}` : ''}
           </span>
+          {isTeammateOwned && (
+            <span className="text-[10px] px-1.5 py-0.5 tracking-wider" style={{ color: C.rust, border: `1px solid ${C.rustDim}` }}>
+              TAKE?
+            </span>
+          )}
           {t.urgent && !t.strategic && !t.legacy && (
             <span className="text-[10px] px-1.5 py-0.5" style={{ color: C.rust, border: `1px solid ${C.rustDim}` }}>
               P0
