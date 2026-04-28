@@ -5,7 +5,6 @@ import { C, FONT } from '../../data/theme.js';
 import { getEventNode } from '../../game/state.js';
 import { renderCast } from '../../game/cast.js';
 import { TicketCard } from '../common/TicketCard.jsx';
-import { Meter } from '../common/Meter.jsx';
 import { BurnDown } from '../common/BurnDown.jsx';
 import { Btn } from '../common/Btn.jsx';
 import { Stage } from '../scene/Stage.jsx';

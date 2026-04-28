@@ -2,7 +2,6 @@
 
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
-import { SpeechBubble } from '../common/SpeechBubble.jsx';
 
 export const OutdoorScene = ({ event }) => {
   const isFireDrill = event?.id === 'fire_drill';

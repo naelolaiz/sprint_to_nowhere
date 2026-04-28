@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Play } from 'lucide-react';
-import { C, FONT } from '../../data/theme.js';
+import { C } from '../../data/theme.js';
 import { Btn } from '../common/Btn.jsx';
 
 export const MenuPhase = ({ onStart }) => (

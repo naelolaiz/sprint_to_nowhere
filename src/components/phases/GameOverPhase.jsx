@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Skull, Flame, RotateCcw } from 'lucide-react';
-import { C, FONT } from '../../data/theme.js';
+import { C } from '../../data/theme.js';
 import { MELTDOWN_FLAVORS } from '../../data/meltdownFlavors.js';
 import { Btn } from '../common/Btn.jsx';
 

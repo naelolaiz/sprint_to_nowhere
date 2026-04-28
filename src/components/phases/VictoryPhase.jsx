@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Award, RotateCcw } from 'lucide-react';
-import { C, FONT } from '../../data/theme.js';
-import { Meter } from '../common/Meter.jsx';
+import { C } from '../../data/theme.js';
 import { Btn } from '../common/Btn.jsx';
 
 export const VictoryPhase = ({ s, onRestart }) => (

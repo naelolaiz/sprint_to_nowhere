@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { CheckCircle2, XCircle, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
-import { C, FONT } from '../../data/theme.js';
+import { C } from '../../data/theme.js';
 import { TicketIcon } from '../common/TicketIcon.jsx';
 import { Btn } from '../common/Btn.jsx';
 
