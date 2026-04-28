@@ -16,20 +16,20 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
   const workableTickets = s.sprintPlan.filter(t => !t.shipped && t.progress < t.effort);
 
   return (
-    <div className="flex-1 grid grid-cols-5 gap-0 overflow-hidden">
+    <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 gap-0 lg:overflow-hidden">
       {/* Left: stage + action area */}
-      <div className="col-span-3 flex flex-col overflow-hidden" style={{ borderRight: `1px solid ${C.border}` }}>
+      <div className="lg:col-span-3 flex flex-col lg:overflow-hidden lg:border-r" style={{ borderColor: C.border }}>
         {/* STAGE */}
-        <div style={{
-          height: 240, backgroundColor: C.bg,
+        <div className="h-44 sm:h-56 lg:h-60 shrink-0" style={{
+          backgroundColor: C.bg,
           borderBottom: `1px solid ${C.border}`,
           backgroundImage: `linear-gradient(to bottom, ${C.surface} 0%, ${C.bg} 100%)`,
         }}>
           <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt} burnout={s.burnout} morale={s.morale}/>
         </div>
 
-        {/* Action area (scrollable) */}
-        <div className="flex-1 p-6 overflow-auto">
+        {/* Action area (scrollable on desktop, flows on mobile) */}
+        <div className="flex-1 p-3 sm:p-6 lg:overflow-auto">
         <div className="text-xs tracking-[0.3em] mb-4" style={{ color: C.amberDim }}>
           DAY {s.currentDay} OF 5 · {s.dayFocusRemaining.toFixed(1)}h FOCUS LEFT
         </div>
@@ -54,7 +54,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           const isMultiTurn = !!Ev.nodes;
           const isStartNode = !isMultiTurn || s.dialogNode === (Ev.start || 'start');
           return (
-          <div style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, padding: 24 }}>
+          <div className="p-4 sm:p-6" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
             {isStartNode && (
               <div className="flex items-center gap-3 mb-3">
                 {EvIcon && <EvIcon size={20} style={{ color: C.amber }}/>}
@@ -231,7 +231,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
       </div>
 
       {/* Right: burn-down + sprint plan */}
-      <div className="col-span-2 p-6 overflow-auto" style={{ backgroundColor: C.bg }}>
+      <div className="lg:col-span-2 p-3 sm:p-6 lg:overflow-auto lg:border-t-0 border-t" style={{ backgroundColor: C.bg, borderColor: C.border }}>
         <BurnDown
           history={s.hourHistory}
           currentRemaining={s.sprintPlan.reduce((sum, t) => sum + Math.max(0, t.effort - t.progress), 0)}

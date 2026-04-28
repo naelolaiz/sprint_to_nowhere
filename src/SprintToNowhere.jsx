@@ -273,7 +273,7 @@ export default function SprintToNowhere() {
       {s.phase === 'retro' && <RetroPhase s={s} onNext={nextSprint}/>}
       {s.phase === 'gameover' && <GameOverPhase s={s} onRestart={restart}/>}
       {s.phase === 'victory' && <VictoryPhase s={s} onRestart={restart}/>}
-      <div className="px-6 py-2 text-[10px] tracking-widest uppercase" style={{
+      <div className="px-3 sm:px-6 py-2 text-[10px] tracking-widest uppercase" style={{
         color: C.textDimmer, borderTop: `1px solid ${C.border}`,
       }}>
         sprint_to_nowhere · v0 · ship anyway
