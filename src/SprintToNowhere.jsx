@@ -8,6 +8,7 @@ import { generateBacklog, mkTicket } from './game/backlog.js';
 import { sampleEventCast } from './game/cast.js';
 import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget } from './game/state.js';
 import { applyChoice, workOnTicket } from './game/mechanics.js';
+import { applyTeammateContributions } from './game/team.js';
 import { HUD } from './components/common/HUD.jsx';
 import { MenuPhase } from './components/phases/MenuPhase.jsx';
 import { PlanningPhase } from './components/phases/PlanningPhase.jsx';
@@ -236,16 +237,24 @@ export default function SprintToNowhere() {
     const newBurnout = Math.max(0, prev.burnout - sleepRecovery);
     const newStreak = wasBadDay ? (prev.badDayStreak || 0) + 1 : 0;
     const newBudget = dailyFocusBudget(newBurnout, newStreak);
+    // The team also worked overnight (allegedly). They can finish tickets;
+    // the player wakes up to find them shipped (and inherits the debt).
+    const team = applyTeammateContributions(prev);
     const next = {
       ...prev,
       hourHistory: history,
       currentDay: prev.currentDay + 1,
+      sprintPlan: team.sprintPlan,
+      sprintShipped: [...prev.sprintShipped, ...team.shipped],
+      totalShipped: prev.totalShipped + team.shipped.length,
+      debt: Math.max(0, prev.debt + team.debtDelta),
+      morale: Math.max(0, Math.min(100, prev.morale + team.moraleDelta)),
       dayFocus: newBudget,
       dayFocusRemaining: newBudget,
       burnout: newBurnout,
       badDayStreak: newStreak,
       stayedLate: false,
-      dayLog: [],
+      dayLog: team.log,
       subPhase: 'event',
       dialogNode: 'start',
       // morning focus ceiling drops as burnout climbs — exhausted devs start the day distracted
