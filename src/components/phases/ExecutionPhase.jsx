@@ -47,11 +47,15 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               rawDesc = Ev.descriptions[idx % Ev.descriptions.length];
             }
           }
-          const desc = typeof rawDesc === 'function'
-            ? rawDesc(s)
-            : renderCast(rawDesc, s.eventCast);
           const isMultiTurn = !!Ev.nodes;
           const isStartNode = !isMultiTurn || s.dialogNode === (Ev.start || 'start');
+          // When chaos happened overnight, the morning standup IS that
+          // discussion — replace the random standup blurb with the chaos
+          // flavor so the conversation makes sense in context.
+          const useChaosAsDesc = Ev.id === 'daily_standup' && isStartNode && s.lastChaosFlavor;
+          const desc = useChaosAsDesc
+            ? s.lastChaosFlavor
+            : (typeof rawDesc === 'function' ? rawDesc(s) : renderCast(rawDesc, s.eventCast));
           return (
           <div className="p-4 sm:p-6" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
             {isStartNode && (

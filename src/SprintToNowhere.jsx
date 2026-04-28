@@ -5,7 +5,7 @@ import { C, FONT } from './data/theme.js';
 import { STRATEGIC_INITIATIVES } from './data/tickets.js';
 import { EVENTS, MELTDOWN_EVENT } from './data/events.js';
 import { generateBacklog, mkTicket } from './game/backlog.js';
-import { sampleEventCast } from './game/cast.js';
+import { sampleEventCast, renderCast } from './game/cast.js';
 import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget } from './game/state.js';
 import { applyChoice, workOnTicket } from './game/mechanics.js';
 import { applyTeammateContributions } from './game/team.js';
@@ -93,14 +93,15 @@ export default function SprintToNowhere() {
     // Dialog resolved. If there's another event queued for today, fire it next.
     if (newState.eventQueue && newState.eventQueue.length > 0) {
       const [nextEv, ...rest] = newState.eventQueue;
+      const nextCast = sampleEventCast(nextEv.id);
       return {
         ...newState,
         currentEvent: nextEv,
         eventQueue: rest,
         dialogNode: nextEv.start || 'start',
-        eventCast: sampleEventCast(nextEv.id),
+        eventCast: nextCast,
         subPhase: 'event',
-        dayLog: [...newState.dayLog, `— and then: ${nextEv.title}`],
+        dayLog: [...newState.dayLog, `— and then: ${renderCast(nextEv.title, nextCast)}`],
       };
     }
     // Otherwise, off to work.
@@ -267,7 +268,9 @@ export default function SprintToNowhere() {
       totalShipped: prev.totalShipped + team.shipped.length,
       debt: Math.max(0, prev.debt + team.debtDelta),
       morale: Math.max(0, Math.min(100, prev.morale + team.moraleDelta)),
+      capital: Math.max(0, Math.min(5, prev.capital + (team.capitalDelta || 0))),
       pendingCleanups: [...(prev.pendingCleanups || []), ...(team.pendingCleanups || [])],
+      lastChaosFlavor: team.chaosFlavor || null,
       dayFocus: newBudget,
       dayFocusRemaining: newBudget,
       burnout: newBurnout,
@@ -276,8 +279,11 @@ export default function SprintToNowhere() {
       dayLog: team.log,
       subPhase: 'event',
       dialogNode: 'start',
-      // morning focus ceiling drops as burnout climbs — exhausted devs start the day distracted
-      focus: Math.max(40, 100 - Math.floor(newBurnout * 0.4)),
+      // morning focus ceiling drops as burnout climbs — exhausted devs start the day
+      // distracted. Chaos events can knock that ceiling further down.
+      focus: Math.max(0, Math.min(100,
+        Math.max(40, 100 - Math.floor(newBurnout * 0.4)) + (team.focusDelta || 0)
+      )),
     };
     const queue = pickDayEvents(next);
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');

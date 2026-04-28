@@ -198,6 +198,8 @@ export const workOnTicket = (state, ticketId) => {
   const idx = s.sprintPlan.findIndex(t => t.id === ticketId);
   if (idx < 0) return s;
   const t = s.sprintPlan[idx];
+  const previousAssignee = t.assignedTo;
+  const stolenFrom = previousAssignee && previousAssignee !== 'you' ? previousAssignee : null;
   const debtPen = debtSpeedPenalty(s.debt);
   const burnPen = burnoutSpeedPenalty(s.burnout);
   const focusMul = Math.max(0.3, (s.focus ?? 100) / 100);
@@ -281,6 +283,11 @@ export const workOnTicket = (state, ticketId) => {
   s.boothBonus = false;
   s.sprintPlan[idx] = t;
   s.dayLog = [...s.dayLog, workLog];
+  // Taking a teammate-owned ticket without asking has a social cost.
+  if (stolenFrom) {
+    s.morale = Math.max(0, s.morale - 4);
+    s.dayLog = [...s.dayLog, `(You took "${t.title}" from @${stolenFrom} without asking. They'll find out at standup. −4 morale.)`];
+  }
   // Track this work session in the burn-up chart
   s.hourHistory = [...(s.hourHistory || []), {
     day: dayFrac(s),
