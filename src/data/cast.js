@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+export const CAST_POOLS = {
+  // Older guy with the milk spreadsheet, calls you "boss/chief/sport"
+  dougs:     ['Doug', 'Greg', 'Larry', 'Steve', 'Frank', 'Hank', 'Gary'],
+  // Older "Karen-type" — complaints, voice memos, all-caps Slack messages
+  karens:    ['Karen', 'Linda', 'Pat', 'Rhonda', 'Carol', 'Sue'],
+  // Sales-bro with the Tesla / pickleball / "synergy at scale"
+  bros:      ['Brad', 'Chad', 'Brock', 'Tanner', 'Trevor', 'Hunter', 'Skyler'],
+  // Competent engineer you actually like working with
+  engineers: ['Sarah', 'Priya', 'Jamal', 'Wei', 'Maya', 'Yusuf', 'Ana', 'Devon'],
+  // The helpful Jin-type at the next desk, often gender-neutral
+  jins:      ['Jin', 'Alex', 'Sam', 'Kit', 'Riley', 'Avery', 'Morgan'],
+};
+
+export const EVENT_CAST_RULES = {
+  shoulder_tap:       { person: 'bros' },
+  kitchen_karen:      { person: 'dougs' },     // event id is legacy; person is now Doug-archetype
+  loud_sales_call:    { person: 'bros' },
+  backlog_refinement: { facilitator: 'bros', objector: 'dougs' },
+  daily_standup:      { offliner: 'bros', updater: 'dougs', dev: 'engineers' },
+  mental_health:      { facilitator: 'engineers' },
+  broken_package:     { dev: 'engineers' },    // platform-team person
+  fire_drill:         { sales: 'bros' },       // the sales-bro at the cluster
+  meeting_cascade:    { bro: 'bros' },         // the person who has to leave
+  building_issue:     { complainer: 'dougs' }, // the channel-spammer
+};
