@@ -71,12 +71,20 @@ export const initialState = () => {
     lastChaosFlavor: null,         // one-line chaos summary surfaced in the next morning's standup
     eventCast: {},
     eventQueue: [],
+    atHome: false,                 // true once the player has bailed home for the day; resets each morning
   };
 };
 
 export const pickEvent = (state, exclude = null) => {
   const eligible = EVENTS.filter(e => {
     if (exclude && exclude.has(e.id)) return false;
+    // At-home interruptions are only drawn after the player has bailed home.
+    // They never appear in the normal office-day pool.
+    if (e.atHome && !state.atHome) return false;
+    // Conversely, once the player has gone home, in-office disruptions
+    // (badge readers, fire drills, Doug at the espresso machine) no longer
+    // make narrative sense.
+    if (state.atHome && e.inOffice) return false;
     if (e.requires && !e.requires(state)) return false;
     return true;
   });

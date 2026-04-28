@@ -224,6 +224,7 @@ export const EVENTS = [
   {
     id: 'shoulder_tap', icon: Coffee,
     title: "{person} wants to tell you about his weekend",
+    inOffice: true,
     start: 'open',
     nodes: {
       open: {
@@ -319,6 +320,7 @@ export const EVENTS = [
   {
     id: 'kitchen_karen', icon: Coffee,
     title: 'Kitchen ambush',
+    inOffice: true,
     start: 'enter',
     nodes: {
       enter: {
@@ -415,6 +417,7 @@ export const EVENTS = [
   {
     id: 'loud_sales_call', icon: Megaphone,
     title: 'Open-plan symphony',
+    inOffice: true,
     start: 'overhear',
     nodes: {
       overhear: {
@@ -2064,7 +2067,7 @@ export const EVENTS = [
     },
   },
   {
-    id: 'network_down', icon: Wrench,
+    id: 'network_down', icon: Wrench, inOffice: true,
     title: 'Blocker: office network is down',
     start: 'open',
     nodes: {
@@ -2079,7 +2082,7 @@ export const EVENTS = [
         choices: [
           { label: 'Tether and grind through it', next: 'tether' },
           { label: 'Walk to the coffee shop across the street', next: 'coffee_shop' },
-          { label: 'Use it as an excuse to go home', next: 'go_home' },
+          { label: 'Use it as an excuse to go home', next: 'go_home', effect: { goHome: true } },
           { label: 'Just wait it out', next: 'wait' },
         ],
       },
@@ -2094,7 +2097,7 @@ export const EVENTS = [
         description: 'They\'ve put up a sign: "WiFi password rotates daily. Ask staff." The barista looks tired. There are no outlets. Your laptop is at 23%. A man at the next table is on a video call about "synergy."',
         choices: [
           { label: 'Stay until your laptop dies', effect: { focus: -1.5, burnout: 5 }, log: 'You worked on a 23% battery charge for 45 minutes. You shipped one small thing. The man\'s call lasted longer than yours.' },
-          { label: 'Give up and go home', next: 'go_home' },
+          { label: 'Give up and go home', next: 'go_home', effect: { goHome: true } },
         ],
       },
       go_home: {
@@ -2119,14 +2122,14 @@ export const EVENTS = [
       wait: {
         description: 'You refresh the IT status page. You read the Hacker News thread about your IT vendor\'s outage. You realize 90 minutes have passed. You have not done any of your work.',
         choices: [
-          { label: 'Snap out of it', effect: { focus: -3, focusPct: -25, burnout: 8 }, log: 'You snapped out of it after 2 hours. The network was still down. You went home.' },
+          { label: 'Snap out of it', effect: { focus: -3, focusPct: -25, burnout: 8, goHome: true }, log: 'You snapped out of it after 2 hours. The network was still down. You went home.' },
         ],
       },
     },
   },
   // ===== INTERRUPTIONS — physical/environmental =====
   {
-    id: 'fire_drill', icon: Flame,
+    id: 'fire_drill', icon: Flame, inOffice: true,
     title: 'Interruption: mandatory fire drill',
     start: 'open',
     nodes: {
@@ -2295,7 +2298,7 @@ export const EVENTS = [
   },
   // ===== MORNING ARRIVAL — only fires at the very start of a day =====
   {
-    id: 'morning_arrival', icon: Wrench,
+    id: 'morning_arrival', icon: Wrench, inOffice: true,
     title: 'Morning arrival',
     descriptions: [
       'Your badge stopped working at the front door. The receptionist is on PTO. The backup receptionist is also on PTO. There is a sign that says "in case of emergency, call IT" with no number.',
@@ -2312,14 +2315,14 @@ export const EVENTS = [
         choices: [
           { label: 'Find a workaround and get in', effect: { focus: -0.5, burnout: 1 }, log: 'You got in. It cost ten minutes you needed.' },
           { label: 'Wait it out in the lobby', effect: { focus: -1, burnout: 2 }, log: 'You waited. Twenty minutes. Marcus pinged you "just checking in."' },
-          { label: 'Just go home and remote', effect: { focus: 0, capital: -0.5, morale: 1, burnout: -1 }, log: 'You drove home. WiFi is faster. Nobody noticed for an hour.' },
+          { label: 'Just go home and remote', effect: { focus: 0, capital: -0.5, morale: 1, burnout: -1, goHome: true }, log: 'You drove home. WiFi is faster. Nobody noticed for an hour.' },
         ],
       },
     },
   },
   // ===== BUILDING ISSUES — facilities crap that steals time =====
   {
-    id: 'building_issue', icon: Wrench,
+    id: 'building_issue', icon: Wrench, inOffice: true,
     title: 'Building issue',
     // Multiple description variants so it doesn't read identical each time.
     descriptions: [
@@ -2337,7 +2340,7 @@ export const EVENTS = [
         choices: [
           { label: 'Try to file a Facilities ticket', next: 'ticket' },
           { label: 'Slack #building-issues', next: 'slack' },
-          { label: 'Just go home and work remote', next: 'home' },
+          { label: 'Just go home and work remote', next: 'home', effect: { goHome: true } },
           { label: 'Ignore it, work around it', next: 'workaround' },
         ],
       },
@@ -2380,7 +2383,7 @@ export const EVENTS = [
         description: 'You pack up. Marcus DMs immediately: "are you in office today? want to grab a quick coffee with stakeholder Y at 2pm." You realize you\'re always pinged the moment you leave.',
         choices: [
           { label: '"Working from home today, building issue."', next: 'wfh_excuse' },
-          { label: 'Say yes, come back', effect: { focus: -3, capital: 0.5, burnout: 9 }, log: 'You came back. The building issue was not resolved. The coffee with stakeholder Y was unproductive.' },
+          { label: 'Say yes, come back', effect: { focus: -3, capital: 0.5, burnout: 9, returnOffice: true }, log: 'You came back. The building issue was not resolved. The coffee with stakeholder Y was unproductive.' },
         ],
       },
       wfh_excuse: {
@@ -2394,7 +2397,131 @@ export const EVENTS = [
         description: 'You decide to work around the issue. Specifically: stairs / different bathroom / personal hotspot / sweat through it. You start. After 30 minutes you realize the workaround is actually quite annoying.',
         choices: [
           { label: 'Power through anyway', effect: { focus: -2, burnout: 6 }, log: 'You powered through. You smell. Your knees hurt. You used 1.4GB of personal data. Your work was fine.' },
-          { label: 'Give up, go home', next: 'home' },
+          { label: 'Give up, go home', next: 'home', effect: { goHome: true } },
+        ],
+      },
+    },
+  },
+  // ===== AT-HOME INTERRUPTIONS — only fire when state.atHome is true =====
+  // Pulled in by applyChoice's goHome handler (and a small chance during a
+  // coffee break at home). Tagged atHome:true so pickEvent never picks them
+  // for the office-day pool.
+  {
+    id: 'home_neighbor', icon: Megaphone,
+    title: 'Neighbor noise',
+    atHome: true,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A landscaping crew has shown up next door. Three leaf blowers, simultaneously, in a coordinated triangle. Your kitchen window does not fully close. Your call in 40 minutes is on Zoom.',
+          'Your neighbor is having a tree removed. The chainsaw runs in 90-second bursts. The bursts are perfectly anti-correlated with your typing flow. You have written the same line of code three times.',
+          'Construction next door. The radio is on. The radio is playing the same four songs on rotation. You can sing along to one of them now and you do not want to.',
+          'Your upstairs neighbor has rearranged their living room. They are still rearranging it. It has been forty minutes. Something with wheels keeps moving back and forth above your head.',
+          'Someone in the building is practicing trumpet. Scales. Repeatedly. Always missing the same note. Always.',
+        ],
+        choices: [
+          { label: 'Put on headphones and grind', effect: { focus: -1.5, burnout: 4 }, log: 'You put on headphones. The bass shook through anyway. You shipped a small thing. Your jaw is tight.' },
+          { label: 'Walk to a coffee shop', effect: { focus: -1, burnout: 2, morale: 1 }, log: 'You walked to the place with the good iced coffee. The Wi-Fi was passable. You were briefly happy.' },
+          { label: 'Knock on their door', next: 'confront' },
+          { label: 'Wait it out', effect: { focus: -0.5, burnout: 1, morale: 1 }, log: 'You read for twenty minutes. The noise stopped on its own. You returned slightly calmer.' },
+        ],
+      },
+      confront: {
+        description: 'They open the door three inches. You explain you work from home. They say "yeah, us too, sorry." Nothing changes. The noise continues.',
+        choices: [
+          { label: 'Smile, retreat', effect: { focus: -1, burnout: 3 }, log: 'You retreated. The noise continued. You put on headphones anyway.' },
+          { label: 'Push back', effect: { focus: -2, burnout: 5, morale: -2 }, log: 'You insisted. They closed the door. The noise continued. Now there is also a feeling.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'home_appliance', icon: Wrench,
+    title: 'Something at home is leaking',
+    atHome: true,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'You hear a sound from the laundry room. You investigate. The washing machine is leaking. There is a thin sheen of water spreading across the floor. The floor is hardwood.',
+          'Your dishwasher is mid-cycle and making a sound it has never made before. A new sound. A wet sound. You pause it. You open it. There is more water than there should be.',
+          'You smell something. You walk through the apartment. The smell is from the bathroom. Specifically, from below the sink. Something has decided today is the day.',
+          'The water heater is making a knocking sound. Rhythmic. Louder than it has been before. You search "water heater knocking" in another tab. The results are not reassuring.',
+          'The fridge has been running constantly for the last hour. You only just noticed because the kitchen is somehow warmer than the rest of the apartment.',
+        ],
+        choices: [
+          { label: 'Mop / contain it and keep working', effect: { focus: -2, burnout: 5 }, log: 'You spent twenty minutes with towels. You worked the rest of the day with a small problem in the back of your mind.' },
+          { label: 'Call the landlord / a repair person', next: 'call' },
+          { label: 'Ignore it, it\'s probably fine', effect: { focus: -1, burnout: 3, morale: -2 }, log: 'You ignored it. The problem grew. You will deal with it tonight. You added it to a mental list that already has 14 items.' },
+        ],
+      },
+      call: {
+        description: 'You spend 18 minutes on hold. The hold music is one minute long, on a loop, with a saxophone. When someone finally answers, they need photos and your unit number and a description and the model number.',
+        choices: [
+          { label: 'See it through', effect: { focus: -3, burnout: 6, capital: -0.5 }, log: 'They will "send someone next Tuesday between 10 and 4." You missed two Slack pings during the hold music.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'home_doorbell', icon: Briefcase,
+    title: 'Doorbell',
+    atHome: true,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'The doorbell rings. Through the peephole: a delivery driver with a clipboard. The package needs a signature. You did not order anything that needed a signature.',
+          'A door-to-door salesperson is at your door. They are selling solar panels. They have been trained not to leave when you say "no." They are wearing a polo with a logo you have never seen.',
+          'Two people in matching polos. They want to "talk for a few minutes" about the neighborhood and your roof. They have a tablet.',
+          'The mail carrier is at the door with a parcel that won\'t fit in the box. Friendly. Wants to chat about the weather. You are wearing the t-shirt you slept in because you have been on a remote standup.',
+          'Someone is collecting signatures for something. They have a clipboard. They have a smile. They have already started talking through the door.',
+        ],
+        choices: [
+          { label: 'Answer the door', next: 'answer' },
+          { label: 'Pretend not to be home', effect: { focus: -1, burnout: 2 }, log: 'You stood very still in the kitchen for four minutes. They left a notice. You will deal with it tomorrow.' },
+          { label: 'Yell "leave it at the door"', effect: { focus: -0.5, burnout: 1 }, log: 'You yelled through the door. They left it. You returned to your laptop. Slack had three new messages.' },
+        ],
+      },
+      answer: {
+        description: 'You open the door. They are friendly and persistent. The conversation lasts longer than you planned. You are aware of the meeting starting in seven minutes.',
+        choices: [
+          { label: 'Be polite, escape', effect: { focus: -1.5, burnout: 4 }, log: 'You escaped after eleven minutes. You joined the meeting two minutes late, slightly out of breath, in the same t-shirt.' },
+          { label: 'Be rude, escape faster', effect: { focus: -0.5, burnout: 2, morale: -1 }, log: 'You shut it down in 90 seconds. You felt slightly bad about it. You returned to your laptop.' },
+        ],
+      },
+    },
+  },
+  {
+    // Generic "someone you live with" — partner / roommate / parent / kid.
+    // Kept abstract on purpose so the variants land for whatever home setup
+    // the player imagines.
+    id: 'home_household', icon: Heart,
+    title: 'Someone at home needs you',
+    atHome: true,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A small head appears in the doorway. "Are you on a call." It is technically a question. You are not technically on a call. There is a drawing involved.',
+          'Your partner pokes their head in. "Sorry — are you in a meeting?" You are not. You can see them deciding whether the question they came to ask is worth the cost.',
+          'The cat is on your keyboard. Not next to it. On it. Three new tabs have opened. One is a Wikipedia article about a 14th-century Pope.',
+          'The dog is at the door, looking at you, then at the door, then at you. You promised yourself you\'d take the morning walk. You did not take the morning walk.',
+          'Your kid bursts in holding something they made. They want you to look at it now. The thing is genuinely good.',
+          'A roommate knocks. "Quick thing — packages, the buzzer, also do we have any —" they trail off. Whatever it was, it wasn\'t quick.',
+        ],
+        choices: [
+          { label: 'Engage warmly, take a few minutes', effect: { focus: -0.5, burnout: -2, morale: 5 }, log: 'You stopped what you were doing. You were present for five minutes. The work was still there afterward. You felt a little less hollow.' },
+          { label: 'Ask them to come back later', next: 'defer' },
+          { label: '"I\'m on a call"', effect: { focus: -0.25, burnout: 2, morale: -3 }, log: 'You lied. They left. You weren\'t on a call. You felt the lie sit there for the rest of the afternoon.' },
+        ],
+      },
+      defer: {
+        description: 'You ask for ten minutes. They say "OK." You can see them register that "ten minutes" has historically meant fifty.',
+        choices: [
+          { label: 'Actually keep your word', effect: { focus: -1, burnout: -1, morale: 4 }, log: 'You wrapped up at the ten-minute mark and went to find them. They were surprised. So were you.' },
+          { label: 'Get sucked back in for an hour', effect: { focus: -1.5, burnout: 4, morale: -3 }, log: 'You meant to come back. You didn\'t. You found them eating dinner alone.' },
         ],
       },
     },
@@ -2405,6 +2532,7 @@ export const EVENTS = [
     // Combines: scope_change pressure + addUrgentFeature + capital tax.
     id: 'sales_pincer', icon: Users,
     title: 'Marcus and Priya have "a quick chat" with you',
+    inOffice: true,
     requires: (s) => s.sprint >= 2 && s.currentDay >= 2 && s.sprintPlan.length >= 2,
     start: 'open',
     nodes: {
