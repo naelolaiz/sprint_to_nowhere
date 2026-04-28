@@ -1427,8 +1427,8 @@ export const EVENTS = [
       fake_drop_followup: {
         description: 'A 30-minute "sync" appears on your calendar for 4:30 PM today. The title is "[catch-up — should be quick]." There is no agenda. The other invitee is {offliner}.',
         choices: [
-          { label: 'Accept', effect: { focus: -1.5, capital: 0.5, burnout: 5, addUrgentFeature: true }, log: 'The 4:30 ran 50 minutes. Marcus and {offliner} used it to add a ticket to your sprint that they couldn\'t add at standup.' },
-          { label: 'Decline with "conflict"', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You declined. Marcus rebooked it twice. The third invite has "[REQUIRED]" in the title.' },
+          { label: 'Accept', effect: { focus: -1.5, capital: 0.5, burnout: 5, addUrgentFeature: true }, log: 'You took Marcus\'s 4:30 catch-up. It ran 50 minutes. He and {offliner} used it to add a ticket to your sprint that they couldn\'t add at standup.' },
+          { label: 'Decline with "conflict"', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You declined Marcus\'s 4:30 catch-up. He rebooked it twice. The third invite has "[REQUIRED]" in the title.' },
         ],
       },
       // ----- wrap_attempt: you try to be the adult in the room -----
@@ -2293,6 +2293,30 @@ export const EVENTS = [
       },
     },
   },
+  // ===== MORNING ARRIVAL — only fires at the very start of a day =====
+  {
+    id: 'morning_arrival', icon: Wrench,
+    title: 'Morning arrival',
+    descriptions: [
+      'Your badge stopped working at the front door. The receptionist is on PTO. The backup receptionist is also on PTO. There is a sign that says "in case of emergency, call IT" with no number.',
+      'The parking lot is full. The overflow parking is full. You park three blocks away. It starts raining halfway back.',
+      'You arrive on time. The office is locked. The building manager is "running late." Three other people are standing outside reading their phones.',
+      'You badge in. The reader beeps red. You badge again. Green. The door does not open. You stand there for thirty seconds before pushing it.',
+      'The elevators are inspecting. There is a sign. The sign is dated three weeks ago. The stairwell smells like new paint.',
+      'Construction in the lobby. There\'s a single funnel-corridor of plastic sheeting. A worker waves you through. The plastic sheeting smells like new car.',
+    ],
+    start: 'open',
+    nodes: {
+      open: {
+        description: '',  // resolved at fire time from descriptions
+        choices: [
+          { label: 'Find a workaround and get in', effect: { focus: -0.5, burnout: 1 }, log: 'You got in. It cost ten minutes you needed.' },
+          { label: 'Wait it out in the lobby', effect: { focus: -1, burnout: 2 }, log: 'You waited. Twenty minutes. Marcus pinged you "just checking in."' },
+          { label: 'Just go home and remote', effect: { focus: 0, capital: -0.5, morale: 1, burnout: -1 }, log: 'You drove home. WiFi is faster. Nobody noticed for an hour.' },
+        ],
+      },
+    },
+  },
   // ===== BUILDING ISSUES — facilities crap that steals time =====
   {
     id: 'building_issue', icon: Wrench,
@@ -2300,7 +2324,6 @@ export const EVENTS = [
     // Multiple description variants so it doesn't read identical each time.
     descriptions: [
       'The elevators are out. All four of them. The maintenance company sent someone yesterday who "couldn\'t replicate the issue." Your stand-up is on the 14th floor.',
-      'Your badge stopped working at the front door. The receptionist is on PTO. The backup receptionist is also on PTO. There is a sign that says "in case of emergency, call IT" with no number.',
       'The office VoIP system is down for the third time this month. You can\'t take stakeholder calls. Marcus says "just use your personal cell, it\'s fine, just this once" — for the third time this month.',
       'The HVAC is broken. The office is 27°C and rising. Doug is wearing a sweater. He says "feels good" without irony.',
       'The bathroom on your floor is closed for "extensive maintenance." The next nearest one is two floors up. There is no signage. People are just figuring it out.',

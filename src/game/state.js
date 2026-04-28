@@ -100,8 +100,8 @@ export const pickEvent = (state, exclude = null) => {
     if (e.id === 'fire_drill') w = 2;
     if (e.id === 'meeting_cascade') w = 4;
     if (e.id === 'building_issue') w = 3;
-    // ----- CEREMONIES (slotted separately in pickDayEvents) -----
-    if (['backlog_refinement','daily_standup'].includes(e.id)) w = 0;  // never picked here — see pickDayEvents
+    // ----- CEREMONIES + MORNING (slotted separately in pickDayEvents) -----
+    if (['backlog_refinement','daily_standup','morning_arrival'].includes(e.id)) w = 0;  // never picked here — see pickDayEvents
     // ----- ONE-OFF + RECURRING -----
     if (e.id === 'one_on_one') w = (state.sprint % 3 === 0 && !state.promise) ? 4 : 0;
     if (e.id === 'initiative_cancelled') w = 5;
@@ -124,6 +124,14 @@ export const pickDayEvents = (state) => {
   const queue = [];
   const day = state.currentDay;
 
+  // Morning-arrival slot: ~15% of days something goes wrong before you're
+  // even at your desk. Always fires before standup so the narrative order
+  // matches the timeline.
+  if (Math.random() < 0.15) {
+    const ev = EVENTS.find(e => e.id === 'morning_arrival');
+    if (ev) queue.push(ev);
+  }
+
   // Ceremony slot: standups are daily, refinement happens early or mid-sprint
   const isRefinementDay = day === 1 || (day === 3 && Math.random() < 0.6);
   const r = Math.random();
@@ -137,7 +145,7 @@ export const pickDayEvents = (state) => {
   }
 
   // Disruption slot — always fires, always biased toward scope-adds
-  const exclude = new Set(['backlog_refinement','daily_standup']);
+  const exclude = new Set(['backlog_refinement','daily_standup','morning_arrival']);
   const main = pickEvent(state, exclude);
   if (main) queue.push(main);
 

@@ -5,7 +5,7 @@ import { C, FONT } from './data/theme.js';
 import { STRATEGIC_INITIATIVES } from './data/tickets.js';
 import { EVENTS, MELTDOWN_EVENT } from './data/events.js';
 import { generateBacklog, mkTicket } from './game/backlog.js';
-import { sampleEventCast } from './game/cast.js';
+import { sampleEventCast, renderCast } from './game/cast.js';
 import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget } from './game/state.js';
 import { applyChoice, workOnTicket } from './game/mechanics.js';
 import { applyTeammateContributions } from './game/team.js';
@@ -93,14 +93,15 @@ export default function SprintToNowhere() {
     // Dialog resolved. If there's another event queued for today, fire it next.
     if (newState.eventQueue && newState.eventQueue.length > 0) {
       const [nextEv, ...rest] = newState.eventQueue;
+      const nextCast = sampleEventCast(nextEv.id);
       return {
         ...newState,
         currentEvent: nextEv,
         eventQueue: rest,
         dialogNode: nextEv.start || 'start',
-        eventCast: sampleEventCast(nextEv.id),
+        eventCast: nextCast,
         subPhase: 'event',
-        dayLog: [...newState.dayLog, `— and then: ${nextEv.title}`],
+        dayLog: [...newState.dayLog, `— and then: ${renderCast(nextEv.title, nextCast)}`],
       };
     }
     // Otherwise, off to work.
