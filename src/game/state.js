@@ -78,7 +78,10 @@ export const initialState = () => {
 export const pickEvent = (state, exclude = null) => {
   const eligible = EVENTS.filter(e => {
     if (exclude && exclude.has(e.id)) return false;
-    // Once the player has gone home for the day, in-office disruptions
+    // At-home interruptions are only drawn after the player has bailed home.
+    // They never appear in the normal office-day pool.
+    if (e.atHome && !state.atHome) return false;
+    // Conversely, once the player has gone home, in-office disruptions
     // (badge readers, fire drills, Doug at the espresso machine) no longer
     // make narrative sense.
     if (state.atHome && e.inOffice) return false;

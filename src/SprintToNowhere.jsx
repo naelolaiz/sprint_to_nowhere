@@ -162,9 +162,25 @@ export default function SprintToNowhere() {
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
       if (s.atHome) {
         // Coffee in your own kitchen — no Doug, no Brad, no spreadsheet.
+        // ~25% chance a housemate / partner / kid / cat needs a moment.
+        if (Math.random() < 0.25) {
+          const ev = EVENTS.find(e => e.id === 'home_household');
+          if (ev) {
+            s.subPhase = 'event';
+            s.currentEvent = ev;
+            s.dialogNode = ev.start || 'start';
+            s.eventCast = sampleEventCast(ev.id);
+            return s;
+          }
+        }
         s.burnout = Math.max(0, s.burnout - 3);
         s.focus = Math.min(100, s.focus + 18);
-        s.dayLog = [...s.dayLog, 'You made coffee in your own kitchen. Nobody had a theory about the milk. The window faced a tree. The ten minutes were yours.'];
+        const homeCoffeeFlavors = [
+          'You made coffee in your own kitchen. Nobody had a theory about the milk. The window faced a tree. The ten minutes were yours.',
+          'You stood at the counter while the kettle boiled. The light was good. You did not check Slack.',
+          'You drank coffee on the back step. A bird did something on a fence. You watched it for the whole song.',
+        ];
+        s.dayLog = [...s.dayLog, homeCoffeeFlavors[Math.floor(Math.random() * homeCoffeeFlavors.length)]];
         return s;
       }
       s.dayLog = [...s.dayLog, 'You head to the kitchen for coffee.'];

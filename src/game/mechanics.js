@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { URGENT_FEATURES, LEGACY_TICKETS } from '../data/tickets.js';
+import { EVENTS } from '../data/events.js';
 import { mkTicket } from './backlog.js';
 import { renderCast } from './cast.js';
 import { totalRemaining } from './state.js';
@@ -165,11 +166,22 @@ export const applyChoice = (state, choice) => {
 
   // Going home flips the day to "remote" — drop any in-office disruptions
   // still queued for today so the narrative stays coherent (no fire drill
-  // after you've already driven home).
+  // after you've already driven home). If we dropped any, replace one slot
+  // with a home-side interruption (neighbor, washing machine, household)
+  // so the day still has texture.
   if (e.goHome) {
     s.atHome = true;
     if (s.eventQueue && s.eventQueue.length > 0) {
-      s.eventQueue = s.eventQueue.filter(ev => !ev.inOffice);
+      const filtered = s.eventQueue.filter(ev => !ev.inOffice);
+      const droppedInOffice = s.eventQueue.length - filtered.length;
+      s.eventQueue = filtered;
+      if (droppedInOffice > 0 && Math.random() < 0.6) {
+        const homeEvents = EVENTS.filter(ev => ev.atHome);
+        if (homeEvents.length > 0) {
+          const inject = homeEvents[Math.floor(Math.random() * homeEvents.length)];
+          s.eventQueue = [...s.eventQueue, inject];
+        }
+      }
     }
   }
   if (e.returnOffice) s.atHome = false;
