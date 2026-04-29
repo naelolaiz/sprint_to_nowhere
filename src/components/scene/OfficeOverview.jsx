@@ -3,6 +3,7 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { Desk } from './Desk.jsx';
+import { InitechLogo } from './InitechLogo.jsx';
 
 const SlackPing = ({ x, y }) => (
   <g transform={`translate(${x} ${y})`}>
@@ -26,6 +27,10 @@ export const OfficeOverview = ({ activeArea, burnout = 0 }) => {
     )}
 
     <text x="10" y="13" fontSize="6" fontFamily={FONT} fill={C.textDimmer} letterSpacing="2">FLOOR 14 · "INNOVATION HUB" · OPEN PLAN</text>
+    {/* Wall signage in the empty top strip between the floor label and the meeting rooms */}
+    <g transform="translate(348 2)">
+      <InitechLogo width={18}/>
+    </g>
     <text x="20" y="30" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">ENGINEERING POD</text>
 
     <Desk x={55} y={70} you screen="code" label="JARED"/>

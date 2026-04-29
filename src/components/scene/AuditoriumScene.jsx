@@ -2,6 +2,7 @@
 
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
+import { InitechLogo } from './InitechLogo.jsx';
 
 export const AuditoriumScene = ({ event }) => {
   const eid = event?.id;
@@ -49,6 +50,11 @@ export const AuditoriumScene = ({ event }) => {
 
       {/* Spotlight beams from above onto the screen */}
       <ellipse cx="200" cy="50" rx="180" ry="60" fill="url(#stage-spot)"/>
+
+      {/* Company plaque high on the side wall, between the exit sign and the screen */}
+      <g transform="translate(12 48)">
+        <InitechLogo width={32} dim/>
+      </g>
 
       {/* Big AV screen + projector wash */}
       <g>

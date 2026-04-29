@@ -19,8 +19,20 @@ export const sample = (arr, n) => {
   return out;
 };
 
-export const generateBacklog = () => [
-  ...sample(FEATURES, 5).map(t => mkTicket(t, 'feature')),
-  ...sample(BUGS, 3).map(t => mkTicket(t, 'bug')),
-  ...sample(REFACTORS, 2).map(t => mkTicket(t, 'refactor')),
+// Sample n templates from a pool, preferring ones whose title isn't in
+// `excludeTitles`. If the un-shipped pool is too small, the remaining slots
+// are filled from the full pool — this is what allows backlog repetition
+// after the player has burned through ~10 sprints of unique stories.
+const sampleAvoiding = (pool, n, excludeTitles) => {
+  const avail = pool.filter(t => !excludeTitles.has(t.title));
+  const fromAvail = sample(avail, Math.min(n, avail.length));
+  if (fromAvail.length === n) return fromAvail;
+  const fromAll = sample(pool.filter(t => !fromAvail.includes(t)), n - fromAvail.length);
+  return [...fromAvail, ...fromAll];
+};
+
+export const generateBacklog = (excludeTitles = new Set()) => [
+  ...sampleAvoiding(FEATURES, 5, excludeTitles).map(t => mkTicket(t, 'feature')),
+  ...sampleAvoiding(BUGS, 3, excludeTitles).map(t => mkTicket(t, 'bug')),
+  ...sampleAvoiding(REFACTORS, 2, excludeTitles).map(t => mkTicket(t, 'refactor')),
 ];

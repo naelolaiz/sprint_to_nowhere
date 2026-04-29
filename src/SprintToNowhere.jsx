@@ -6,7 +6,7 @@ import { STRATEGIC_INITIATIVES } from './data/tickets.js';
 import { EVENTS, MELTDOWN_EVENT } from './data/events.js';
 import { generateBacklog, mkTicket } from './game/backlog.js';
 import { sampleEventCast, renderCast } from './game/cast.js';
-import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget } from './game/state.js';
+import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget, eventApplicable, pushRecentEvent, pushRecentDesc } from './game/state.js';
 import { applyChoice, workOnTicket } from './game/mechanics.js';
 import { applyTeammateContributions } from './game/team.js';
 import { HUD } from './components/common/HUD.jsx';
@@ -21,7 +21,9 @@ export default function SprintToNowhere() {
   const [s, setS] = useState(initialState());
 
   const startGame = () => setS(prev => ({
-    ...prev, phase: 'planning', backlog: generateBacklog(), sprintPlan: [],
+    ...prev, phase: 'planning',
+    backlog: generateBacklog(new Set(prev.shippedTitles || [])),
+    sprintPlan: [],
     debtAtSprintStart: prev.debt, sprintShipped: [], sprintBumped: [], dayLog: [],
   }));
 
@@ -72,7 +74,15 @@ export default function SprintToNowhere() {
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');
     next.eventQueue = queue.slice(1);
     if (next.currentEvent?.start) next.dialogNode = next.currentEvent.start;
-    next.eventCast = next.currentEvent ? sampleEventCast(next.currentEvent.id) : {};
+    next.eventCast = next.currentEvent
+      ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [])
+      : {};
+    next.recentEventIds = pushRecentEvent(prev.recentEventIds || [], next.currentEvent?.id);
+    next.recentDescIdx = pushRecentDesc(
+      prev.recentDescIdx || {},
+      next.currentEvent?.id,
+      next.eventCast?._descIdx,
+    );
     return next;
   });
 
@@ -91,10 +101,20 @@ export default function SprintToNowhere() {
       // Multi-turn dialog: advance to next node, stay in event subPhase
       return { ...newState, dialogNode: choice.next };
     }
-    // Dialog resolved. If there's another event queued for today, fire it next.
-    if (newState.eventQueue && newState.eventQueue.length > 0) {
-      const [nextEv, ...rest] = newState.eventQueue;
-      const nextCast = sampleEventCast(nextEv.id);
+    // Dialog resolved. Look for the next still-applicable event in the queue
+    // (state may have changed under us — e.g. atHome flipped — so blindly
+    // popping the next event can produce out-of-order narratives like a fire
+    // drill firing after the player has already gone home).
+    let queue = newState.eventQueue || [];
+    while (queue.length > 0 && !eventApplicable(queue[0], newState)) {
+      queue = queue.slice(1);
+    }
+    if (queue.length > 0) {
+      const [nextEv, ...rest] = queue;
+      const nextCast = sampleEventCast(
+        nextEv.id,
+        newState.recentDescIdx?.[nextEv.id] || [],
+      );
       return {
         ...newState,
         currentEvent: nextEv,
@@ -103,10 +123,12 @@ export default function SprintToNowhere() {
         eventCast: nextCast,
         subPhase: 'event',
         dayLog: [...newState.dayLog, `— and then: ${renderCast(nextEv.title, nextCast)}`],
+        recentEventIds: pushRecentEvent(newState.recentEventIds || [], nextEv.id),
+        recentDescIdx: pushRecentDesc(newState.recentDescIdx || {}, nextEv.id, nextCast?._descIdx),
       };
     }
     // Otherwise, off to work.
-    return { ...newState, subPhase: 'work', dialogNode: 'start' };
+    return { ...newState, subPhase: 'work', dialogNode: 'start', eventQueue: [] };
   });
 
   const work = (id) => setS(prev => ({
@@ -169,7 +191,9 @@ export default function SprintToNowhere() {
             s.subPhase = 'event';
             s.currentEvent = ev;
             s.dialogNode = ev.start || 'start';
-            s.eventCast = sampleEventCast(ev.id);
+            s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+            s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
+            s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
             return s;
           }
         }
@@ -192,7 +216,9 @@ export default function SprintToNowhere() {
           s.subPhase = 'event';
           s.currentEvent = ev;
           s.dialogNode = ev.start || 'start';
-          s.eventCast = sampleEventCast(ev.id);
+          s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+          s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
+          s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
         }
       } else if (r < 0.6) {
         // On the way back, Brad rolls his chair to intercept — fire his dialog tree
@@ -202,7 +228,9 @@ export default function SprintToNowhere() {
           s.subPhase = 'event';
           s.currentEvent = ev;
           s.dialogNode = ev.start || 'start';
-          s.eventCast = sampleEventCast(ev.id);
+          s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+          s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
+          s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
         }
       } else {
         // Clean break — focus and burnout both improve
@@ -290,6 +318,12 @@ export default function SprintToNowhere() {
       sprintPlan: team.sprintPlan,
       sprintShipped: [...prev.sprintShipped, ...team.shipped],
       totalShipped: prev.totalShipped + team.shipped.length,
+      // Append titles teammates shipped overnight so future backlogs skip
+      // them too. Keep the list deduplicated.
+      shippedTitles: Array.from(new Set([
+        ...(prev.shippedTitles || []),
+        ...team.shipped.map(t => t.title).filter(Boolean),
+      ])),
       debt: Math.max(0, prev.debt + team.debtDelta),
       morale: Math.max(0, Math.min(100, prev.morale + team.moraleDelta)),
       capital: Math.max(0, Math.min(5, prev.capital + (team.capitalDelta || 0))),
@@ -314,7 +348,15 @@ export default function SprintToNowhere() {
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');
     next.eventQueue = queue.slice(1);
     if (next.currentEvent?.start) next.dialogNode = next.currentEvent.start;
-    next.eventCast = next.currentEvent ? sampleEventCast(next.currentEvent.id) : {};
+    next.eventCast = next.currentEvent
+      ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [])
+      : {};
+    next.recentEventIds = pushRecentEvent(prev.recentEventIds || [], next.currentEvent?.id);
+    next.recentDescIdx = pushRecentDesc(
+      prev.recentDescIdx || {},
+      next.currentEvent?.id,
+      next.eventCast?._descIdx,
+    );
     return next;
   });
 
@@ -335,11 +377,16 @@ export default function SprintToNowhere() {
     return {
       ...prev, phase: 'planning',
       sprint: prev.sprint + 1,
-      backlog: generateBacklog(), sprintPlan: [],
+      backlog: generateBacklog(new Set(prev.shippedTitles || [])),
+      sprintPlan: [],
       debtAtSprintStart: prev.debt,
       burnout: recovered,
       badDayStreak: 0,
       stayedLate: false,
+      // Reset per-sprint repetition trackers so the new week starts fresh,
+      // but keep `shippedTitles` (it persists across sprints).
+      recentEventIds: [],
+      recentDescIdx: {},
     };
   });
 

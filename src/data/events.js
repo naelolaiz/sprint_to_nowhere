@@ -187,8 +187,9 @@ export const EVENTS = [
   {
     id: 'all_hands', icon: Users,
     title: 'All-hands meeting',
-    // ~monthly cadence. With ~5 days/sprint, fire roughly every 4 sprints.
-    requires: (s) => s.sprint % 4 === 0 || s.sprint === 1,
+    // Fire on odd sprints — about half the calendar — and lean on the
+    // weighting in pickEvent for actual frequency.
+    requires: (s) => s.sprint % 2 === 1,
     descriptions: [
       'Mandatory. Slide deck. Q&A from the audience. The CEO uses the word "synergy" unironically.',
       'Mandatory all-hands. The CEO is in a fleece vest. He starts with "I want to be transparent with you." The next slide is heavily redacted.',
@@ -214,6 +215,19 @@ export const EVENTS = [
       'All-hands. The Chief Product Officer presents "the future of our product" using only AI-generated images. Several of the images contain six-fingered hands. One of the executives in a mockup has a sword.',
       'All-hands. The CEO opens with: "I want to read a Slack message from a customer that really moved me." He reads it. The message is from himself, posted in #general 4 days ago, under a customer\'s account that he was logged into for testing.',
       'All-hands. New format: "anonymous Q&A via Slido." 47 questions submitted. The CEO answers two. They are the two with the fewest upvotes. The most-upvoted question, "are we profitable?" is "saved for next time."',
+      'All-hands. The CEO has flown in a "category designer" he met on a podcast. The category designer claims, with slides, that we are inventing an entirely new market. The market is "AI-native B2B." Three competitors are also there, presumably also inventing it.',
+      'All-hands. The CEO has installed a live "vibes meter" widget on the deck. It updates from audience reactions. He keeps glancing at it. When it dips, he says "let me re-frame that." It does not go back up.',
+      'All-hands. A pre-recorded message from the founder, who is "currently in a deep-work cabin in Wyoming." The message is 9 minutes. The Wyoming background is clearly a Zoom virtual background; you can see his arm cut through a tree.',
+      'All-hands. The CEO opens with: "I want to talk about something hard." He talks for 11 minutes. By minute 11 nobody can identify what the hard thing was. The slide titled "ACCOUNTABILITY" was never explained.',
+      'All-hands held in the new "town square" — a converted breakroom with bleachers. The bleachers were ordered by the office manager who has since been let go. Three people fall through one of them during the Q&A.',
+      'All-hands. The CFO presents three "scenario plans" for the year, labeled GOOD / GREAT / GENERATIONAL. The GOOD scenario is "what we did last year, again." Nobody asks about the BAD scenario, because there isn\'t one on the slide.',
+      'All-hands. The CEO has decided to "open with vulnerability" and shares a story about his middle-school basketball coach. The story has no analog to anything the company is doing. He concludes: "and that\'s why we ship."',
+      'All-hands. A new VP of Strategy is "introducing themselves" with a 22-slide journey deck. Slide 4 is them at age 7. Slide 11 is them at McKinsey. Slide 22 is them, today, "ready to listen." The Q&A immediately afterward is empty.',
+      'All-hands. The CEO unveils the new visual identity. Everything is now in a typeface he commissioned, named "Vector." Three letters of "Vector" — V, E, T — are in different weights. He says it is "intentional." The kerning is, on closer inspection, broken.',
+      'All-hands. A "town hall on the town hall." Half the meeting is meta-commentary on whether all-hands are working as a format. The conclusion: yes, but we will now also do "vibes-only" all-hands monthly, which start next month.',
+      'All-hands. The CEO has hired an "energy consultant" to do a 5-minute opener on "leaning into possibility." She instructs the audience to make eye contact with three people. Brad makes eye contact with the camera and waves.',
+      'All-hands. The CEO has read the Andy Grove book and is "going to start delegating differently." Slide 6 is a hand-drawn org chart with arrows pointing every direction. He says "this isn\'t the new structure, but it could be." Three VPs nod with great seriousness.',
+      'All-hands. A surprise demo: the CEO has been "vibe-coding" a feature personally. He shares his screen. The repo is a fork of a repo nobody recognizes. The feature does not run. He says "the spirit is right."',
     ],
     choices: [
       { label: 'Attend (multitasking)', effect: { focus: -1.5, burnout: 5 }, log: 'You half-listened while clearing your inbox. Heard "exciting quarter" 11 times. Did not hear the layoff number.' },
@@ -817,8 +831,8 @@ export const EVENTS = [
   {
     id: 'compliance', icon: Briefcase,
     title: 'Compliance training due today',
-    // Compliance trainings are mostly annual + ad-hoc. Cap at one per ~3 sprints.
-    requires: (s) => s.sprint % 3 === 0 || s.sprint === 1,
+    // Compliance trainings are annual + ad-hoc — fire on odd sprints.
+    requires: (s) => s.sprint % 2 === 1,
     descriptions: [
       'A 47-minute video about phishing. There will be a quiz. Skipping is not an option. The quiz auto-fails if it detects a second tab. The training itself opens in a second tab.',
       'Mandatory: "Information Security Awareness 2026." A 38-slide deck with stock footage of laptops. The narrator pronounces SQL as "sequel" half the time and "S-Q-L" the other half. Twice he says "squirrel."',
@@ -884,8 +898,8 @@ export const EVENTS = [
   {
     id: 'town_hall', icon: Megaphone,
     title: 'Quarterly town hall with the CEO',
-    // Quarterly = every ~3 sprints. Skip sprint 1 (just opened the game with all-hands).
-    requires: (s) => s.sprint > 1 && s.sprint % 3 === 0,
+    // Skip sprint 1 (which opens with all-hands), then fire on even sprints.
+    requires: (s) => s.sprint > 1 && s.sprint % 2 === 0,
     descriptions: [
       'PowerPoint with a hockey-stick chart. "We\'re disrupting the industry." A slide that says "OUR CUSTOMERS LOVE US" with no data. Q&A is pre-screened.',
       'Town hall. Slide 1: a slogan. Slide 2: a hockey-stick chart with no axis labels. Slide 14: "QUESTIONS?" Q&A is exclusively from a Slido that\'s been heavily moderated.',
@@ -903,6 +917,12 @@ export const EVENTS = [
       'Town hall. The CEO opens with: "I want to admit I made a mistake last quarter." The mistake, it transpires, is that he "didn\'t push us hard enough." The room makes a sound that is not laughter.',
       'Town hall. New visual identity. Every slide now has a small AI-generated mascot — a friendly raccoon — in the corner. The raccoon is named "RAY." RAY has a backstory.',
       'Town hall. The CEO has invited an external "futurist" who closes with: "the next decade will reward the bold and punish the slow." The futurist also wrote The Whisper Method, available in the lobby.',
+      'Town hall. The CEO has prepared a slide titled "STATE OF THE COMPANY" with three colored quadrants. Two of them say "STRONG." The third says "EVOLVING." Nothing on the slide is what evolving means.',
+      'Town hall. The CEO opens with a personal story about a flight he took yesterday. The flight is not a metaphor for anything. He just wants to share it. The story takes 8 minutes.',
+      'Town hall. There is a guest panel of three "founder-friends" who collectively run companies in three different categories. They give advice. The advice contradicts itself. The CEO nods at all of it.',
+      'Town hall. The CEO has banned the word "but" from leadership communications, effective today. He explains this for 11 minutes, in which he says "but" four times and corrects himself three.',
+      'Town hall. New segment: "Q&A with the C-suite." The Q is from the C-suite. The A is also from the C-suite. The audience watches.',
+      'Town hall. A surprise interpretive dance routine performed by the People Team to the company values. The CFO leaves the room mid-routine and is described as "pulled into something" afterward.',
     ],
     choices: [
       { label: 'Attend (camera off)', effect: { focus: -1.5, burnout: 5 }, log: 'You learned the company is doing both "incredibly well" and "facing headwinds." The slide had both arrows.' },
@@ -930,8 +950,8 @@ export const EVENTS = [
   {
     id: 'values_refresh', icon: Sparkles,
     title: 'Mandatory: Q3 Values Refresh',
-    // Quarterly. Avoid stacking with town hall on the same sprint.
-    requires: (s) => s.sprint > 2 && s.sprint % 4 === 2,
+    // Fires on sprints divisible by 3, after the first two settle in.
+    requires: (s) => s.sprint > 2 && s.sprint % 3 === 0,
     descriptions: [
       '90-minute training where you learn the company\'s values are now: Bold. Customer-Obsessed. Frugal. Bias for Action. (Last quarter: Innovate. Empower. Trust. Excellence.)',
       'A consultant walks you through the new values. They are: "Move Fast." "Operate with Heart." "Tell the Truth." (Last quarter: Innovate, Empower, Trust, Excellence. The quarter before: Velocity, Boldness, Curiosity, Drive.)',
@@ -993,8 +1013,8 @@ export const EVENTS = [
   {
     id: 'inclusion_workshop', icon: Sparkles,
     title: 'Mandatory: "Inclusion Through Action" workshop',
-    // $40k consultants do not visit weekly. Quarterly-ish, off-cycle from values refresh.
-    requires: (s) => s.sprint >= 3 && s.sprint % 4 === 3,
+    // Off-cycle from values refresh: fires when sprint % 3 === 1, from sprint 4 on.
+    requires: (s) => s.sprint >= 4 && s.sprint % 3 === 1,
     start: 'open',
     nodes: {
       open: {
@@ -2762,7 +2782,7 @@ export const EVENTS = [
     // Quarterly OKR calibration where 0.7 is the goal but is also the expectation.
     id: 'okr_calibration', icon: Briefcase,
     title: 'Quarterly OKR calibration ("be ambitious!")',
-    requires: (s) => s.sprint > 2 && s.sprint % 3 === 0,
+    requires: (s) => s.sprint > 2 && s.sprint % 2 === 0,
     start: 'open',
     nodes: {
       open: {

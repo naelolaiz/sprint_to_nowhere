@@ -72,22 +72,38 @@ export const initialState = () => {
     eventCast: {},
     eventQueue: [],
     atHome: false,                 // true once the player has bailed home for the day; resets each morning
+    // ----- repetition / continuity tracking (reset only on game restart) -----
+    shippedTitles: [],             // every distinct ticket title shipped this run; excluded from new backlogs
+    recentEventIds: [],            // last few main events fired; pickEvent avoids them
+    recentDescIdx: {},             // { eventId: [last few description indices] } — avoids same opener back-to-back
   };
 };
 
-export const pickEvent = (state, exclude = null) => {
-  const eligible = EVENTS.filter(e => {
+// Are we still "in" a previous event-firing slot? Used to filter the queued
+// list when state has changed under us (player went home mid-day, finished a
+// promise, etc.) so the next event still makes narrative sense.
+export const eventApplicable = (ev, state) => {
+  if (!ev) return false;
+  if (ev.atHome && !state.atHome) return false;
+  if (state.atHome && ev.inOffice) return false;
+  if (ev.requires && !ev.requires(state)) return false;
+  return true;
+};
+
+export const pickEvent = (state, exclude = null, recent = []) => {
+  const recentSet = new Set(recent);
+  const filterFor = (allowRecent) => EVENTS.filter(e => {
     if (exclude && exclude.has(e.id)) return false;
-    // At-home interruptions are only drawn after the player has bailed home.
-    // They never appear in the normal office-day pool.
+    if (!allowRecent && recentSet.has(e.id)) return false;
     if (e.atHome && !state.atHome) return false;
-    // Conversely, once the player has gone home, in-office disruptions
-    // (badge readers, fire drills, Doug at the espresso machine) no longer
-    // make narrative sense.
     if (state.atHome && e.inOffice) return false;
     if (e.requires && !e.requires(state)) return false;
     return true;
   });
+  // Try with the "recent" filter on first; if that wipes the pool, drop it.
+  let eligible = filterFor(false);
+  if (eligible.length === 0) eligible = filterFor(true);
+
   const weighted = [];
   for (const e of eligible) {
     let w = 1;
@@ -117,8 +133,20 @@ export const pickEvent = (state, exclude = null) => {
     if (e.id === 'loud_sales_call') w = 2;
     if (e.id === 'shoulder_tap') w = 2;
     if (e.id === 'mental_health') w = 1;
-    // corporate theater is common background radiation
-    if (['ethics_email','town_hall','volunteer_day','values_refresh','engagement_survey','impact_email','inclusion_workshop'].includes(e.id)) w = 2;
+    // ----- CORPORATE THEATER -----
+    if (e.id === 'all_hands') w = 6;
+    if (e.id === 'town_hall') w = 5;
+    if (e.id === 'values_refresh') w = 4;
+    if (e.id === 'engagement_survey') w = 3;
+    if (e.id === 'impact_email') w = 3;
+    if (e.id === 'inclusion_workshop') w = 3;
+    if (e.id === 'ethics_email') w = 3;
+    if (e.id === 'volunteer_day') w = 2;
+    if (e.id === 'compliance') w = 3;
+    if (e.id === 'okr_calibration') w = 3;
+    if (e.id === 'rebrand') w = 3;
+    if (e.id === 'cto_skiplevel') w = 2;
+    if (e.id === 'copilot_mandate') w = 3;
     // ----- COMBINATION EVENTS — multiple pressures at once, weight them like big disruptions -----
     if (e.id === 'sales_pincer') w = 3;
     if (e.id === 'ai_initiative_kickoff') w = 3;
@@ -131,13 +159,14 @@ export const pickEvent = (state, exclude = null) => {
 export const pickDayEvents = (state) => {
   const queue = [];
   const day = state.currentDay;
+  const recent = state.recentEventIds || [];
 
   // Morning-arrival slot: ~15% of days something goes wrong before you're
   // even at your desk. Always fires before standup so the narrative order
   // matches the timeline.
   if (Math.random() < 0.15) {
     const ev = EVENTS.find(e => e.id === 'morning_arrival');
-    if (ev) queue.push(ev);
+    if (ev && !state.atHome) queue.push(ev);
   }
 
   // Ceremony slot: standups are daily, refinement happens early or mid-sprint
@@ -152,18 +181,35 @@ export const pickDayEvents = (state) => {
     if (ev) queue.push(ev);
   }
 
-  // Disruption slot — always fires, always biased toward scope-adds
+  // Disruption slot — always fires, always biased toward scope-adds. Excludes
+  // both the ceremonies above AND anything that fired in the last few events
+  // so the player doesn't see the same disruption twice in a row.
   const exclude = new Set(['backlog_refinement','daily_standup','morning_arrival']);
-  const main = pickEvent(state, exclude);
+  const main = pickEvent(state, exclude, recent);
   if (main) queue.push(main);
 
   // Bonus extra event on some days — a Marcus "quick chat" or production fire
   // doesn't preclude HQ also dropping a ticket five hours later
   if (day >= 2 && Math.random() < 0.35) {
     const exclude2 = new Set([...exclude, main?.id].filter(Boolean));
-    const extra = pickEvent(state, exclude2);
+    const recentNow = [...recent, main?.id].filter(Boolean);
+    const extra = pickEvent(state, exclude2, recentNow);
     if (extra) queue.push(extra);
   }
 
   return queue;
+};
+
+// Append-and-trim helper for recentEventIds. Keep the last 6 — long enough to
+// kill back-to-back repeats, short enough to not starve the pool.
+export const pushRecentEvent = (recent = [], id) => {
+  if (!id) return recent;
+  return [...recent, id].slice(-6);
+};
+
+// Append-and-trim helper for recent description indexes per event id.
+export const pushRecentDesc = (map = {}, id, idx) => {
+  if (!id || idx === undefined || idx === null) return map;
+  const prev = map[id] || [];
+  return { ...map, [id]: [...prev, idx].slice(-3) };
 };
