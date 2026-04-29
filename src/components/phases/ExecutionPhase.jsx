@@ -120,7 +120,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
             {(s.pairBonus || s.boothBonus) && (
               <div className="text-xs mb-3 p-2" style={{ color: C.amber, backgroundColor: C.surface, border: `1px solid ${C.amberDim}` }}>
                 Active for next ticket work:
-                {s.pairBonus && <span className="ml-2">⊕ pairing +50%</span>}
+                {s.pairBonus && <span className="ml-2">⊕ pairing{s.pairPartner ? ` with @${s.pairPartner}` : ''} +50%</span>}
                 {s.boothBonus && <span className="ml-2">⊕ focus mode +30%</span>}
               </div>
             )}
@@ -164,14 +164,14 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                   </button>
                   <button
                     onClick={() => onAction('coffee')}
-                    disabled={s.dayFocusRemaining < 1}
+                    disabled={s.dayFocusRemaining < 1/3}
                     className="text-left px-3 py-2.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ backgroundColor: C.surface2, color: C.text, border: `1px solid ${C.border}`, fontFamily: FONT }}
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
                     <span style={{ color: C.amber }}>☕ Take a coffee break </span>
-                    <span style={{ color: C.textDim }}>· 1h · risk of small talk</span>
+                    <span style={{ color: C.textDim }}>· 20 min · risk of small talk</span>
                   </button>
                   <button
                     onClick={() => onAction('ask')}

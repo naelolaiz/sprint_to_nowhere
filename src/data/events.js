@@ -230,9 +230,52 @@ export const EVENTS = [
       'All-hands. A surprise demo: the CEO has been "vibe-coding" a feature personally. He shares his screen. The repo is a fork of a repo nobody recognizes. The feature does not run. He says "the spirit is right."',
     ],
     choices: [
-      { label: 'Attend (multitasking)', effect: { focus: -1.5, burnout: 5 }, log: 'You half-listened while clearing your inbox. Heard "exciting quarter" 11 times. Did not hear the layoff number.' },
-      { label: 'Camera off, mute, do real work', effect: { focus: -0.5, capital: -0.5, burnout: 2, morale: 1 }, log: 'You worked through it. Marcus DM\'d you a 🙃 mid-meeting. You ignored him.' },
-      { label: 'Genuinely listen for once', effect: { focus: -1.5, burnout: 7, morale: -3 }, log: 'You listened. The contradiction with last quarter\'s message was sharper than expected. You are sadder now. The work has not changed.' },
+      {
+        label: 'Attend (multitasking)',
+        effect: { focus: -1.5, burnout: 5 },
+        log: 'You half-listened while clearing your inbox. By the end you could not have summarized any of it. The work has not changed.',
+        // Description-specific overrides where multitasking-through-it has a sharper detail.
+        logByDesc: {
+          5: 'You half-listened. Got the poll right (Energized). Did not get flagged. The work has not changed.',
+          7: 'You half-listened to the recap of last quarter. The shipped/missed numbers slid past you. The slide said "significant progress." The work has not changed.',
+          14: 'You half-listened while clearing your inbox. Heard "exciting quarter" 11 times. Did not hear the layoff number.',
+          17: 'You half-listened. The phrase "instantiate market dominance" registered, briefly, as a Slack ping. The work has not changed.',
+          22: 'You half-listened. The CEO read aloud from "a customer" while you replied to three emails. You did not catch that the customer was him. The work has not changed.',
+          23: 'You half-listened. The most-upvoted question went unanswered, which made it easier to keep working. The work has not changed.',
+        },
+      },
+      {
+        label: 'Camera off, mute, do real work',
+        effect: { focus: -0.5, capital: -0.5, burnout: 2, morale: 1 },
+        log: 'You worked through it. Marcus DM\'d you a 🙃 mid-meeting. You ignored him.',
+        logByDesc: {
+          25: 'You worked through it. The vibes meter dipped every time the CEO said "re-frame." You did not contribute to the dip. Marcus DM\'d you a 🙃 anyway.',
+          28: 'You worked through it. Heard the bleacher snap from two rooms over. Marcus DM\'d you "u seeing this." You did not look up.',
+        },
+      },
+      {
+        label: 'Genuinely listen for once',
+        effect: { focus: -1.5, burnout: 7, morale: -3 },
+        log: 'You listened. It was a lot, in a way that did not help. You are sadder now. The work has not changed.',
+        // Description-specific overrides — for openings where "you listened to X"
+        // has a sharper hook than the generic fallback.
+        logByDesc: {
+          1: 'You listened. The redacted slide stayed redacted. "Transparent" did most of the work it was not doing. You are sadder now. The work has not changed.',
+          3: 'You listened. The contradiction with last quarter\'s message was sharper than expected. You are sadder now. The work has not changed.',
+          6: 'You listened to the rap, end to end. Two minutes was longer than two minutes. Comms is already cutting clips for #wins. You are sadder now. The work has not changed.',
+          7: 'You listened to the recap. Three commitments shipped. Eight did not. The slide said "significant progress." The math made you tired. You are sadder now. The work has not changed.',
+          8: 'You listened through the moment of silence and the "ACCELERATING FORWARD" slide that came right after. The juxtaposition did not land for the people who wrote it. You are sadder now. The work has not changed.',
+          9: 'You listened. You put a hand on your heart when the coach asked. Your heart did not feel reachable. You are sadder now. The work has not changed.',
+          14: 'You listened. "Intentional reshaping" took 90 seconds to land as the layoff number. The number was not on the slide. You are sadder now. The work has not changed.',
+          16: '\"Founder mode.\" \"Fonder mode.\" You let it land both ways. Neither one helped. You are sadder now. The work has not changed.',
+          19: 'You listened to the CFO sing "ship-pin\' on and on and on." You will hear it for days. You are sadder now. The work has not changed.',
+          20: 'You listened to the 11-year-old. She made more sense than the slide before her. You are sadder now. The work has not changed.',
+          22: 'You listened. The customer message the CEO "found so moving" turned out to be his own, posted under a test login. Nobody on the call corrected him. You are sadder now. The work has not changed.',
+          28: 'You listened from the working bleachers. Three rows over, three people are still being checked on. You are sadder now. The work has not changed.',
+          30: 'You listened. There was a basketball coach in the story. You are not sure why. You are sadder now. The work has not changed.',
+          36: 'You listened. The CEO\'s "vibe-coded" feature did not run. He said "the spirit is right." You are sadder now. The work has not changed.',
+        },
+      },
     ],
   },
   {
