@@ -72,6 +72,7 @@ export const initialState = () => {
     eventCast: {},
     eventQueue: [],
     atHome: false,                 // true once the player has bailed home for the day; resets each morning
+    actionsToday: {},              // { lunch: n, walk: n, coffee: n } — how many times today; resets each morning
     // ----- repetition / continuity tracking (reset only on game restart) -----
     shippedTitles: [],             // every distinct ticket title shipped this run; excluded from new backlogs
     recentEventIds: [],            // last few main events fired; pickEvent avoids them

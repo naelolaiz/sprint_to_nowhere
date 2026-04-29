@@ -5,7 +5,7 @@ import { Person } from './Person.jsx';
 import { Desk } from './Desk.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
 
-export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70 }) => {
+export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLate = false }) => {
   const eid = event?.id;
   const screen =
     eid === 'production_fire' || eid === 'dependency' ? 'fire' :
@@ -34,7 +34,8 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70 }) => {
   const canCount = burnout > 80 ? 3 : burnout > 60 ? 2 : burnout > 40 ? 1 : 0;
   const moraleLow = morale < 30;
   const debtCritical = debt > 70;
-  const isLate = burnout > 75;          // window goes dark
+  // Window goes dark only when the player actually stayed late tonight.
+  const isLate = stayedLate;
   const fireAlert = eid === 'production_fire' || eid === 'on_call' || eid === 'dependency';
 
   return (

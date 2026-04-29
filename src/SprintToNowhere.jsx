@@ -7,6 +7,7 @@ import { EVENTS, MELTDOWN_EVENT } from './data/events.js';
 import { generateBacklog, mkTicket } from './game/backlog.js';
 import { sampleEventCast, renderCast } from './game/cast.js';
 import { initialState, totalRemaining, pickDayEvents, dailyFocusBudget, eventApplicable, pushRecentEvent, pushRecentDesc } from './game/state.js';
+import { CAST_POOLS } from './data/cast.js';
 import { applyChoice, workOnTicket } from './game/mechanics.js';
 import { applyTeammateContributions } from './game/team.js';
 import { HUD } from './components/common/HUD.jsx';
@@ -69,6 +70,7 @@ export default function SprintToNowhere() {
       hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
       dialogNode: 'start',
       atHome: false,
+      actionsToday: {},
     };
     const queue = pickDayEvents(next);
     next.currentEvent = queue[0] || EVENTS.find(e => e.id === 'quick_sync');
@@ -77,6 +79,12 @@ export default function SprintToNowhere() {
     next.eventCast = next.currentEvent
       ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [])
       : {};
+    if (next.currentEvent) {
+      next.dayLog = [
+        ...next.dayLog,
+        `— ${renderCast(next.currentEvent.title, next.eventCast)}`,
+      ];
+    }
     next.recentEventIds = pushRecentEvent(prev.recentEventIds || [], next.currentEvent?.id);
     next.recentDescIdx = pushRecentDesc(
       prev.recentDescIdx || {},
@@ -146,7 +154,14 @@ export default function SprintToNowhere() {
       s.burnout = Math.max(0, s.burnout - 3);
       s.focus = Math.min(100, s.focus + 12);
       s.morale = Math.min(100, s.morale + 6);
-      s.dayLog = [...s.dayLog, 'Paired with Sarah for 90 minutes. She rubber-ducked your weird race condition. You lost 1.5h but you\'re unstuck — and a little less alone.'];
+      const partner = CAST_POOLS.engineers[Math.floor(Math.random() * CAST_POOLS.engineers.length)];
+      const pairFlavors = [
+        `Paired with ${partner} for 90 minutes. They rubber-ducked your weird race condition. You lost 1.5h but you're unstuck — and a little less alone.`,
+        `Paired with ${partner}. They spotted the off-by-one in 14 seconds. You both pretended not to know which of you wrote it.`,
+        `${partner} pulled up a chair. By minute 40 you'd both refactored a method neither of you was supposed to touch. Felt good.`,
+        `Pair session with ${partner}. Half the time was you explaining the thing; the other half was them gently asking why. The why was good.`,
+      ];
+      s.dayLog = [...s.dayLog, pairFlavors[Math.floor(Math.random() * pairFlavors.length)]];
     } else if (kind === 'booth') {
       s.capital = Math.max(0, s.capital - 1);
       s.boothBonus = true;
@@ -158,30 +173,72 @@ export default function SprintToNowhere() {
       // A real lunch — leaving the building, sitting somewhere quiet, no laptop.
       // Costs an hour of focus-time but recovers significantly more than a coffee.
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
-      s.burnout = Math.max(0, s.burnout - 6);
-      s.focus = Math.min(100, s.focus + 22);
-      s.morale = Math.min(100, s.morale + 8);
-      const lunchFlavors = [
+      const lunchN = (s.actionsToday?.lunch || 0) + 1;
+      s.actionsToday = { ...(s.actionsToday || {}), lunch: lunchN };
+      // Diminishing returns when you eat lunch twice — also a different tone.
+      const recoveryMul = Math.max(0.25, 1 - 0.6 * (lunchN - 1));
+      s.burnout = Math.max(0, s.burnout - 6 * recoveryMul);
+      s.focus = Math.min(100, s.focus + 22 * recoveryMul);
+      s.morale = Math.min(100, s.morale + 8 * recoveryMul);
+      const lunchFlavorsFirst = [
         'You walked four blocks and ate at the place with the good banh mi. You did not check Slack. The world kept going.',
         'You sat at the park bench by the office. Your sandwich was unremarkable. The pigeons were content. You let yourself watch them for ten minutes.',
         'You ate alone at the counter of the diner across the street. The coffee was bad. The booth was quiet. Nobody asked you anything.',
         'You drove to the grocery store, bought a rotisserie chicken and two apples, ate them in your parked car listening to one full album.',
       ];
-      s.dayLog = [...s.dayLog, lunchFlavors[Math.floor(Math.random() * lunchFlavors.length)]];
+      const lunchFlavorsSecond = [
+        'A SECOND lunch. Bold. The pigeons recognized you and approached without fear. You felt seen, then mildly judged.',
+        'You went out for lunch again. The barista at the second place noticed. They said nothing. They knew.',
+        'You ate twice. The second one was a "lunch lunch" and the first was retroactively reframed as "brunch."',
+        'Second lunch of the day. You\'re not hungry. You just don\'t want to be at your desk. The body knows.',
+      ];
+      const lunchFlavorsThird = [
+        'A third lunch. You are no longer eating; you are just outside, away. Nobody stops you. There is freedom in this.',
+        'Lunch number three. The diner staff has stopped asking what you want — they just bring food. You have been adopted.',
+      ];
+      const pool = lunchN >= 3 ? lunchFlavorsThird : lunchN === 2 ? lunchFlavorsSecond : lunchFlavorsFirst;
+      s.dayLog = [...s.dayLog, pool[Math.floor(Math.random() * pool.length)]];
     } else if (kind === 'walk') {
       // A short walk around the block — small but free recovery, no political cost
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.5);
-      s.burnout = Math.max(0, s.burnout - 3);
-      s.focus = Math.min(100, s.focus + 10);
-      s.morale = Math.min(100, s.morale + 3);
-      const walkFlavors = [
+      const walkN = (s.actionsToday?.walk || 0) + 1;
+      s.actionsToday = { ...(s.actionsToday || {}), walk: walkN };
+      const walkMul = Math.max(0.4, 1 - 0.4 * (walkN - 1));
+      s.burnout = Math.max(0, s.burnout - 3 * walkMul);
+      s.focus = Math.min(100, s.focus + 10 * walkMul);
+      s.morale = Math.min(100, s.morale + 3 * walkMul);
+      const walkFlavorsFirst = [
         'You walked around the block. You noticed three things you had not noticed before. None of them were work.',
         'You walked to the end of the parking lot and back. Your eyes adjusted to looking far. Your shoulders dropped a centimeter.',
         'You walked through the lobby, around the building, and back. The security guard nodded at you. You nodded back. It was nice.',
       ];
-      s.dayLog = [...s.dayLog, walkFlavors[Math.floor(Math.random() * walkFlavors.length)]];
+      const walkFlavorsRepeat = [
+        'Another walk. Same block. Same security guard. They almost said something.',
+        'You walked again. The route is now familiar. You added a small detour just to make it feel different.',
+        'Second lap of the day. The third tree on the right has a small carving you missed earlier. You stared at it.',
+      ];
+      const pool = walkN >= 2 ? walkFlavorsRepeat : walkFlavorsFirst;
+      s.dayLog = [...s.dayLog, pool[Math.floor(Math.random() * pool.length)]];
     } else if (kind === 'coffee') {
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
+      const coffeeN = (s.actionsToday?.coffee || 0) + 1;
+      s.actionsToday = { ...(s.actionsToday || {}), coffee: coffeeN };
+      // Caffeine curve: the first cup is great, the second still good, by the
+      // fourth you're vibrating in your chair and it costs more than it gives.
+      const caffeine = coffeeN === 1 ? { focus: 18, burnout: -3 } :
+                       coffeeN === 2 ? { focus: 14, burnout: -1 } :
+                       coffeeN === 3 ? { focus: 6,  burnout: 3  } :
+                                       { focus: -6, burnout: 6  };
+      const applyCaffeine = () => {
+        s.focus = Math.max(0, Math.min(100, s.focus + caffeine.focus));
+        s.burnout = Math.max(0, Math.min(100, s.burnout + caffeine.burnout));
+      };
+      const jitterFlavor = coffeeN >= 4
+        ? 'Cup four. Your hands aren\'t still. You are typing too fast and it shows. The headache starts behind your right eye.'
+        : coffeeN === 3
+          ? 'Third cup. The focus is sharp but jagged. Your jaw is doing a thing.'
+          : null;
+
       if (s.atHome) {
         // Coffee in your own kitchen — no Doug, no Brad, no spreadsheet.
         // ~25% chance a housemate / partner / kid / cat needs a moment.
@@ -192,19 +249,22 @@ export default function SprintToNowhere() {
             s.currentEvent = ev;
             s.dialogNode = ev.start || 'start';
             s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+            s.dayLog = [...s.dayLog, `— ${renderCast(ev.title, s.eventCast)}`];
             s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
             s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
+            applyCaffeine();
+            if (jitterFlavor) s.dayLog = [...s.dayLog, jitterFlavor];
             return s;
           }
         }
-        s.burnout = Math.max(0, s.burnout - 3);
-        s.focus = Math.min(100, s.focus + 18);
+        applyCaffeine();
         const homeCoffeeFlavors = [
           'You made coffee in your own kitchen. Nobody had a theory about the milk. The window faced a tree. The ten minutes were yours.',
           'You stood at the counter while the kettle boiled. The light was good. You did not check Slack.',
           'You drank coffee on the back step. A bird did something on a fence. You watched it for the whole song.',
         ];
         s.dayLog = [...s.dayLog, homeCoffeeFlavors[Math.floor(Math.random() * homeCoffeeFlavors.length)]];
+        if (jitterFlavor) s.dayLog = [...s.dayLog, jitterFlavor];
         return s;
       }
       s.dayLog = [...s.dayLog, 'You head to the kitchen for coffee.'];
@@ -217,6 +277,7 @@ export default function SprintToNowhere() {
           s.currentEvent = ev;
           s.dialogNode = ev.start || 'start';
           s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+          s.dayLog = [...s.dayLog, `— ${renderCast(ev.title, s.eventCast)}`];
           s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
           s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
         }
@@ -229,15 +290,16 @@ export default function SprintToNowhere() {
           s.currentEvent = ev;
           s.dialogNode = ev.start || 'start';
           s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+          s.dayLog = [...s.dayLog, `— ${renderCast(ev.title, s.eventCast)}`];
           s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
           s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
         }
       } else {
-        // Clean break — focus and burnout both improve
-        s.burnout = Math.max(0, s.burnout - 3);
-        s.focus = Math.min(100, s.focus + 18);
+        // Clean break
         s.dayLog = [...s.dayLog, 'A clean coffee break. The kitchen was empty. You stared out the window for 4 minutes. It helped.'];
       }
+      applyCaffeine();
+      if (jitterFlavor) s.dayLog = [...s.dayLog, jitterFlavor];
     } else if (kind === 'late') {
       // Voluntary overtime — push past the workday on a hard ticket.
       // Costly: burnout, morale, and counts as a bad day (next day's budget shrinks).
@@ -260,15 +322,16 @@ export default function SprintToNowhere() {
       const candidates = s.sprintPlan
         .map((t, i) => ({ t, i }))
         .filter(({ t }) => !t.shipped && t.progress < t.effort);
+      const helper = CAST_POOLS.jins[Math.floor(Math.random() * CAST_POOLS.jins.length)];
       if (candidates.length > 0) {
         candidates.sort((a, b) => (a.t.progress / a.t.effort) - (b.t.progress / b.t.effort));
         const { i } = candidates[0];
         const stuck = s.sprintPlan[i];
         const bump = Math.min(3, stuck.effort - stuck.progress);
         s.sprintPlan[i] = { ...stuck, progress: stuck.progress + bump };
-        s.dayLog = [...s.dayLog, `You walked over to Jin's desk. Asked about "${stuck.title}". They pointed at one line and said "that's your bug." +${bump.toFixed(0)}h progress.`];
+        s.dayLog = [...s.dayLog, `You walked over to ${helper}'s desk. Asked about "${stuck.title}". They pointed at one line and said "that's your bug." +${bump.toFixed(0)}h progress.`];
       } else {
-        s.dayLog = [...s.dayLog, 'You went to ask Jin for help. Nothing to ask about. You both stared at his screen for a polite minute.'];
+        s.dayLog = [...s.dayLog, `You went to ask ${helper} for help. Nothing to ask about. You both stared at their screen for a polite minute.`];
       }
     }
     return s;
@@ -324,7 +387,7 @@ export default function SprintToNowhere() {
         ...(prev.shippedTitles || []),
         ...team.shipped.map(t => t.title).filter(Boolean),
       ])),
-      debt: Math.max(0, prev.debt + team.debtDelta),
+      debt: Math.max(0, Math.min(100, prev.debt + team.debtDelta)),
       morale: Math.max(0, Math.min(100, prev.morale + team.moraleDelta)),
       capital: Math.max(0, Math.min(5, prev.capital + (team.capitalDelta || 0))),
       pendingCleanups: [...(prev.pendingCleanups || []), ...(team.pendingCleanups || [])],
@@ -335,6 +398,7 @@ export default function SprintToNowhere() {
       badDayStreak: newStreak,
       stayedLate: false,
       atHome: false,
+      actionsToday: {},
       dayLog: team.log,
       subPhase: 'event',
       dialogNode: 'start',
@@ -351,6 +415,12 @@ export default function SprintToNowhere() {
     next.eventCast = next.currentEvent
       ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [])
       : {};
+    if (next.currentEvent) {
+      next.dayLog = [
+        ...next.dayLog,
+        `— ${renderCast(next.currentEvent.title, next.eventCast)}`,
+      ];
+    }
     next.recentEventIds = pushRecentEvent(prev.recentEventIds || [], next.currentEvent?.id);
     next.recentDescIdx = pushRecentDesc(
       prev.recentDescIdx || {},
@@ -383,6 +453,12 @@ export default function SprintToNowhere() {
       burnout: recovered,
       badDayStreak: 0,
       stayedLate: false,
+      // Pair / phone-booth boosts fade over the weekend.
+      pairBonus: false,
+      boothBonus: false,
+      // The chaos flavor from the last night of the prior sprint shouldn't
+      // bleed into next week's standup — clear it on the sprint boundary.
+      lastChaosFlavor: null,
       // Reset per-sprint repetition trackers so the new week starts fresh,
       // but keep `shippedTitles` (it persists across sprints).
       recentEventIds: [],

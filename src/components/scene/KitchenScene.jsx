@@ -45,7 +45,7 @@ export const KitchenScene = () => (
     </g>
 
     {/* Microwave with a fish meal — Doug's lingering smell vector */}
-    <g transform="translate(225 102)">
+    <g transform="translate(205 102)">
       <rect x="-11" y="-9" width="22" height="11" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.6"/>
       <rect x="-9" y="-7.5" width="14" height="8" fill="#0a0a0a"/>
       <circle cx="6" cy="-3" r="0.7" fill={C.amber}/>

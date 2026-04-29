@@ -43,7 +43,7 @@ export const applyChoice = (state, choice) => {
 
   if (e.focus) s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining + e.focus);
   if (e.focusPct) s.focus = Math.max(0, Math.min(100, s.focus + e.focusPct));
-  if (e.debt) s.debt = Math.max(0, s.debt + e.debt);
+  if (e.debt) s.debt = Math.max(0, Math.min(100, s.debt + e.debt));
   if (e.capital !== undefined) s.capital = Math.max(0, Math.min(5, s.capital + e.capital));
   if (e.burnout) s.burnout = Math.max(0, Math.min(100, s.burnout + e.burnout));
   if (e.morale) s.morale = Math.max(0, Math.min(100, s.morale + e.morale));
@@ -221,6 +221,10 @@ export const workOnTicket = (state, ticketId) => {
   const idx = s.sprintPlan.findIndex(t => t.id === ticketId);
   if (idx < 0) return s;
   const t = s.sprintPlan[idx];
+  // No-op if the ticket is already shipped or has no remaining work, so the
+  // shipping side-effects (morale, capital, totalShipped, etc.) cannot fire
+  // twice for the same ticket.
+  if (t.shipped || t.progress >= t.effort) return s;
   const previousAssignee = t.assignedTo;
   const stolenFrom = previousAssignee && previousAssignee !== 'you' ? previousAssignee : null;
   const debtPen = debtSpeedPenalty(s.debt);
@@ -261,7 +265,7 @@ export const workOnTicket = (state, ticketId) => {
     t.shippedBy = 'you';
     let debtChange = t.debtImpact;
     if (t.scopeCreep > 0 && t.type === 'feature') debtChange += t.scopeCreep * 2;
-    s.debt = Math.max(0, s.debt + debtChange);
+    s.debt = Math.max(0, Math.min(100, s.debt + debtChange));
     s.sprintShipped = [...s.sprintShipped, { ...t, debtChange }];
     s.totalShipped += 1;
     // Remember the title so future backlogs don't re-roll the same story.
