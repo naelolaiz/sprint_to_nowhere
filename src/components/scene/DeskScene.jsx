@@ -3,6 +3,7 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { Desk } from './Desk.jsx';
+import { InitechLogo } from './InitechLogo.jsx';
 
 export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70 }) => {
   const eid = event?.id;
@@ -172,6 +173,11 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70 }) => {
         <path d="M -2 -2 C -6 -10 -5 -14 -3 -15" fill="none" stroke={moraleLow ? C.amberDim : C.sageDim} strokeWidth="0.5"/>
         <path d="M 2 -2 C 6 -10 5 -14 3 -15" fill="none" stroke={moraleLow ? C.amberDim : C.sageDim} strokeWidth="0.5"/>
         {moraleLow && <text x="0" y="14" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>(thirsty)</text>}
+      </g>
+
+      {/* ----- Company plaque on the empty wall between the poster and the cubicle, hung at window height ----- */}
+      <g transform="translate(258 36)">
+        <InitechLogo width={36} dim/>
       </g>
 
       {/* ----- Whiteboard sliver visible on the back wall (between window and poster) ----- */}

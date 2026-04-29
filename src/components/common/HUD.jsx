@@ -24,6 +24,21 @@ export const HUD = ({ s }) => (
       {s.phase === 'execution' && (
         <span className="tracking-wider uppercase">D<span style={{ color: C.amber, fontWeight: 600 }}>{s.currentDay}/5</span></span>
       )}
+      {s.phase === 'execution' && s.atHome && (
+        <span
+          className="tracking-widest uppercase px-2 py-0.5"
+          style={{
+            color: C.amber,
+            backgroundColor: C.bg,
+            border: `1px solid ${C.amberDim}`,
+            fontSize: '10px',
+            fontWeight: 700,
+          }}
+          title="Working from home — in-office events won't fire today"
+        >
+          ⌂ WFH
+        </span>
+      )}
     </div>
   </div>
 );

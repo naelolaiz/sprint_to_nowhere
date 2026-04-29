@@ -2,6 +2,7 @@
 
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
+import { InitechLogo } from './InitechLogo.jsx';
 
 // A long-table boardroom for high-stakes meetings: the AI-initiative kickoff,
 // the sales pincer, and similar combo events where multiple stakeholders converge.
@@ -68,6 +69,11 @@ export const BoardroomScene = ({ event }) => {
       <rect x="0" y="0" width="400" height="14" fill={C.surface2}/>
       <rect x="0" y="14" width="400" height="148" fill="url(#board-wall)"/>
       <rect x="0" y="162" width="400" height="18" fill={C.bg}/>
+
+      {/* Brass plaque on the back wall */}
+      <g transform="translate(18 26)">
+        <InitechLogo width={36} dim/>
+      </g>
 
       {/* Coffered ceiling */}
       {[60, 140, 220, 300].map((cx, i) => (

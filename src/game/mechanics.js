@@ -264,6 +264,10 @@ export const workOnTicket = (state, ticketId) => {
     s.debt = Math.max(0, s.debt + debtChange);
     s.sprintShipped = [...s.sprintShipped, { ...t, debtChange }];
     s.totalShipped += 1;
+    // Remember the title so future backlogs don't re-roll the same story.
+    if (t.title && !(s.shippedTitles || []).includes(t.title)) {
+      s.shippedTitles = [...(s.shippedTitles || []), t.title];
+    }
     // SHIPPING REWARDS by type — different work makes different people happy
     let shipNote = '';
     if (t.type === 'refactor') {
