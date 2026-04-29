@@ -221,7 +221,9 @@ export default function SprintToNowhere() {
       const pool = walkN >= 2 ? walkFlavorsRepeat : walkFlavorsFirst;
       s.dayLog = [...s.dayLog, pool[Math.floor(Math.random() * pool.length)]];
     } else if (kind === 'coffee') {
-      s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
+      // Coffee is a 20-minute round trip — the kitchen is upstairs, you take
+      // it back to your desk, you sit back down. It's the smallest break.
+      s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1/3);
       const coffeeN = (s.actionsToday?.coffee || 0) + 1;
       s.actionsToday = { ...(s.actionsToday || {}), coffee: coffeeN };
       // Caffeine curve: the first cup is great, the second still good, by the
@@ -234,10 +236,25 @@ export default function SprintToNowhere() {
         s.focus = Math.max(0, Math.min(100, s.focus + caffeine.focus));
         s.burnout = Math.max(0, Math.min(100, s.burnout + caffeine.burnout));
       };
+      const cup3Pool = [
+        'Third cup. The focus is sharp but jagged. Your jaw is doing a thing.',
+        'Third cup. You can feel your pulse in your eyelid.',
+        'Third cup. The tab count crossed 40 at some point you cannot pin down.',
+        'Third cup. The keyboard sounds louder than it is. You are typing fine. Your shoulders are not.',
+      ];
+      const cup4PlusPool = [
+        `Cup ${coffeeN}. Your hands aren't still. The headache starts behind your right eye.`,
+        `Cup ${coffeeN}. Your typing has become percussion. Someone two desks over glances over.`,
+        `Cup ${coffeeN}. You walked back from the kitchen and forgot what you were doing for a full eight seconds.`,
+        `Cup ${coffeeN}. You are sweating in a way that is not climate-related. A coworker asks if you're okay. You say "yes" three times.`,
+        `Cup ${coffeeN}. The room is humming. Or you are. Both are also possible.`,
+        `Cup ${coffeeN}. You read the same line of code four times. None of them counted.`,
+        `Cup ${coffeeN}. Your reflection in the dark monitor looks slightly wired. You don't dwell on it.`,
+      ];
       const jitterFlavor = coffeeN >= 4
-        ? 'Cup four. Your hands aren\'t still. You are typing too fast and it shows. The headache starts behind your right eye.'
+        ? cup4PlusPool[Math.floor(Math.random() * cup4PlusPool.length)]
         : coffeeN === 3
-          ? 'Third cup. The focus is sharp but jagged. Your jaw is doing a thing.'
+          ? cup3Pool[Math.floor(Math.random() * cup3Pool.length)]
           : null;
 
       if (s.atHome) {
