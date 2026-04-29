@@ -41,7 +41,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           borderBottom: `1px solid ${C.border}`,
           backgroundImage: `linear-gradient(to bottom, ${C.surface} 0%, ${C.bg} 100%)`,
         }}>
-          <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt} burnout={s.burnout} morale={s.morale} atHome={s.atHome}/>
+          <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt} burnout={s.burnout} morale={s.morale} atHome={s.atHome} stayedLate={s.stayedLate}/>
         </div>
 
         {/* Action area (scrollable on desktop, flows on mobile) */}
@@ -148,7 +148,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>👥 Pair with Sarah </span>
+                    <span style={{ color: C.amber }}>👥 Pair program with a teammate </span>
                     <span style={{ color: C.textDim }}>· 1.5h, costs 0.5 capital · +50% on your next ticket work</span>
                   </button>
                   <button
@@ -181,7 +181,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>🙋 Ask Jin for help </span>
+                    <span style={{ color: C.amber }}>🙋 Ask a teammate for help </span>
                     <span style={{ color: C.textDim }}>· 1h, costs 0.5 capital · unstick a stuck ticket (small progress boost)</span>
                   </button>
                   <button

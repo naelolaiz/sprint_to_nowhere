@@ -24,11 +24,7 @@ export const OutdoorScene = ({ event }) => {
       <rect x="0" y="120" width="400" height="60" fill={C.surface2}/>
       <line x1="0" y1="120" x2="400" y2="120" stroke={C.borderHi} strokeWidth="0.8"/>
 
-      {/* Sun */}
-      <circle cx="350" cy="42" r="14" fill="none" stroke={C.amberDim} strokeWidth="0.8"/>
-      <circle cx="350" cy="42" r="9" fill="none" stroke={C.amberDim} strokeWidth="0.6"/>
-
-      {/* Banner */}
+{/* Banner */}
       <rect x="40" y="22" width="320" height="26" fill={C.surface2} stroke={bannerColor} strokeWidth="0.8"/>
       <text x="200" y="38" textAnchor="middle" fontSize={isFireDrill ? 7 : isMorning ? 7 : 9} fontFamily={FONT} fill={bannerColor} fontWeight="700" letterSpacing="2">{banner}</text>
 
@@ -55,7 +51,8 @@ export const OutdoorScene = ({ event }) => {
         <>
           {/* Building facade — closed, with the company plaque over the door */}
           <rect x="80" y="60" width="240" height="60" fill={C.bg} stroke={C.borderHi} strokeWidth="0.8"/>
-          {[100, 140, 180, 220, 260, 300].map((cx, i) => (
+          {/* Windows — skip the slot directly above the door (around x=180-210) */}
+          {[100, 140, 220, 260, 300].map((cx, i) => (
             <rect key={i} x={cx} y={70} width="14" height="22" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.4"/>
           ))}
           {/* Glass front doors */}

@@ -7,8 +7,17 @@ import { Desk } from './Desk.jsx';
 // Working-from-home variant of DeskScene. Same player + same screen vocabulary,
 // different surroundings: warm wall, kitchen counter behind the desk, a
 // houseplant that doesn't wilt, no fluorescent ceiling, no cubicle.
-export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70 }) => {
+export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLate = false }) => {
   const eid = event?.id;
+  // When WFH, meetings, all-hands and boardroom-style events become a Zoom
+  // tile grid on the home monitor.
+  const meetingScreenIds = new Set([
+    'quick_sync','one_on_one','initiative_cancelled','standup_debug','interview',
+    'new_hire','backlog_refinement','daily_standup','meeting_cascade','requirements_changed',
+    'town_hall','all_hands','values_refresh','compliance','inclusion_workshop',
+    'mental_health','reorg',
+    'ai_initiative_kickoff','sales_pincer','cto_skiplevel',
+  ]);
   const screen =
     eid === 'production_fire' || eid === 'dependency' || eid === 'on_call' ? 'fire' :
     ['ethics_email','impact_email'].includes(eid) ? 'email' :
@@ -16,11 +25,12 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70 }) => 
     eid === 'pivot' || eid === 'requirements_changed' ? 'pivot' :
     eid === 'tickets_down' || eid === 'network_down' ? 'down' :
     eid === 'broken_package' ? 'sdk' :
+    meetingScreenIds.has(eid) ? 'meeting' :
     'code';
 
   const moraleLow = morale < 30;
   const debtCritical = debt > 70;
-  const isLate = burnout > 75;
+  const isLate = stayedLate;
   const fireAlert = eid === 'production_fire' || eid === 'on_call' || eid === 'dependency';
 
   return (

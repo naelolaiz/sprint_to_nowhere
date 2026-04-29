@@ -148,11 +148,6 @@ export const AuditoriumScene = ({ event }) => {
       {/* You highlighted */}
       <Person x={68} y={116} type="you" scale={0.65} glow label="JARED"/>
 
-      {/* Speaker at the center of the front row of seats — a moderator */}
-      <g transform="translate(200 78)">
-        <rect x="-3" y="0" width="6" height="14" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.4"/>
-      </g>
-
       {/* Ceiling AC vents */}
       <g opacity="0.5">
         {[40, 200, 360].map((cx, i) => (
