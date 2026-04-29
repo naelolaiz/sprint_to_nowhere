@@ -23,7 +23,8 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
   const status = statusOf(t);
   const statusStyle = STATUS_STYLE[status];
   const assignee = t.shipped ? t.shippedBy : t.assignedTo;
-  const isTeammateOwned = !t.shipped && assignee && assignee !== 'you';
+  // "you" or "you & X" both mean you're on the ticket — not a steal candidate.
+  const isTeammateOwned = !t.shipped && assignee && !assignee.startsWith('you');
   const badgeFg = isTeammateOwned ? C.rust : statusStyle.fg;
   const badgeBorder = isTeammateOwned ? C.rustDim : statusStyle.border;
   const stealHint = isTeammateOwned && onClick && !disabled

@@ -155,6 +155,7 @@ export default function SprintToNowhere() {
       s.focus = Math.min(100, s.focus + 12);
       s.morale = Math.min(100, s.morale + 6);
       const partner = CAST_POOLS.engineers[Math.floor(Math.random() * CAST_POOLS.engineers.length)];
+      s.pairPartner = partner;
       const pairFlavors = [
         `Paired with ${partner} for 90 minutes. They rubber-ducked your weird race condition. You lost 1.5h but you're unstuck — and a little less alone.`,
         `Paired with ${partner}. They spotted the off-by-one in 14 seconds. You both pretended not to know which of you wrote it.`,
@@ -455,6 +456,7 @@ export default function SprintToNowhere() {
       stayedLate: false,
       // Pair / phone-booth boosts fade over the weekend.
       pairBonus: false,
+      pairPartner: null,
       boothBonus: false,
       // The chaos flavor from the last night of the prior sprint shouldn't
       // bleed into next week's standup — clear it on the sprint boundary.

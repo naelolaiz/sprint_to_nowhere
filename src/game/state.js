@@ -61,6 +61,7 @@ export const initialState = () => {
     hourHistory: [],
     dialogNode: 'start',
     pairBonus: false,
+    pairPartner: null,             // teammate name you paired with today; clears with pairBonus
     boothBonus: false,
     burnout: 0,
     focus: 100,

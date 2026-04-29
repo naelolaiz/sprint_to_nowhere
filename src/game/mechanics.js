@@ -211,7 +211,16 @@ export const applyChoice = (state, choice) => {
   }
 
   const cast = state.eventCast || {};
-  const renderedChoiceLog = choice.log ? renderCast(choice.log, cast) : null;
+  // choice.logByDesc is a sparse map { descIdx: 'log text' } that lets an event
+  // author tailor the log line to the specific description that was rolled —
+  // useful when a single generic log can't sensibly cover every flavor (e.g.
+  // an all-hands with 30+ distinct opening scenes). Falls back to choice.log.
+  const descIdx = cast._descIdx;
+  const overrideLog = choice.logByDesc && descIdx !== undefined
+    ? choice.logByDesc[descIdx]
+    : null;
+  const rawLog = overrideLog || choice.log;
+  const renderedChoiceLog = rawLog ? renderCast(rawLog, cast) : null;
   s.dayLog = [...s.dayLog, ...[renderedChoiceLog, ...log].filter(Boolean)];
   return s;
 };
@@ -226,7 +235,14 @@ export const workOnTicket = (state, ticketId) => {
   // twice for the same ticket.
   if (t.shipped || t.progress >= t.effort) return s;
   const previousAssignee = t.assignedTo;
-  const stolenFrom = previousAssignee && previousAssignee !== 'you' ? previousAssignee : null;
+  // "Stealing" = taking a teammate's ticket without asking. Pairing with that
+  // teammate is the explicit cooperative version, so it doesn't count.
+  const pairedInWith = s.pairBonus && s.pairPartner && previousAssignee === s.pairPartner
+    ? s.pairPartner
+    : null;
+  const stolenFrom = previousAssignee && previousAssignee !== 'you' && !pairedInWith
+    ? previousAssignee
+    : null;
   const debtPen = debtSpeedPenalty(s.debt);
   const burnPen = burnoutSpeedPenalty(s.burnout);
   const focusMul = Math.max(0.3, (s.focus ?? 100) / 100);
@@ -243,7 +259,7 @@ export const workOnTicket = (state, ticketId) => {
   const hoursWorked = Math.min(hoursAvailable, Math.ceil(hoursNeeded / Math.max(0.1, speed)));
   const effective = hoursWorked * speed;
   t.progress = Math.min(t.effort, t.progress + effective);
-  t.assignedTo = 'you';
+  t.assignedTo = pairedInWith ? `you & ${pairedInWith}` : 'you';
   s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - hoursWorked);
   // grinding adds a small amount of burnout — more if the codebase fights you
   s.burnout = Math.min(100, s.burnout + (hoursWorked * (s.debt > 70 ? 0.6 : 0.3)));
@@ -262,7 +278,7 @@ export const workOnTicket = (state, ticketId) => {
 
   if (t.progress >= t.effort) {
     t.shipped = true;
-    t.shippedBy = 'you';
+    t.shippedBy = pairedInWith ? `you & ${pairedInWith}` : 'you';
     let debtChange = t.debtImpact;
     if (t.scopeCreep > 0 && t.type === 'feature') debtChange += t.scopeCreep * 2;
     s.debt = Math.max(0, Math.min(100, s.debt + debtChange));
@@ -311,6 +327,7 @@ export const workOnTicket = (state, ticketId) => {
   }
   // bonuses are consumed
   s.pairBonus = false;
+  s.pairPartner = null;
   s.boothBonus = false;
   s.sprintPlan[idx] = t;
   s.dayLog = [...s.dayLog, workLog];
@@ -318,6 +335,8 @@ export const workOnTicket = (state, ticketId) => {
   if (stolenFrom) {
     s.morale = Math.max(0, s.morale - 4);
     s.dayLog = [...s.dayLog, `(You took "${t.title}" from @${stolenFrom} without asking. They'll find out at standup. −4 morale.)`];
+  } else if (pairedInWith) {
+    s.dayLog = [...s.dayLog, `(You paired in on @${pairedInWith}'s ticket — both names on the commit. No standup drama.)`];
   }
   // Track this work session in the burn-up chart
   s.hourHistory = [...(s.hourHistory || []), {

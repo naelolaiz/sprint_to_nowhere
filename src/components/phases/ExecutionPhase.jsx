@@ -120,7 +120,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
             {(s.pairBonus || s.boothBonus) && (
               <div className="text-xs mb-3 p-2" style={{ color: C.amber, backgroundColor: C.surface, border: `1px solid ${C.amberDim}` }}>
                 Active for next ticket work:
-                {s.pairBonus && <span className="ml-2">⊕ pairing +50%</span>}
+                {s.pairBonus && <span className="ml-2">⊕ pairing{s.pairPartner ? ` with @${s.pairPartner}` : ''} +50%</span>}
                 {s.boothBonus && <span className="ml-2">⊕ focus mode +30%</span>}
               </div>
             )}

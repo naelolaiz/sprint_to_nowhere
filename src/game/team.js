@@ -40,7 +40,8 @@ const NARRATIVE_IDS = new Set([
   'pr_review_war', 'qa_reopen', 'stale_pr_block', 'qa_tickets_stuck',
   'review_nitpick_spiral', 'flaky_test_quarantine',
   'cherry_pick_chaos', 'rebase_conflict_marathon',
-  'pandora_quick_fix',
+  'pandora_quick_fix', 'pandora_config_drift',
+  'pandora_dependency_surprise', 'pandora_legacy_tax',
 ]);
 
 const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
@@ -74,6 +75,9 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
   events.push({ id: 'lint_war', weight: 3 });
   events.push({ id: 'rebase_conflict_marathon', weight: 4 });
   events.push({ id: 'pandora_quick_fix', weight: 5 });
+  events.push({ id: 'pandora_config_drift', weight: 3 });
+  events.push({ id: 'pandora_dependency_surprise', weight: 3 });
+  events.push({ id: 'pandora_legacy_tax', weight: 3 });
   events.push({ id: 'slack_war', weight: 4 });
   events.push({ id: 'donuts', weight: 4 });
   events.push({ id: 'innovation_hour', weight: 3 });
@@ -548,6 +552,79 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
         'Jin opens with "small thing — that comment that says \'we\'ll fix this in Q2\'? Q2 was 2022."',
         'Three people independently say "wait, has it been broken this WHOLE time?" Sarah quietly nods.',
         'Sarah: "I think the original ticket was hiding three more tickets." Marcus: "love that we\'re finding these now."',
+      ]);
+      break;
+    }
+    case 'pandora_config_drift': {
+      // A one-line flag flip reveals every environment is configured differently.
+      deltas.debt += 8;
+      deltas.morale -= 3;
+      deltas.focus -= 6;
+      pendingCleanups.push({
+        title: 'Reconcile the four config sources nobody agrees on',
+        effort: 8,
+        debt: -2,
+        type: 'refactor',
+        urgent: false,
+      });
+      log.push('Overnight: a one-line flag flip revealed staging, prod, the .env, and the Helm chart all hold different values for the same setting. Nobody can name the source of truth. Debt +8, −3 morale, −6 focus. Reconciliation ticket will land next sprint.');
+      deltas.flavor = pick([
+        'Sarah: "I changed the flag in one place. Three other places had it set differently. Two of them I didn\'t know existed." Marcus suggests "we just pick one." Nobody picks one.',
+        'Jin opens a thread: "which of these is the real config?" Four people answer with four different answers. The thread is at 47 messages and still climbing.',
+        'Marcus reframes the drift as "per-environment tuning, on purpose." The room is silent. Sarah closes her laptop.',
+        'Someone finds a fifth config source nobody knew about. It is the one prod is actually reading.',
+      ]);
+      break;
+    }
+    case 'pandora_dependency_surprise': {
+      // A "patch-only" library bump quietly breaks downstream code that depended
+      // on undocumented behavior.
+      deltas.debt += 10;
+      deltas.morale -= 4;
+      deltas.focus -= 4;
+      deltas.capital -= 0.5;
+      pendingCleanups.push({
+        title: 'Untangle the modules implicitly relying on the old library behavior',
+        effort: 10,
+        debt: -2,
+        type: 'refactor',
+        urgent: true,
+      });
+      log.push('Overnight: a "patch-only" bump on a sleepy utility lib quietly broke three downstream modules that were depending on undocumented behavior. Debt +10, −4 morale, −4 focus, −0.5 capital. Urgent cleanup ticket lands next sprint.');
+      deltas.flavor = pick([
+        'Jin: "the changelog said nothing changed. The behavior changed. We were depending on the bug." Marcus: "classic." It is the third time this quarter.',
+        'Sarah pulls up the failing tests: "these are passing on main." They are not passing on main. They have not passed on main for two weeks. Nobody knew.',
+        'Three engineers independently say "wait, we were relying on THAT?" Yes. You were.',
+        'Marcus: "let\'s just pin to the old version." Jin: "the old version has the CVE." The room exhales slowly.',
+      ]);
+      break;
+    }
+    case 'pandora_legacy_tax': {
+      // A "simple rename" inside a file marked DEPRECATED proves the file is
+      // load-bearing for things nobody could name.
+      deltas.debt += 9;
+      deltas.morale -= 4;
+      deltas.focus -= 3;
+      pendingCleanups.push({
+        title: 'Document what the legacy module actually does before anyone touches it again',
+        effort: 6,
+        debt: -1,
+        type: 'refactor',
+        urgent: false,
+      });
+      pendingCleanups.push({
+        title: 'Add the missing tests around the legacy module the rename exposed',
+        effort: 5,
+        debt: -2,
+        type: 'bug',
+        urgent: false,
+      });
+      log.push('Overnight: a "simple rename" in a file marked DEPRECATED in 2021 turned out to be load-bearing for two services nobody could name. Debt +9, −4 morale, −3 focus. Two cleanup tickets will land next sprint.');
+      deltas.flavor = pick([
+        'Marcus on the deprecated file: "we should just delete it." Sarah: "it\'s imported in 23 places." Marcus: "still." Nobody deletes it.',
+        'Jin: "the file says DEPRECATED. The file is also the only thing handling the auth fallback. Both are true." Marcus blinks.',
+        'Sarah\'s investigation finds a comment from 2021: "TODO: remove after Q3." It does not say which Q3.',
+        'The blame on the load-bearing function points to someone who left in 2019. Nobody on the call recognizes the name.',
       ]);
       break;
     }
