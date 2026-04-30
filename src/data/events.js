@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Wrench, AlertTriangle, Zap, MessageSquare, Users, Coffee, XCircle, Flame, Briefcase, Clock, Archive, Sparkles, Heart, Megaphone } from 'lucide-react';
+import { formatClock } from '../game/cast.js';
+
+// Context predicates for choices and descriptions that only fit one location.
+// REMOTE: player is working from home (Zoom/Slack-huddle dynamics apply —
+// fake-Wi-Fi, "camera off", "drop the call" are believable).
+// OFFICE: player is in the office (the team is physically nearby — those
+// remote-only excuses don't fly).
+const REMOTE = (s) => !!s.atHome;
+const OFFICE = (s) => !s.atHome;
+
+// Shorthand for descriptions that need to render the actual in-game time.
+// `T(cast)` = current wall-clock when the event fired.
+// `T(cast, 8)` = 8 minutes after the event fired.
+const T = formatClock;
 
 export const EVENTS = [
   {
@@ -246,12 +260,19 @@ export const EVENTS = [
       },
       {
         label: 'Camera off, mute, do real work',
+        requires: REMOTE,
         effect: { focus: -0.5, capital: -0.5, burnout: 2, morale: 1 },
         log: 'You worked through it. Marcus DM\'d you a 🙃 mid-meeting. You ignored him.',
         logByDesc: {
           25: 'You worked through it. The vibes meter dipped every time the CEO said "re-frame." You did not contribute to the dip. Marcus DM\'d you a 🙃 anyway.',
           28: 'You worked through it. Heard the bleacher snap from two rooms over. Marcus DM\'d you "u seeing this." You did not look up.',
         },
+      },
+      {
+        label: 'Sit in the back, laptop open, do real work',
+        requires: OFFICE,
+        effect: { focus: -0.5, capital: -0.5, burnout: 2, morale: 1 },
+        log: 'You worked through it from the back row. Marcus DM\'d you a 🙃 mid-meeting. You ignored him.',
       },
       {
         label: 'Genuinely listen for once',
@@ -267,7 +288,7 @@ export const EVENTS = [
           8: 'You listened through the moment of silence and the "ACCELERATING FORWARD" slide that came right after. The juxtaposition did not land for the people who wrote it. You are sadder now. The work has not changed.',
           9: 'You listened. You put a hand on your heart when the coach asked. Your heart did not feel reachable. You are sadder now. The work has not changed.',
           14: 'You listened. "Intentional reshaping" took 90 seconds to land as the layoff number. The number was not on the slide. You are sadder now. The work has not changed.',
-          16: '\"Founder mode.\" \"Fonder mode.\" You let it land both ways. Neither one helped. You are sadder now. The work has not changed.',
+          16: '"Founder mode." "Fonder mode." You let it land both ways. Neither one helped. You are sadder now. The work has not changed.',
           19: 'You listened to the CFO sing "ship-pin\' on and on and on." You will hear it for days. You are sadder now. The work has not changed.',
           20: 'You listened to the 11-year-old. She made more sense than the slide before her. You are sadder now. The work has not changed.',
           22: 'You listened. The customer message the CEO "found so moving" turned out to be his own, posted under a test login. Nobody on the call corrected him. You are sadder now. The work has not changed.',
@@ -694,7 +715,7 @@ export const EVENTS = [
         descriptions: [
           'Manager stops by your desk. "Quick one — the auth-module refactor. We need to bump it for now. Marketing is asking when the new export feature ships and we need to focus."',
           'Manager DMs: "hey got 5? need to talk re: priorities for this sprint." You jump on. "So — the refactor. Can we move it? Sales has a deal that needs the dashboards-V2 work."',
-          'Manager pulls you aside after standup. "Look — between us — leadership saw the velocity dip last sprint. We can\'t do another sprint that\'s mostly cleanup. Refactor needs to wait."',
+          'Manager pulls you aside in the morning. "Look — between us — leadership saw the velocity dip last sprint. We can\'t do another sprint that\'s mostly cleanup. Refactor needs to wait."',
           'Manager writes one of those long DMs that ends with "thoughts?" The DM\'s actual content is: "we need to bump the refactor in favor of the new pricing-page work."',
           'Manager joins your async refactor doc with a comment: "Can we discuss this 1:1?" The 1:1 was scheduled six minutes ago.',
         ],
@@ -835,8 +856,8 @@ export const EVENTS = [
       'HR forgot to put it on your calendar. The candidate is already in the lobby. You skim the resume.',
       'A meeting invite from 23 minutes ago. Subject: "Loop interview — please attend." You did not get a heads-up. The candidate is already on Zoom.',
       'You\'re subbing for someone who called in sick. You haven\'t read the resume. The candidate has done the take-home. You haven\'t read that either.',
-      'Recruiter pings: "Hey! You\'re in the loop for the Senior PM interview at 2! Got a question bank for you." It is 1:54.',
-      'Interview at 3 PM. The candidate has already been through 4 rounds. You are the 5th round. You don\'t know what\'s left to evaluate.',
+      (s, c) => `Recruiter pings: "Hey! You're in the loop for the Senior PM interview at ${T(c, 6)}! Got a question bank for you." It is ${T(c)}.`,
+      (s, c) => `Interview at ${T(c)}. The candidate has already been through 4 rounds. You are the 5th round. You don't know what's left to evaluate.`,
       'You\'re on a panel for "values alignment." You don\'t know what the values are this quarter. You decide to ask the candidate questions about teamwork and pretend the answers reveal a value.',
       'You\'re interviewing a senior. They walk through their take-home with confidence. The take-home solution is, you slowly realize, copied verbatim from a Medium article you wrote two years ago.',
       'You\'re interviewing a junior. They are nervous. They are also better than you were at their level. You feel a complicated thing.',
@@ -863,12 +884,14 @@ export const EVENTS = [
       'Someone screenshares VSCode. They have 47 unsaved tabs. They cannot find the file they want to show. They scroll through the tabs for two minutes. Two of them are stack traces.',
       'Someone: "real quick — does anyone know which env var actually controls auth?" Three people answer. The three answers are mutually exclusive. All three answers are also out of date.',
       'Someone shares a Datadog dashboard. The dashboard\'s queries are red. The queries are red because the dashboard owner left the company. The dashboard now reports the engineer-of-record\'s outage status.',
-      '"Sorry — last thing — has Production looked weird to anyone today?" Six engineers immediately mute. Two camera-off. One audibly sighs.',
+      { text: '"Sorry — last thing — has Production looked weird to anyone today?" Six engineers immediately mute. Two camera-off. One audibly sighs.', requires: REMOTE },
+      { text: '"Sorry — last thing — has Production looked weird to anyone today?" Six engineers immediately look at their laptops. Two close them slowly. One audibly sighs.', requires: OFFICE },
     ],
     choices: [
       { label: 'Help debug live', effect: { focus: -1.5, burnout: 3, debt: -1 }, log: 'Found their typo. They thank you. Standup ran 50 minutes. The fix is one line. The Slack thread celebrating it is twelve.' },
       { label: 'Move it to a separate call', effect: { focus: -0.5, capital: -0.5 }, log: 'Standup ended on time. The separate call was scheduled. Three people were added "in case." The bug remained.' },
-      { label: 'Stay muted, eat your breakfast', effect: { focus: -0.5, capital: -0.25, burnout: 1 }, log: 'You let it ride. The bug was eventually found by the most junior engineer, who DM\'d you a question you ignored. They figured it out anyway.' },
+      { label: 'Stay muted, eat your breakfast', requires: REMOTE, effect: { focus: -0.5, capital: -0.25, burnout: 1 }, log: 'You let it ride. The bug was eventually found by the most junior engineer, who DM\'d you a question you ignored. They figured it out anyway.' },
+      { label: 'Stay quiet, finish your breakfast', requires: OFFICE, effect: { focus: -0.5, capital: -0.25, burnout: 1 }, log: 'You let it ride. The bug was eventually found by the most junior engineer, who later DM\'d you a question you ignored. They figured it out anyway.' },
     ],
   },
   {
@@ -968,8 +991,10 @@ export const EVENTS = [
       'Town hall. A surprise interpretive dance routine performed by the People Team to the company values. The CFO leaves the room mid-routine and is described as "pulled into something" afterward.',
     ],
     choices: [
-      { label: 'Attend (camera off)', effect: { focus: -1.5, burnout: 5 }, log: 'You learned the company is doing both "incredibly well" and "facing headwinds." The slide had both arrows.' },
-      { label: 'Camera on, nod earnestly, let the calendar reclaim it', effect: { focus: -1.5, capital: 0.5, burnout: 6 }, log: 'You performed engagement. The CEO referenced "energy in the room" twice. Yours was the energy he meant. You feel briefly seen and lastingly used.' },
+      { label: 'Attend (camera off)', requires: REMOTE, effect: { focus: -1.5, burnout: 5 }, log: 'You learned the company is doing both "incredibly well" and "facing headwinds." The slide had both arrows.' },
+      { label: 'Sit in the back, laptop half-open', requires: OFFICE, effect: { focus: -1.5, burnout: 5 }, log: 'You learned the company is doing both "incredibly well" and "facing headwinds." The slide had both arrows.' },
+      { label: 'Camera on, nod earnestly, let the calendar reclaim it', requires: REMOTE, effect: { focus: -1.5, capital: 0.5, burnout: 6 }, log: 'You performed engagement. The CEO referenced "energy in the room" twice. Yours was the energy he meant. You feel briefly seen and lastingly used.' },
+      { label: 'Front row, nod earnestly, let the calendar reclaim it', requires: OFFICE, effect: { focus: -1.5, capital: 0.5, burnout: 6 }, log: 'You performed engagement from the second row. The CEO referenced "energy in the room" twice. Yours was the energy he meant. You feel briefly seen and lastingly used.' },
     ],
   },
   {
@@ -1160,11 +1185,13 @@ export const EVENTS = [
           // ----- methodology drift openers -----
           'Marcus opens refinement with: "Quick reminder of how Planning Poker works." This is his fourth time giving the reminder this quarter. {objector} starts typing a comment in the doc.',
           'Refinement. Marcus has migrated the team from Jira to Linear to ClickUp this quarter. The current backlog exists in all three. None of them agree on which tickets are real.',
-          'Refinement. Marcus has introduced a new "story point philosophy" he read about on LinkedIn. Story points are now "in days." But not really. They\'re "vibe days." Sprint capacity is now in vibe-days. {objector} hasn\'t turned his camera on.',
+          { text: 'Refinement. Marcus has introduced a new "story point philosophy" he read about on LinkedIn. Story points are now "in days." But not really. They\'re "vibe days." Sprint capacity is now in vibe-days. {objector} hasn\'t turned his camera on.', requires: REMOTE },
+          { text: 'Refinement. Marcus has introduced a new "story point philosophy" he read about on LinkedIn. Story points are now "in days." But not really. They\'re "vibe days." Sprint capacity is now in vibe-days. {objector} is staring at the ceiling and refusing to vote.', requires: OFFICE },
           'Refinement. Marcus: "I\'ve been reading Reinertsen and I think we should switch to T-shirt sizes." S/M/L/XL. Then immediately: "and S is roughly a 3." It is exactly the same system, with extra steps.',
           'Refinement. Marcus has read about #NoEstimates and is "experimenting" with sizing tickets in count-only. {facilitator}: "so a 3-month epic and a 5-minute typo are the same?" Marcus: "trust the average."',
           // ----- AI/automation openers (max irony) -----
-          'Refinement. Marcus has invited an "AI scoping co-pilot" to size tickets. The AI is sizing every ticket as a 3. Marcus: "Wow it\'s really decisive!" {objector} mutes himself.',
+          { text: 'Refinement. Marcus has invited an "AI scoping co-pilot" to size tickets. The AI is sizing every ticket as a 3. Marcus: "Wow it\'s really decisive!" {objector} mutes himself.', requires: REMOTE },
+          { text: 'Refinement. Marcus has invited an "AI scoping co-pilot" to size tickets. The AI is sizing every ticket as a 3. Marcus: "Wow it\'s really decisive!" {objector} closes his laptop, slowly and pointedly.', requires: OFFICE },
           'Refinement. Marcus has piloted Cursor-for-PMs. It auto-writes ticket descriptions from his Slack history. The current ticket\'s description begins: "Hey real quick can we just" and ends mid-sentence.',
           'Refinement. Marcus, beaming: "good news — I had Claude rewrite all our acceptance criteria last night." The first one reads: "I cannot help with that — let me know how I can be useful." Marcus: "yeah we\'ll workshop those."',
           // ----- pre-committed work openers -----
@@ -1176,7 +1203,8 @@ export const EVENTS = [
         choices: [
           { label: 'Engage on the next ticket', next: 'engage' },
           { label: 'Push back on the format itself', next: 'format_pushback' },
-          { label: 'Stay on mute, camera off', next: 'mute' },
+          { label: 'Stay on mute, camera off', next: 'mute', requires: REMOTE },
+          { label: 'Sit in the back, head down on your laptop', next: 'mute', requires: OFFICE },
           { label: 'Multitask through it', effect: { focus: -2, burnout: 4 }, log: 'You answered Slack messages with the meeting on. Three tickets got sized while you weren\'t listening. You may or may not inherit one of them depending on who\'s asleep less than you.' },
         ],
       },
@@ -1321,11 +1349,15 @@ export const EVENTS = [
         ],
       },
       mute: {
-        description: 'You stay muted, camera off. Hour 1.5 begins. {objector} says "I\'m gonna respectfully push back on that" for the eleventh time. {facilitator} is arguing that effort points should be re-calibrated weekly. Marcus is in three Slack threads simultaneously.',
+        descriptions: [
+          { text: 'You stay muted, camera off. Hour 1.5 begins. {objector} says "I\'m gonna respectfully push back on that" for the eleventh time. {facilitator} is arguing that effort points should be re-calibrated weekly. Marcus is in three Slack threads simultaneously.', requires: REMOTE },
+          { text: 'You disengage. Hour 1.5 begins. {objector} says "I\'m gonna respectfully push back on that" for the eleventh time. {facilitator} is arguing that effort points should be re-calibrated weekly. Marcus is on his laptop, in three Slack threads simultaneously, while the room argues around him.', requires: OFFICE },
+        ],
         choices: [
           { label: 'Endure the rest', effect: { focus: -2, burnout: 6 }, log: 'You endured. Meeting ran 35 minutes over. The room sized 14 tickets. None of them landed on you today.' },
           { label: 'Endure, but check Slack on the side', effect: { focus: -2.5, burnout: 7, addUrgentFeature: true }, log: 'You half-listened. While checking Slack, you missed a ticket being assigned to you. It was assigned to you anyway. You\'ll discover it tomorrow.' },
-          { label: 'Drop with "lost connection"', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You used the network excuse. Marcus didn\'t buy it. He didn\'t mention it either.' },
+          { label: 'Drop with "lost connection"', requires: REMOTE, effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You used the network excuse. Marcus didn\'t buy it. He didn\'t mention it either.' },
+          { label: '"Sorry — bathroom," and slip out', requires: OFFICE, effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You walked out. Marcus didn\'t buy that you came back. He didn\'t mention it either.' },
         ],
       },
     },
@@ -1341,13 +1373,14 @@ export const EVENTS = [
           'You are on minute 13 of a 15-minute meeting that has had 2 minutes of actual standups in it. {updater} is mid-update on something that started as "I worked on stuff" and is now somehow about a customer call from last quarter.',
           'Standup started 6 minutes late because Marcus\'s 9:30 ran over. {updater} is mid-update, cross-referencing a Jira ticket they "just need to find — one sec." The "one sec" is now 90 seconds old.',
           '{updater} began their update with "I\'m going to keep this short" exactly four minutes ago. They are now describing a Slack thread they had with Marketing in 2023.',
-          'Marcus opens with "before we start — Logan from leadership is dropping in today, just FYI, act normal." Logan has been on mute, camera off, the whole time. Logan\'s status is "Available." Logan posted a 🎯 in the chat 90 seconds ago and you do not know what it means.',
+          { text: 'Marcus opens with "before we start — Logan from leadership is dropping in today, just FYI, act normal." Logan has been on mute, camera off, the whole time. Logan\'s status is "Available." Logan posted a 🎯 in the chat 90 seconds ago and you do not know what it means.', requires: REMOTE },
+          { text: 'Marcus opens with "before we start — Logan from leadership is dropping in today, just FYI, act normal." Logan is in the back of the huddle, looking at his phone. Logan\'s Slack status is "Available." Logan has not made eye contact with anyone. Logan posted a 🎯 in the team channel 90 seconds ago and you do not know what it means.', requires: OFFICE },
           'Standup runs into Marcus\'s next meeting. Marcus: "let\'s do a lightning round." The lightning round takes 19 minutes because Marcus interrupts each update with "love that — quick follow-up."',
           'Marcus, sharing his screen: "small format change — I added an icebreaker question." Today\'s icebreaker: "what\'s your spirit animal as a Jira ticket type?" {updater} answers seriously. {updater}\'s answer is "an Epic."',
-          'Marcus opens with "I want to celebrate a win." The win is that {dev} closed 14 tickets. 11 of them were duplicates. Marcus knows this. Marcus is celebrating anyway, with a 🎉 emoji bot he installed yesterday that fires for everyone in the call.',
+          'Marcus opens with "I want to celebrate a win." The win is that {dev} closed 14 tickets. 11 of them were duplicates. Marcus knows this. Marcus is celebrating anyway, with a 🎉 emoji bot he installed yesterday that fires for everyone on the team.',
           // ----- Loom replay branch (no real "offline" applies — just absurdity) -----
           '{updater} is sharing their screen for a standup. They are showing a Loom they recorded yesterday. The Loom is 9 minutes long. Marcus says "love this, very prepared" and lets it play in full. The Loom is also playing at 0.85x because {updater} forgot to bump the speed.',
-          'Marcus, brightly: "{updater} pre-recorded their update! Async-first, baby." It plays. {updater} is also live on the call. Live-{updater} watches Recorded-{updater} and visibly disagrees with their own past self.',
+          { text: 'Marcus, brightly: "{updater} pre-recorded their update! Async-first, baby." It plays. {updater} is also live on the call. Live-{updater} watches Recorded-{updater} and visibly disagrees with their own past self.', requires: REMOTE },
           // ----- "vibes update" format branch -----
           'Marcus has restructured standup. There is now a "yesterday / today / blockers / vibes" framework. He is asking everyone for a "vibes update" on a 1–5 scale. {updater} is asking what the difference between a 3 and a 4 is.',
           'Marcus: "I want to try a new format — instead of yesterday/today/blockers, we go yesterday/today/blockers/blockers we MADE for ourselves. So we own it." {updater}: "I made a typo." Marcus: "love the vulnerability."',
@@ -1356,12 +1389,12 @@ export const EVENTS = [
           'Marcus has added an "agentic AI co-pilot" to the standup that summarizes everyone\'s update. The summary is wrong about three of them. The summary will be sent to leadership. Logan reacts to it with 🚀.',
           'Marcus has piloted a new tool: every standup is auto-transcribed by an AI and turned into a Notion page nobody reads. The AI has misheard "I shipped the auth fix" as "I shipped the off-ramp."',
           // ----- async/multi-channel chaos -----
-          'Standup is now async-first. It is also still on Zoom every morning. It is also in a Notion doc. It is also in a Slack thread. {updater} is reading their async update aloud while the doc is on screen. Two people are typing in the Slack thread. The doc has 31 unread comments.',
-          'Standup is on Slack huddle today because the Zoom license got "rationalized." The huddle has no video. Three people are clearly walking somewhere. One is on a treadmill. {updater} is at the dentist and giving updates between rinse-and-spits.',
+          { text: 'Standup is now async-first. It is also still on Zoom every morning. It is also in a Notion doc. It is also in a Slack thread. {updater} is reading their async update aloud while the doc is on screen. Two people are typing in the Slack thread. The doc has 31 unread comments.', requires: REMOTE },
+          { text: 'Standup is on Slack huddle today because the Zoom license got "rationalized." The huddle has no video. Three people are clearly walking somewhere. One is on a treadmill. {updater} is at the dentist and giving updates between rinse-and-spits.', requires: REMOTE },
           'Standup. {updater} joins from the airport, on cellular, in motion. Their video keeps freezing on a slightly unflattering expression. They are giving an update. They are also clearly going through security. A TSA agent\'s arm appears in frame.',
           // ----- leadership theatre -----
           'Marcus: "before we start, leadership has asked us to track our standups against velocity. So I\'m going to be timing each update. Just so we have data." {updater}\'s update is 9 seconds long. Marcus says "that felt rushed."',
-          'Marcus, in a tone that is almost a whisper: "small heads-up — Logan asked for a Loom of today\'s standup for the leadership readout. So if you could each \'do your update like Logan is watching\' that\'d be great." Logan, who is on the call: 🎯',
+          'Marcus, in a tone that is almost a whisper: "small heads-up — Logan asked for a Loom of today\'s standup for the leadership readout. So if you could each \'do your update like Logan is watching\' that\'d be great." Logan, who is also here: 🎯',
           'Standup. Marcus: "small thing — leadership has asked that we use this time to also talk about \'what unblocked you yesterday.\' It\'s a wins-orientation thing. So please come prepared with that going forward." Yesterday you were blocked by Marcus\'s scope creep. You will not be saying this.',
           // ----- the "let\'s take that offline" boss-deflect (the central irony) -----
           '{updater}: "I want to flag a blocker." Marcus, instantly: "love that — let\'s take that offline." {updater}: "It\'s blocking the whole sprint." Marcus: "totally — let\'s take it offline." Marcus has not opened a doc. There will be no offline.',
@@ -1369,15 +1402,23 @@ export const EVENTS = [
           // ----- the surprise-debug derail (legitimate, "offline" doesn\'t apply — this IS the work) -----
           'Standup\'s last 60 seconds. {dev}: "wait — quick — is anyone else seeing 500s on the dashboard right now?" Three people check. Three people see them. Marcus: "let\'s take that offline." Customers cannot see the dashboard.',
           // ----- Marcus is, somehow, double-booked AT his own standup -----
-          'Marcus is running standup from his car. He is in a parking garage. The audio echoes. He is also clearly on a different call on his phone — you can hear someone else\'s voice say "you\'re still on mute, Marcus." He is on mute on the other call.',
+          { text: 'Marcus is running standup from his car. He is in a parking garage. The audio echoes. He is also clearly on a different call on his phone — you can hear someone else\'s voice say "you\'re still on mute, Marcus." He is on mute on the other call.', requires: REMOTE },
           'Marcus has a hard out at 9:30 for a 9:30 he booked himself. He has been saying "real quick — last update, real quick" since 9:22. He has gotten through one person.',
           // ----- the "no Marcus today" rare branch -----
-          'Marcus is OOO. {dev} is "facilitating." {dev} has not facilitated before. {dev}: "ok so — should I just like — go in alphabetical?" Six people have unmuted to suggest different orderings. Nobody has given an update.',
+          { text: 'Marcus is OOO. {dev} is "facilitating." {dev} has not facilitated before. {dev}: "ok so — should I just like — go in alphabetical?" Six people have unmuted to suggest different orderings. Nobody has given an update.', requires: REMOTE },
+          // ----- in-person huddle openers (only fire when player is in office) -----
+          { text: 'Standup at the team\'s pod. Marcus is holding coffee with both hands. {updater} is mid-update on something that started "I worked on stuff" and is now somehow about a customer call from last quarter. Nobody is sitting; nobody can quite leave.', requires: OFFICE },
+          { text: 'Huddle around your desk. The remote half of the team is stacked on the TV behind Marcus. {updater}, in person, is talking too quietly. Marcus says "louder for the camera!" twice. The remote half mostly nods.', requires: OFFICE },
+          { text: 'Standup at the huddle wall. Doug walks past loudly continuing his oat-milk monologue from the kitchen. The huddle gets quieter. Marcus pretends not to hear. {updater} restarts their update.', requires: OFFICE },
+          { text: 'Standup. {dev} arrives 90 seconds late, breathing hard, holding an iced coffee. They mouth "did I miss anything?" {updater} keeps going without looking at them.', requires: OFFICE },
+          { text: 'Standup. The remote attendee is frozen on the TV — mid-blink, slightly unflattering. Nobody mentions it. The standup goes on around the still face for four minutes before someone reconnects them.', requires: OFFICE },
         ],
         choices: [
-          { label: 'Mute, camera off, eat a granola bar', next: 'glazed' },
+          { label: 'Mute, camera off, eat a granola bar', next: 'glazed', requires: REMOTE },
+          { label: 'Stand at the back of the huddle, eyes on your phone', next: 'glazed', requires: OFFICE },
           { label: 'Give a crisp 30-second update first', next: 'your_update' },
-          { label: 'Fake a connection issue and bail', next: 'fake_drop' },
+          { label: 'Fake a connection issue and bail', next: 'fake_drop', requires: REMOTE },
+          { label: 'Drift back to your desk to "check something"', requires: OFFICE, effect: { focus: -0.5, capital: -0.5, burnout: 1 }, log: 'You took a slow step back, then another. Marcus was mid-sentence and didn\'t look up. You bought back ~10 minutes; he\'ll bring it up obliquely later.' },
           { label: '"Marcus, can we wrap? I\'m at 12 minutes."', next: 'wrap_attempt' },
         ],
       },
@@ -1390,8 +1431,10 @@ export const EVENTS = [
         ],
         choices: [
           { label: 'Listen — what\'s {offliner} actually saying?', next: 'derail_router' },
-          { label: 'Stay muted, eyes glazed, ride it out', effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You waited it out. {offliner}\'s "quick question" became a new ticket somewhere mid-monologue. It is on you. You don\'t remember which one.' },
-          { label: 'Drop off ("oh no my Wi-Fi")', effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You used the Wi-Fi excuse. Marcus didn\'t notice. {offliner} continued. The ticket landed on someone else.' },
+          { label: 'Stay muted, eyes glazed, ride it out', requires: REMOTE, effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You waited it out. {offliner}\'s "quick question" became a new ticket somewhere mid-monologue. It is on you. You don\'t remember which one.' },
+          { label: 'Stand still, eyes glazed, ride it out', requires: OFFICE, effect: { focus: -2, burnout: 6, addUrgentFeature: true }, log: 'You waited it out, hands in your pockets. {offliner}\'s "quick question" became a new ticket somewhere mid-monologue. It is on you. You don\'t remember which one.' },
+          { label: 'Drop off ("oh no my Wi-Fi")', requires: REMOTE, effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You used the Wi-Fi excuse. Marcus didn\'t notice. {offliner} continued. The ticket landed on someone else.' },
+          { label: '"Sorry — gotta grab this," and walk away with your phone', requires: OFFICE, effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You held your phone up like it had vibrated and walked off. It hadn\'t. Marcus didn\'t notice. {offliner} continued. The ticket landed on someone else.' },
         ],
       },
       // Routes the player to the actual nature of the derail. Each sub-branch is internally consistent.
@@ -1407,7 +1450,8 @@ export const EVENTS = [
           { label: '"Marcus — that one\'s legitimately blocking, not offline material."', next: 'real_blocker' },
           { label: '"That\'s a scope discussion, not a standup."', next: 'scope_pushback' },
           { label: '"Take it offline — for real, not the Marcus version of offline."', next: 'real_offline' },
-          { label: 'Mute and watch it unfold', effect: { focus: -2, burnout: 7, addUrgentFeature: true }, log: 'You watched. The conversation went somewhere only Marcus could love. A new ticket appeared. It is now yours.' },
+          { label: 'Mute and watch it unfold', requires: REMOTE, effect: { focus: -2, burnout: 7, addUrgentFeature: true }, log: 'You watched. The conversation went somewhere only Marcus could love. A new ticket appeared. It is now yours.' },
+          { label: 'Stay quiet and watch it unfold', requires: OFFICE, effect: { focus: -2, burnout: 7, addUrgentFeature: true }, log: 'You watched. The conversation went somewhere only Marcus could love. A new ticket appeared. It is now yours.' },
         ],
       },
       // Real blocker — the IRONIC version of "take it offline" was Marcus\'s deflection in the openers
@@ -1448,14 +1492,16 @@ export const EVENTS = [
         descriptions: [
           'You give a clean 30-second update. Marcus: "love that — quick question for you, real quick — could you also look at the export thing this week?" The export thing is not on your sprint.',
           'You give a clean 30-second update. {offliner}: "Building on what they just said — I think there\'s actually a bigger question here, which is — what does success look like?"',
-          'You give a clean 30-second update. Logan, who has been silent on mute, unmutes for the first time and says: "🎯 — quick one — could you write that up in a doc by EOD? Just a one-pager. For my readout." Logan re-mutes.',
+          { text: 'You give a clean 30-second update. Logan, who has been silent on mute, unmutes for the first time and says: "🎯 — quick one — could you write that up in a doc by EOD? Just a one-pager. For my readout." Logan re-mutes.', requires: REMOTE },
+          { text: 'You give a clean 30-second update. Logan, who has been silent the whole standup, looks up from his phone for the first time and says: "🎯 — quick one — could you write that up in a doc by EOD? Just a one-pager. For my readout." Logan looks back down.', requires: OFFICE },
           'You give a clean 30-second update. Marcus, immediately: "amazing — and totally aligned with what we discussed in our 1:1." You did not have a 1:1 about this.',
         ],
         choices: [
           { label: '"Sure, I\'ll add it to the sprint."', effect: { addUrgentFeature: true, capital: 0.5, burnout: 4 }, log: 'You absorbed the new ticket and thanked them for it. Marcus celebrated your "energy."' },
           { label: '"Can we triage that in planning?"', next: 'triage_attempt' },
           { label: '"Happy to look — what should we drop?"', next: 'what_drop' },
-          { label: 'Drop off (Zoom acted up)', effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You dropped. Marcus did not notice. The ask was repeated to {dev}, who absorbed it.' },
+          { label: 'Drop off (Zoom acted up)', requires: REMOTE, effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You dropped. Marcus did not notice. The ask was repeated to {dev}, who absorbed it.' },
+          { label: '"One sec — back-to-back," and step away', requires: OFFICE, effect: { focus: -0.5, capital: -0.5, burnout: 2 }, log: 'You walked off mid-ask. Marcus did not chase. The ask was repeated to {dev}, who absorbed it.' },
         ],
       },
       triage_attempt: {
@@ -1548,7 +1594,7 @@ export const EVENTS = [
         ],
       },
       reply_mgr: {
-        description: 'You DM your manager. They reply: "thanks! actually can you also look at the dashboard issue tonight? want to be ahead of it before tomorrow." It is 4:43 PM. The workshop ends at 6.',
+        description: (s, c) => `You DM your manager. They reply: "thanks! actually can you also look at the dashboard issue tonight? want to be ahead of it before tomorrow." It is ${T(c)}. The workshop is not done.`,
         choices: [
           { label: '"OK"', effect: { focus: -1, burnout: 8 }, log: 'You agreed to extra work during the wellbeing workshop. The irony was lost on no one. {facilitator} was talking about boundaries on the slide above your manager\'s name.' },
           { label: '"I\'m in a workshop, can it wait?"', next: 'wait_mgr' },
@@ -1841,7 +1887,8 @@ export const EVENTS = [
         description: 'You join. Seven people on the call. The designer is sharing a Figma file titled "v3 — final final." She says: "So we\'ve learned a lot about the user, and we want to take this in a more — guided direction. Less prescriptive. More — adaptive."',
         choices: [
           { label: '"What does that mean for the code?"', next: 'mean_for_code' },
-          { label: 'Stay on mute and observe', next: 'observe' },
+          { label: 'Stay on mute and observe', next: 'observe', requires: REMOTE },
+          { label: 'Stay quiet and observe', next: 'observe', requires: OFFICE },
         ],
       },
       mean_for_code: {
@@ -1859,7 +1906,10 @@ export const EVENTS = [
         ],
       },
       observe: {
-        description: 'You stay muted. Three more people add requirements. The PM types "this is great" without being on camera. The designer says "we should circle back next week to align on the new scope." Marcus DMs you: "sounds good?"',
+        descriptions: [
+          { text: 'You stay muted. Three more people add requirements. The PM types "this is great" without being on camera. The designer says "we should circle back next week to align on the new scope." Marcus DMs you: "sounds good?"', requires: REMOTE },
+          { text: 'You stay quiet. Three more people add requirements. The PM is half-engaged on his laptop, only nodding. The designer says "we should circle back next week to align on the new scope." Marcus, sitting next to you, DMs you: "sounds good?"', requires: OFFICE },
+        ],
         choices: [
           { label: '"sounds good"', effect: { wasteProgress: true, burnout: 11, focusPct: -10 }, log: 'You typed "sounds good." The progress is gone. The new requirements will come next sprint.' },
         ],
@@ -2201,7 +2251,7 @@ export const EVENTS = [
           'A bell rings. Then a recorded voice: "ATTENTION. PLEASE PROCEED CALMLY TO THE NEAREST EXIT. THIS IS A DRILL." You were finally getting into a flow state. This is the third drill this quarter.',
           'A long, loud strobe and a klaxon. Six seconds in you remember today\'s the announced drill. You were nine minutes into a complicated debugging session.',
           'The fire alarm goes off WITHOUT a "this is a drill" announcement. Everyone freezes. Then someone says "this isn\'t scheduled, right?" Then the announcement plays: "PLEASE EVACUATE. THIS IS A DRILL." Then everyone exhales.',
-          'Calendar reminder: "Building Drill — please be near an exit at 2:15 PM." It is 2:14. You did not see the reminder until just now. You have been in a meeting in a windowless conference room.',
+          { text: (s, c) => `Calendar reminder: "Building Drill — please be near an exit at ${T(c, 1)}." It is ${T(c)}. You did not see the reminder until just now. You have been in a meeting in a windowless conference room.` },
           'The PA system clicks on. A voice that is clearly the office manager reading from a paper script begins: "Attention employees. We will be conducting a routine evacuation drill today. Please cooperate fully with your assigned warden."',
         ],
         choices: [
@@ -2268,17 +2318,17 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          'You\'re at the conference room at 2:00 PM sharp. The room is empty. You check the invite — you\'re in the right place. Slack: "Marcus is finishing up another thing, will be a few minutes." It is now 2:08.',
-          'You join the Zoom at 10:00 sharp. You are alone in the meeting. At 10:04 a Slack message arrives: "running 5 min late, sorry — getting coffee." At 10:09 the same person posts: "ok actually 10 — got cornered at the espresso machine."',
-          'The room is booked 10:30–11:00. You arrive at 10:30. The previous meeting is still in there. The previous meeting is run by a VP. The VP makes brief eye contact with you and turns back to her group.',
-          'The meeting is supposed to start at 4:00 PM. At 4:00 PM you are the only one on the call. At 4:05 a "running late, my prev ran over" Slack lands. At 4:11 a different attendee posts the same. At 4:14 Marcus joins, audio not working.',
-          'You\'ve been waiting in the room for 9 minutes. The participants are all pinging in Slack saying "joining in 2." None have joined. The meeting was supposed to be 30 minutes. There are now 21 minutes left.',
+          { text: (s, c) => `You're at the conference room at ${T(c)} sharp. The room is empty. You check the invite — you're in the right place. Slack: "Marcus is finishing up another thing, will be a few minutes." It is now ${T(c, 8)}.`, requires: OFFICE },
+          { text: (s, c) => `You join the Zoom at ${T(c)} sharp. You are alone in the meeting. At ${T(c, 4)} a Slack message arrives: "running 5 min late, sorry — getting coffee." At ${T(c, 9)} the same person posts: "ok actually 10 — got cornered at the espresso machine."`, requires: REMOTE },
+          { text: (s, c) => `The room is booked ${T(c)}–${T(c, 30)}. You arrive at ${T(c)}. The previous meeting is still in there. The previous meeting is run by a VP. The VP makes brief eye contact with you and turns back to her group.`, requires: OFFICE },
+          { text: (s, c) => `The meeting is supposed to start at ${T(c)}. At ${T(c)} you are the only one on the call. At ${T(c, 5)} a "running late, my prev ran over" Slack lands. At ${T(c, 11)} a different attendee posts the same. At ${T(c, 14)} Marcus joins, audio not working.`, requires: REMOTE },
+          { text: 'You\'ve been waiting in the room for 9 minutes. The participants are all pinging in Slack saying "joining in 2." None have joined. The meeting was supposed to be 30 minutes. There are now 21 minutes left.', requires: OFFICE },
           'Calendar invite says: "Quick sync (15 min)." It is hour two. The other six people have spent the last 18 minutes deciding who is the right person to be in the meeting. The right person is not in the meeting. The right person is in another meeting that was scheduled to discuss who the right person is.',
-          'You\'re on Zoom. The host is in a coffee shop with very loud espresso machines. The host has not muted. The host is also clearly talking to a barista. Six other people are typing "🤐" in the chat.',
+          { text: 'You\'re on Zoom. The host is in a coffee shop with very loud espresso machines. The host has not muted. The host is also clearly talking to a barista. Six other people are typing "🤐" in the chat.', requires: REMOTE },
           'You join the call. Marcus opens with: "before we start — Logan is going to drop in for the first 5 minutes. So let\'s do intros first." Logan stays for 41 minutes and intros never end.',
-          '2:00 PM meeting. At 2:02 someone\'s laptop lid closes mid-sentence. At 2:05 the lid reopens — different person. At 2:07 you realize Marcus has been double-booked and is on a different call in the same room, behind a curtain.',
+          { text: (s, c) => `${T(c)} meeting. At ${T(c, 2)} someone's laptop lid closes mid-sentence. At ${T(c, 5)} the lid reopens — different person. At ${T(c, 7)} you realize Marcus has been double-booked and is on a different call in the same room, behind a curtain.`, requires: OFFICE },
           'The host posts the agenda 4 minutes after the meeting was supposed to end. The agenda is "OPEN DISCUSSION." There are 11 attendees. None of them know each other\'s names.',
-          'You\'re at the conference room. Marcus is in the room — physically — but on his phone. He waves you to wait. He\'s on a different meeting. With his other team. He\'ll be "right with you." This goes on for 17 minutes.',
+          { text: 'You\'re at the conference room. Marcus is in the room — physically — but on his phone. He waves you to wait. He\'s on a different meeting. With his other team. He\'ll be "right with you." This goes on for 17 minutes.', requires: OFFICE },
         ],
         choices: [
           { label: 'Wait quietly', next: 'wait' },
@@ -2287,45 +2337,45 @@ export const EVENTS = [
         ],
       },
       wait: {
-        description: 'At 2:11, {bro} from sales walks in carrying a coffee. "Sorry sorry — Doug is having TROUBLE at the espresso bar." At 2:14 the platform-team rep dials in. At 2:17 Marcus finally arrives, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.',
+        description: (s, c) => `At ${T(c, 11)}, {bro} from sales walks in carrying a coffee. "Sorry sorry — Doug is having TROUBLE at the espresso bar." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally arrives, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`,
         choices: [
           { label: 'Push to start anyway', next: 'start' },
           { label: 'Wait for the agenda', next: 'no_agenda' },
         ],
       },
       coffee_grab: {
-        description: 'You go to the kitchen. Doug is there, mid-dictation about the milk. By the time you extract yourself it\'s 2:13. Back in the conference room the meeting has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."',
+        description: (s, c) => `You go to the kitchen. Doug is there, mid-dictation about the milk. By the time you extract yourself it's ${T(c, 13)}. Back in the conference room the meeting has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`,
         choices: [
           { label: 'Sit down quietly', effect: { focus: -1, burnout: 5 }, log: 'You missed the first 8 minutes. The first 8 minutes were the only useful 8 minutes. The next 50 were not.' },
         ],
       },
       dm_marcus: {
-        description: 'Marcus DMs back at 2:12: "omg sorry running 5 min late — actually 10. our 1:30 is going long bc Brad raised something." At 2:23 Marcus arrives. The 1:30 ran 53 minutes over. This meeting was scheduled to end at 2:30.',
+        description: (s, c) => `Marcus DMs back at ${T(c, 12)}: "omg sorry running 5 min late — actually 10. our prev is going long bc Brad raised something." At ${T(c, 23)} Marcus arrives. The prev ran 53 minutes over. This meeting was scheduled to end at ${T(c, 30)}.`,
         choices: [
           { label: 'Sigh, push to start', next: 'start' },
         ],
       },
       no_agenda: {
-        description: 'Marcus searches his Slack DMs for the agenda. By the time he finds it, it\'s 2:23. The "30-minute sync" has now started 23 minutes late on a 30-minute booking.',
+        description: (s, c) => `Marcus searches his Slack DMs for the agenda. By the time he finds it, it's ${T(c, 23)}. The "30-minute sync" has now started 23 minutes late on a 30-minute booking.`,
         choices: [
           { label: 'Sigh, push to start', next: 'start' },
         ],
       },
       start: {
-        description: 'The meeting starts at 2:18. Marcus presents slide 1 of 8. At 2:35 {bro} interrupts: "Wait — I have to drop at 2:30 for another sync. Can we do the action items now?"',
+        description: (s, c) => `The meeting starts at ${T(c, 18)}. Marcus presents slide 1 of 8. At ${T(c, 35)} {bro} interrupts: "Wait — I have to drop at ${T(c, 30)} for another sync. Can we do the action items now?"`,
         choices: [
           { label: '"We just started."', next: 'we_started' },
           { label: '"Sure, what action items?"', next: 'no_action_items' },
         ],
       },
       we_started: {
-        description: 'Marcus: "Yeah we\'re only on slide 3. Maybe just stay 5 more minutes?" {bro} stays. At 2:42 {bro} stands up: "I really have to go — can someone send me the recording? I trust whatever the room decides." {bro} leaves.',
+        description: (s, c) => `Marcus: "Yeah we're only on slide 3. Maybe just stay 5 more minutes?" {bro} stays. At ${T(c, 42)} {bro} stands up: "I really have to go — can someone send me the recording? I trust whatever the room decides." {bro} leaves.`,
         choices: [
           { label: 'Continue without {bro}', next: 'without' },
         ],
       },
       no_action_items: {
-        description: 'Marcus, flustered: "We — we haven\'t gotten there yet, that was going to be the last slide." {bro}: "OK, I\'ll catch up async then." {bro} leaves at 2:33. Marcus has lost his place in the deck.',
+        description: (s, c) => `Marcus, flustered: "We — we haven't gotten there yet, that was going to be the last slide." {bro}: "OK, I'll catch up async then." {bro} leaves at ${T(c, 33)}. Marcus has lost his place in the deck.`,
         choices: [
           { label: 'Wait for Marcus to recover', next: 'without' },
         ],
@@ -2338,9 +2388,9 @@ export const EVENTS = [
         ],
       },
       circles: {
-        description: 'For 25 minutes the conversation goes in circles. "We should ask {bro}." "{bro} just left." "Can someone Slack {bro}?" "{bro} is in their next meeting." "OK so we\'ll just — bring it to {bro} async." "...wasn\'t that what this meeting was for?"\n\nThe meeting ends at 3:14 PM. Fourteen minutes over a 30-minute booking. Your 3PM was supposed to start fourteen minutes ago.',
+        description: (s, c) => `For 25 minutes the conversation goes in circles. "We should ask {bro}." "{bro} just left." "Can someone Slack {bro}?" "{bro} is in their next meeting." "OK so we'll just — bring it to {bro} async." "...wasn't that what this meeting was for?"\n\nThe meeting ends at ${T(c, 44)}. Fourteen minutes over a 30-minute booking. Your next meeting was supposed to start at ${T(c, 30)}.`,
         choices: [
-          { label: 'Pack up, you\'re late for your 3PM', effect: { focus: -2.5, burnout: 11, addUrgentFeature: true }, log: 'You were 14 minutes late to your 3PM. They had already started without you. You missed the only part relevant to your work. A follow-up ticket was assigned to you. Marcus assigned it.' },
+          { label: 'Pack up, you\'re late for your next one', effect: { focus: -2.5, burnout: 11, addUrgentFeature: true }, log: 'You were 14 minutes late to your next meeting. They had already started without you. You missed the only part relevant to your work. A follow-up ticket was assigned to you. Marcus assigned it.' },
         ],
       },
       why_meeting: {
@@ -2351,7 +2401,7 @@ export const EVENTS = [
         ],
       },
       leave_for_next: {
-        description: 'You stand up. "I have to drop for my 3PM." Marcus: "Yeah — totally — but quick before you go: can you own the action items from this?" There were no action items.',
+        description: 'You stand up. "I have to drop for my next one." Marcus: "Yeah — totally — but quick before you go: can you own the action items from this?" There were no action items.',
         choices: [
           { label: 'Take the fake action items', effect: { focus: -1, capital: -0.5, burnout: 7, addUrgentFeature: true }, log: 'You agreed to "follow up with {bro} re: alignment." A real ticket appeared in your sprint to track this fake action item.' },
           { label: '"No, sorry."', effect: { focus: -0.5, capital: -1.5, burnout: 4 }, log: 'You said no. Marcus looked wounded. The room was quiet for a beat. You left.' },
@@ -2678,8 +2728,8 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          'A calendar invite drops at 8:47 AM titled "[CEO + Eng] Agentic AI Kickoff — MANDATORY." It is at 9. The location is the boardroom. The CEO is "personally invested" per Marcus. There is no agenda.',
-          'CEO Slack to #engineering: "🚨 BIG ONE 🚨 — AI strategy kickoff at 10. Drop everything. Logan and the founder of an AI startup will be there. We\'re going to MOVE on this." The startup\'s name is "Synapsai." It was founded yesterday.',
+          (s, c) => `A calendar invite drops at ${T(c, -13)} titled "[CEO + Eng] Agentic AI Kickoff — MANDATORY." It is at ${T(c)}. The location is the boardroom. The CEO is "personally invested" per Marcus. There is no agenda.`,
+          (s, c) => `CEO Slack to #engineering: "🚨 BIG ONE 🚨 — AI strategy kickoff at ${T(c, 13)}. Drop everything. Logan and the founder of an AI startup will be there. We're going to MOVE on this." The startup's name is "Synapsai." It was founded yesterday.`,
           'You walk into the office. There is catering. There is catering on a Tuesday. The CEO is holding a printed deck titled "AGENTIC EVERYTHING." Marcus is wearing a blazer over a hoodie.',
           'A Loom from the CEO at 6:14 AM: "I want to share what I have been thinking." The Loom is 22 minutes. It is mostly him pacing in front of a whiteboard with the word "AGENTIC" written 14 times in different fonts.',
         ],
@@ -2873,7 +2923,7 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          'Slack #announcements at 9:14 AM: "🎉 BIG NEWS — we\'re excited to announce that effective today, the product is now called \'Sparkflow.\' (Formerly: Synergyse.) Comms will follow up with brand guidelines. Please update everything by Friday." Friday is in two days.',
+          (s, c) => `Slack #announcements at ${T(c)}: "🎉 BIG NEWS — we're excited to announce that effective today, the product is now called 'Sparkflow.' (Formerly: Synergyse.) Comms will follow up with brand guidelines. Please update everything by Friday." Friday is in two days.`,
           'A 23-page brand guidelines PDF lands in your inbox. The new name is "Lumen." (Two competitors are also named Lumen.) You are asked to "update all internal references" by EOQ. There are 4,200 internal references.',
           'Email from the CMO: "We\'re sunsetting the Synergyse name in favor of \'Mosaic.\' Please update all docs, code references, customer-facing strings, and internal Slack channels. The new logo is attached. (.fig only.)"',
           'CEO Slack: "team — i had a vision on the peloton. we\'re renaming. \'Vibe.\' that\'s it. that\'s the product. branding is doing assets. eng team please go through the codebase. should be quick 🚀"',
@@ -2945,7 +2995,7 @@ export const EVENTS = [
         ],
       },
       cold: {
-        description: 'You walk in cold. The CTO has prepared. They have a printed sheet. The first question is: "where do you see the codebase in 18 months?" You did not anticipate this question.',
+        description: 'You go in cold. The CTO has prepared. They have a sheet of notes. The first question is: "where do you see the codebase in 18 months?" You did not anticipate this question.',
         choices: [
           { label: 'Improvise honestly — "depends on what we stop adding."', next: 'cto_real' },
           { label: 'Improvise corporately — "scaled, AI-native, hyper-collaborative."', next: 'cto_corp' },
@@ -2956,7 +3006,7 @@ export const EVENTS = [
         description: 'Manager: "honestly? not sure. could be skip-level listening tour. could be re-org related. could be a stretch project. they\'ve been doing more of these. just be honest."',
         choices: [
           { label: 'Continue prep', next: 'prep' },
-          { label: 'Walk in cold', next: 'cold' },
+          { label: 'Go in cold', next: 'cold' },
         ],
       },
       decline_cto: {

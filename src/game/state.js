@@ -127,7 +127,9 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     if (e.id === 'meeting_cascade') w = 4;
     if (e.id === 'building_issue') w = 3;
     // ----- CEREMONIES + MORNING (slotted separately in pickDayEvents) -----
-    if (['backlog_refinement','daily_standup','morning_arrival'].includes(e.id)) w = 0;  // never picked here — see pickDayEvents
+    // standup_debug is a variant of daily_standup that fires in the ceremony
+    // slot, never as a disruption — keeps the morning narrative coherent.
+    if (['backlog_refinement','daily_standup','standup_debug','morning_arrival'].includes(e.id)) w = 0;  // never picked here — see pickDayEvents
     // ----- ONE-OFF + RECURRING -----
     if (e.id === 'one_on_one') w = (state.sprint % 3 === 0 && !state.promise) ? 4 : 0;
     if (e.id === 'initiative_cancelled') w = 5;
@@ -171,7 +173,10 @@ export const pickDayEvents = (state) => {
     if (ev && !state.atHome) queue.push(ev);
   }
 
-  // Ceremony slot: standups are daily, refinement happens early or mid-sprint
+  // Ceremony slot: standups are daily, refinement happens early or mid-sprint.
+  // ~15% of standups derail into a "standup turns into a debug session" variant
+  // — that fires INSTEAD of the regular standup, never on top of it, so we
+  // don't end up narrating two standups back-to-back in the morning.
   const isRefinementDay = day === 1 || (day === 3 && Math.random() < 0.6);
   const r = Math.random();
   if (isRefinementDay && r < 0.7) {
@@ -179,14 +184,16 @@ export const pickDayEvents = (state) => {
     if (ev) queue.push(ev);
   } else if (r < 0.75) {
     // Most other days fire daily standup. It IS daily, after all.
-    const ev = EVENTS.find(e => e.id === 'daily_standup');
+    const standupId = Math.random() < 0.15 ? 'standup_debug' : 'daily_standup';
+    const ev = EVENTS.find(e => e.id === standupId);
     if (ev) queue.push(ev);
   }
 
   // Disruption slot — always fires, always biased toward scope-adds. Excludes
-  // both the ceremonies above AND anything that fired in the last few events
-  // so the player doesn't see the same disruption twice in a row.
-  const exclude = new Set(['backlog_refinement','daily_standup','morning_arrival']);
+  // both the ceremonies above (including the standup-debug variant) AND
+  // anything that fired in the last few events so the player doesn't see the
+  // same disruption twice in a row.
+  const exclude = new Set(['backlog_refinement','daily_standup','standup_debug','morning_arrival']);
   const main = pickEvent(state, exclude, recent);
   if (main) queue.push(main);
 
