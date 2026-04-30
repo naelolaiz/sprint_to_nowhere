@@ -16,6 +16,7 @@ export const AuditoriumScene = ({ event }) => {
     eid === 'mental_health' ? ['RESILIENCE', '&', 'WELLBEING'] :
     eid === 'reorg' ? ['CONTINUED', 'ALIGNMENT'] :
     eid === 'engagement_survey' ? ['YOUR', 'VOICE', 'MATTERS'] :
+    eid === 'dev_summit' ? ['WE ❤', 'DEVELOPERS'] :
     ['UPDATE'];
 
   const slideNo =
@@ -26,6 +27,7 @@ export const AuditoriumScene = ({ event }) => {
     eid === 'inclusion_workshop' ? 'SLIDE 9 / 94' :
     eid === 'mental_health' ? 'SLIDE 11 / 78' :
     eid === 'reorg' ? 'NO SLIDE COUNT' :
+    eid === 'dev_summit' ? 'SLIDE 1 / 1' :
     'SLIDE — / —';
 
   return (
@@ -120,6 +122,28 @@ export const AuditoriumScene = ({ event }) => {
           <rect x="252" y="50" width="14" height="22" fill={C.surface2} stroke={C.amber} strokeWidth="0.8"/>
           <Person x={259} y={52} type="ceo" scale={0.9}/>
           <text x="259" y="80" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.amberDim}>CEO</text>
+        </g>
+      )}
+
+      {/* Dev-summit guest keynote: sweaty evangelist mid-yell at center stage,
+          shouting DEVELOPERS over and over. Big speech bubble for emphasis. */}
+      {eid === 'dev_summit' && (
+        <g>
+          {/* Podium */}
+          <rect x="190" y="58" width="20" height="32" fill={C.surface2} stroke={C.rust} strokeWidth="0.8"/>
+          <line x1="200" y1="58" x2="200" y2="48" stroke={C.rust} strokeWidth="0.4"/>
+          <circle cx="200" cy="47" r="1.4" fill={C.rust}/>
+          {/* Speaker, slightly larger because his energy demands it */}
+          <Person x={200} y={56} type="evangelist" scale={1.1}/>
+          {/* Speech bubble — DEVELOPERS, getting louder */}
+          <g transform="translate(228 32)">
+            <rect x="0" y="0" width="118" height="38" fill={C.surface} stroke={C.rust} strokeWidth="0.8"/>
+            <polygon points="-6,18 0,12 0,24" fill={C.surface} stroke={C.rust} strokeWidth="0.8"/>
+            <text x="6" y="13" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.5">DEVELOPERS!</text>
+            <text x="6" y="22" fontSize="7" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.6">DEVELOPERS!!</text>
+            <text x="6" y="32" fontSize="9" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.8">DEVELOPERS!!!</text>
+          </g>
+          <text x="200" y="96" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.rust}>GUEST KEYNOTE</text>
         </g>
       )}
 
