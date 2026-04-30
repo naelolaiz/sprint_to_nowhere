@@ -77,7 +77,7 @@ export default function SprintToNowhere() {
     next.eventQueue = queue.slice(1);
     if (next.currentEvent?.start) next.dialogNode = next.currentEvent.start;
     next.eventCast = next.currentEvent
-      ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [])
+      ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [], next)
       : {};
     if (next.currentEvent) {
       next.dayLog = [
@@ -122,6 +122,7 @@ export default function SprintToNowhere() {
       const nextCast = sampleEventCast(
         nextEv.id,
         newState.recentDescIdx?.[nextEv.id] || [],
+        newState,
       );
       return {
         ...newState,
@@ -266,7 +267,7 @@ export default function SprintToNowhere() {
             s.subPhase = 'event';
             s.currentEvent = ev;
             s.dialogNode = ev.start || 'start';
-            s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+            s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || [], s);
             s.dayLog = [...s.dayLog, `— ${renderCast(ev.title, s.eventCast)}`];
             s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
             s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
@@ -294,7 +295,7 @@ export default function SprintToNowhere() {
           s.subPhase = 'event';
           s.currentEvent = ev;
           s.dialogNode = ev.start || 'start';
-          s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+          s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || [], s);
           s.dayLog = [...s.dayLog, `— ${renderCast(ev.title, s.eventCast)}`];
           s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
           s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
@@ -307,7 +308,7 @@ export default function SprintToNowhere() {
           s.subPhase = 'event';
           s.currentEvent = ev;
           s.dialogNode = ev.start || 'start';
-          s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || []);
+          s.eventCast = sampleEventCast(ev.id, s.recentDescIdx?.[ev.id] || [], s);
           s.dayLog = [...s.dayLog, `— ${renderCast(ev.title, s.eventCast)}`];
           s.recentEventIds = pushRecentEvent(s.recentEventIds || [], ev.id);
           s.recentDescIdx = pushRecentDesc(s.recentDescIdx || {}, ev.id, s.eventCast?._descIdx);
@@ -431,7 +432,7 @@ export default function SprintToNowhere() {
     next.eventQueue = queue.slice(1);
     if (next.currentEvent?.start) next.dialogNode = next.currentEvent.start;
     next.eventCast = next.currentEvent
-      ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [])
+      ? sampleEventCast(next.currentEvent.id, next.recentDescIdx?.[next.currentEvent.id] || [], next)
       : {};
     if (next.currentEvent) {
       next.dayLog = [
