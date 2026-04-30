@@ -1418,7 +1418,7 @@ export const EVENTS = [
           { label: 'Stand at the back of the huddle, eyes on your phone', next: 'glazed', requires: OFFICE },
           { label: 'Give a crisp 30-second update first', next: 'your_update' },
           { label: 'Fake a connection issue and bail', next: 'fake_drop', requires: REMOTE },
-          { label: 'Drift back to your desk to "check something"', requires: OFFICE, effect: { focus: -0.5, capital: -0.5, burnout: 1 }, log: 'You took a slow step back, then another. Marcus was mid-sentence and didn\'t look up. You bought back ~10 minutes; he\'ll bring it up obliquely later.' },
+          { label: 'Drift back to your desk to "check something"', next: 'office_bail', requires: OFFICE },
           { label: '"Marcus, can we wrap? I\'m at 12 minutes."', next: 'wrap_attempt' },
         ],
       },
@@ -1522,6 +1522,27 @@ export const EVENTS = [
         description: 'Marcus: "Sure, I\'ll put it on the next sprint candidate list." The list has 47 things on it. Two of them have been on it for a year.',
         choices: [
           { label: '"OK."', effect: { capital: 1, focus: -0.5 }, log: 'You traded a ticket for a place on a list. The list is, in functional terms, a graveyard. You bought yourself today.' },
+        ],
+      },
+      // ----- office_bail: in-person sibling of fake_drop. You drift away
+      // physically instead of pretending your Wi-Fi died. Same low-cost
+      // escape, similar political tab.
+      office_bail: {
+        descriptions: [
+          'You take a slow step back, then another. Marcus is mid-sentence and doesn\'t look up. By the time he glances over, you\'re at your desk pretending to read a PR. The huddle continues. You bought back ~10 minutes.',
+          'You hold your phone up like it just buzzed and mouth "sorry — gotta grab this." Nobody calls you back. The phone is on Do Not Disturb. You sit at your desk and actually open the PR you were procrastinating.',
+          'You catch {dev}\'s eye, point at your laptop, and walk back to your pod. {dev} nods like they understand. They do not. The huddle goes on without you for another twelve minutes.',
+        ],
+        choices: [
+          { label: 'Get back to work', effect: { focus: -0.5, capital: -0.5, burnout: 1 }, log: 'A clean drift. You bought back ~10 minutes of morning. Marcus saw it; he didn\'t name it.' },
+          { label: 'Marcus walks over after standup, "everything good?"', next: 'office_bail_followup' },
+        ],
+      },
+      office_bail_followup: {
+        description: 'Marcus is at the side of your desk. "Hey — everything good? You ducked out a little early." It\'s a question that isn\'t a question.',
+        choices: [
+          { label: '"Yeah, sorry, had to look at something."', effect: { focus: -1.5, capital: 0.5, burnout: 5, addUrgentFeature: true }, log: 'You said it lightly. Marcus said "all good!" lightly. He used the next 50 minutes to add a ticket to your sprint that he couldn\'t add at standup.' },
+          { label: '"I\'m at standup capacity for the week, Marcus."', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You named the dynamic. Marcus blinked twice and said "totally fair." He went back to his desk. He\'ll bring this up in your next 1:1, gently.' },
         ],
       },
       // ----- fake_drop: low-cost escape, slight political tax -----
@@ -2266,6 +2287,14 @@ export const EVENTS = [
           { label: 'Stand by yourself', next: 'alone' },
           { label: 'Go say hi to Sarah', next: 'sarah' },
           { label: 'Join {sales} and the sales cluster', next: 'sales_cluster' },
+          { label: 'Just keep walking to your car and WFH', next: 'walk_off' },
+        ],
+      },
+      walk_off: {
+        description: 'You drift toward the back row of the lot. The warden is occupied with someone arguing about whether the alternate exit counts. You unlock your car. Nobody calls your name. By the time the drill ends, you\'re halfway home.',
+        choices: [
+          { label: 'Settle in at your kitchen table', effect: { focus: -0.5, capital: -0.5, morale: 1, burnout: -1, goHome: true }, log: 'You bailed mid-drill. You were on your couch by the time the all-clear went out. Marcus DM\'d "you good?" two hours later. You said yes.' },
+          { label: 'Slack the warden later, blame "an emergency"', effect: { focus: -0.5, capital: -1, morale: 0, burnout: 0, goHome: true }, log: 'You bailed and pre-emptively explained. The warden replied "noted." The capital cost was real. So was the rest of your afternoon.' },
         ],
       },
       alone: {
