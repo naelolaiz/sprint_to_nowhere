@@ -947,6 +947,88 @@ export const EVENTS = [
     ],
   },
   {
+    // ----- HOLY WAR — engineering tribal warfare (vim vs emacs, tabs vs
+    // spaces, IDE wars) and cross-department friction (eng vs QA / sales /
+    // legal / infra / build / research). One event with a wide opener pool;
+    // the choices are tribal-affiliation moves with consistent trade-offs.
+    id: 'holy_war', icon: MessageSquare,
+    title: 'Engineering Slack devolves into a debate',
+    requires: (s) => s.sprint >= 1,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          // ----- editor / IDE wars -----
+          '#engineering-general: someone posted a screenshot of their VS Code with 47 extensions. {dev}: "you should try Cursor." {objector}: "you should try not having a 14-step setup." Three people start typing at once.',
+          '#engineering-general: {dev} casually mentions they\'ve switched back to Vim. {objector}: "you switched back to vim, or you switched back to admitting it." Twenty-seven 😂 reacts. One 😢. Marcus, who uses Notepad++, says nothing.',
+          '#engineering-general: {dev} posts a 14-line Emacs config and says "anyone else still on this?" {objector}: "I\'m an Emacs user. I just don\'t admit it at standup." Three more lurkers come out of the woodwork.',
+          '#engineering-general: a screenshot of CLion debugging a Qt app. {dev}: "yeah but Qt Creator just works for Qt." {objector}: "no IDE just works. that\'s the deal." Eight reacts. One \'qt creator\' meme. One \'kdevelop??\' from the senior who joined in 2008.',
+          '#engineering-general: someone asks "is anyone else on JetBrains? feels like the team\'s all on VS Code." Two replies — both "I switched to Cursor" — and then 14 minutes of complete silence.',
+          '#engineering-general: an intern posts: "what\'s vim?" {dev}: "you\'re about to make some friends and some enemies." Marcus, instantly: "let\'s keep this in DM."',
+          // ----- style wars -----
+          '#engineering-general: a PR comment thread where someone changed tabs to spaces in a single file. {objector}: "this is a 200-line diff for a 1-character change." {dev}: "the 1-character change was correct." The thread is now 91 messages long.',
+          '#engineering-general: {objector} posted: "we should standardize on camelCase." {dev}: "we are standardized on camelCase." {objector}: "the new file is snake_case." {dev}: "...let me check." It is. They wrote it.',
+          '#engineering-general: {dev} suggested removing semicolons from the JS codebase. There are now two camps. The two camps are not on speaking terms. The lint config has been edited four times today.',
+          '#engineering-general: a thread titled "Prettier or Black, but for our actual stack." It has 47 replies. None of them mention either tool. Three people are arguing about whether the question is a category error.',
+          // ----- workflow wars -----
+          '#engineering-general: {dev} merged with `git merge`. {objector}: "we agreed on rebase." {dev}: "we agreed on rebase for feature branches." {objector}: "this IS a feature branch." {dev}: "...is it though." They\'re both right. Neither one will yield.',
+          '#engineering-general: a PR titled "switching the monorepo to a polyrepo." It is one line of YAML. The thread under it is 312 comments. Nobody has run it. Nobody is going to.',
+          '#engineering-general: {objector}: "should we move to TypeScript?" Three engineers post strong opinions. Two of them used to work at the same company. They have not spoken in two years. Today they are aligned. It is unsettling.',
+          '#engineering-general: {dev}: "I think we should do FP for the new module." {objector}: "you mean Haskell?" {dev}: "I mean — like — pure functions, no classes." {objector}: "that\'s every codebase you\'ve ever shipped, just with extra steps."',
+          // ----- silly wars -----
+          '#engineering-general: {dev} posted "JIF" in a thread about animated images. {objector}: "I will die on the GIF hill." Eight people piled in within ninety seconds. None of them are working.',
+          '#engineering-general: a poll titled "dark mode or light mode for the new dashboard." 47 votes for dark. 3 for light. The 3 will be cited in the design review as "not a clear preference."',
+          // ----- cross-department friction -----
+          '#engineering-and-qa: {objector} (QA): "the build broke production." {dev} (eng): "the test was flaky." {objector}: "the test caught a real bug. that\'s its job." Marcus is reacting with 🙏 to both messages.',
+          '#engineering-and-sales: {objector} (sales): "the customer asked when the SSO feature ships." {dev} (eng): "we don\'t have an SSO feature." {objector}: "the demo I gave them last week DID have one." The demo was Figma.',
+          '#engineering-and-legal: Legal posts in #eng-leadership: "we cannot ship the data-flow change until I\'ve reviewed the new diagram." {dev}: "the diagram IS the change." Legal: "I will need a diagram of the diagram."',
+          '#engineering-and-infra: a Slack message from infra: "your service consumed 14% of our quarterly compute budget on `setTimeout`." {dev}: "...that\'s not possible." Infra posts a flame graph. It is, in fact, possible.',
+          '#engineering-and-build: {objector} (build/CI team): "your PR added 11 minutes to CI." {dev}: "the test catches a real bug." {objector}: "11 minutes per PR. across the org. is two engineers full time." Both are right. Nothing will change.',
+          '#engineering-and-research: {objector} (research): "the model you trained doesn\'t fit our latency budget." {dev} (eng): "the latency budget you gave us was for the OLD model." {objector}: "the new model IS the old model." It is not.',
+          '#qa-and-product: {objector} (QA): "the spec doesn\'t describe the empty state." {dev} (PM): "there isn\'t an empty state — the user always has data." {objector}: "the user is, statistically, always new." The thread is 41 messages long.',
+          '#engineering-and-product: {objector} (PM): "the feature was supposed to feel premium." {dev} (eng): "what does premium feel like?" {objector}: "you know — premium." This sub-thread is now an entire meeting.',
+        ],
+        choices: [
+          { label: 'Pick a side and post the strong opinion', next: 'pick_side' },
+          { label: 'Post a meme: "just write good code"', next: 'memed_take' },
+          { label: 'Mute the channel', next: 'mute_channel' },
+          { label: 'Stay out, screenshot, send to one trusted DM', next: 'screenshot' },
+        ],
+      },
+      pick_side: {
+        descriptions: [
+          'You post your take. Three people heart it within 90 seconds. Two people sub-thread it into a slightly different argument. {objector} replies "respectfully — that\'s wrong." Now it\'s a thread about you.',
+          'You post the strong opinion. The thread instantly bifurcates. Half the replies are "+1." Half are 🤔. Marcus DMs you privately: "love the energy, maybe pull the post." You will not pull the post.',
+          'You post. {dev} responds with a 600-word reply, formatted as four numbered points and a footnote. The footnote cites a Hacker News comment. The Hacker News comment is from {dev}.',
+        ],
+        choices: [
+          { label: 'Hold the line, reply once more', effect: { focus: -2, capital: -1, morale: 4, burnout: 4 }, log: 'You held. You won the argument. You did not change anyone\'s mind. You ate a lot of focus. The thread is bookmarked, by you, in a folder called "vindicated."' },
+          { label: 'Walk it back: "fair, didn\'t mean to start a thing"', effect: { focus: -1, capital: 0.5, morale: -2, burnout: 3 }, log: 'You walked it back. Marcus reacted with 🙏. You felt smaller. The thread continued without you. {objector} won, technically.' },
+          { label: 'Escalate: at-channel a senior engineer', effect: { focus: -2.5, capital: -1.5, morale: 2, burnout: 6 }, log: 'You pulled in {dev}, the staff engineer. They wrote a six-paragraph reply that vindicated nobody and bored everyone. The thread died of exhaustion.' },
+        ],
+      },
+      memed_take: {
+        description: 'You post a screenshot of a "just write good code" meme. Twelve people react with 💀. Three people react with 🎯. {objector}: "this is dismissive." {dev}: "this is the only correct take." The argument is now about your meme.',
+        choices: [
+          { label: 'Lean in: post a second meme', effect: { focus: -1, capital: 0.5, morale: 5, burnout: 2 }, log: 'You doubled down. The thread became unserious. The unseriousness defused it. Marcus added 🙏 to your meme. You bought the team an afternoon back.' },
+          { label: 'Apologize: "sorry, joking, carry on"', effect: { focus: -0.5, capital: 0, morale: 1, burnout: 1 }, log: 'You apologized. The argument resumed. Two people DM\'d you "the meme was right tho." You are quietly proud.' },
+        ],
+      },
+      mute_channel: {
+        description: 'You hit Mute on the channel. The notification badge stops climbing. The thread continues without you for 47 more messages. You will, later, be asked your opinion in a 1:1, by name, by Marcus.',
+        choices: [
+          { label: 'Just work', effect: { focus: -0.5, burnout: -1, morale: 1 }, log: 'You bought back an hour and your sanity. Marcus will follow up in a 1:1, gently, with the words "I noticed you weren\'t in that thread."' },
+        ],
+      },
+      screenshot: {
+        description: 'You screenshot the worst three messages and DM them to {dev} (your trusted one). Their reply is "lmao." Then "wait — is this the same thread as last quarter?" It is.',
+        choices: [
+          { label: 'Trade memes for 4 minutes, get back to work', effect: { focus: -0.5, capital: 0, morale: 4, burnout: -1 }, log: 'A small private rebellion. You felt human for four minutes. The channel is still on fire. You are not in it.' },
+        ],
+      },
+    },
+  },
+  {
     id: 'compliance', icon: Briefcase,
     title: 'Compliance training due today',
     // Compliance trainings are annual + ad-hoc — fire on odd sprints.

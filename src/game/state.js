@@ -154,6 +154,9 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     // ----- COMBINATION EVENTS — multiple pressures at once, weight them like big disruptions -----
     if (e.id === 'sales_pincer') w = 3;
     if (e.id === 'ai_initiative_kickoff') w = 3;
+    // Slack flame-war / cross-department friction. Light weight: it should
+    // feel inevitable but not dominate the disruption pool.
+    if (e.id === 'holy_war') w = 2;
     // Rare guest-keynote spectacle. Don't make it common — its impact relies on
     // surprise. Sprint-2+ only (gated in event.requires too).
     if (e.id === 'dev_summit') w = 1;
