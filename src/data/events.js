@@ -199,6 +199,58 @@ export const EVENTS = [
     },
   },
   {
+    // ----- DEV-SUMMIT KEYNOTE — a Ballmer-archetype guest yells DEVELOPERS
+    // at an all-hands. Rare, sprint-2+ only, and never pairs with the regular
+    // all_hands (they're both auditorium events).
+    id: 'dev_summit', icon: Megaphone,
+    title: 'Surprise keynote: "A passionate man with a vision"',
+    requires: (s) => s.sprint >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Mandatory all-hands. The CEO opens with: "I want to introduce someone who built enterprise software back when servers were furniture." A man in a soaked polo bounds onto the stage. He grabs the mic with both hands. The teleprompter is blank. He inhales. He begins: "DEVELOPERS! DEVELOPERS! DEVELOPERS! DEVELOPERS!" Sweat hits the front row. Marketing is filming this for a recruiting clip.',
+          'Mandatory all-hands. The slide reads "WE ❤ DEVELOPERS." A guest "developer evangelist" — booked through a podcast — runs onto the stage to a backing track that cuts out at second four. He keeps going. He starts shouting: "DEVELOPERS! DEVELOPERS! DEVELOPERS!" The CEO is clapping arrhythmically off-stage. Legal is on the call.',
+          'Mandatory all-hands. The CEO has flown in his "operator hero" — a man who has never stopped sweating in any photo of him from 1998 onwards. He takes the stage. He removes the mic from the stand. He yells the word DEVELOPERS five times in quick succession. Then he stops. Then he starts again. The audience is very still.',
+          'Mandatory all-hands. The agenda just says "🔥 SPECIAL GUEST 🔥." A man jogs onstage in a polo two sizes too small. He pumps his fists. He delivers exactly one word, eleven times, increasingly loud: "DEVELOPERS." The CFO covers their ears. The intern is recording in landscape, then portrait, then landscape.',
+        ],
+        choices: [
+          { label: 'Stand up and clap along', next: 'clap' },
+          { label: 'Cringe quietly into your laptop', next: 'cringe' },
+          { label: 'Yell back: "DEVELOPERS!"', next: 'chant_back' },
+          { label: 'Slip out the side door', next: 'slip_out' },
+        ],
+      },
+      clap: {
+        description: 'You stand. A few rows back, three sales reps stand with you. The keynote\'s eyes lock onto yours. He points. He yells "YESSSSS!" directly at you. The CEO posts in #wins: "loved seeing the energy in the room." Your name is in the post. Misspelled.',
+        choices: [
+          { label: 'Sit back down', effect: { focus: -1.5, capital: 1, burnout: 5, morale: -2 }, log: 'You performed enthusiasm for a man yelling DEVELOPERS at a wall. You bought a small political win. You will think about this on the drive home.' },
+        ],
+      },
+      cringe: {
+        description: 'You stare at your laptop. The keynote is now doing a kind of half-squat shimmy with each yell. It is in your peripheral vision. It is hard to focus on anything else. {dev}, two seats over, has tears in their eyes — laughter or grief, you cannot tell.',
+        choices: [
+          { label: 'Endure', effect: { focus: -2, burnout: 6, morale: -3 }, log: 'You endured. The keynote was 22 minutes. The word "developers" was used 91 times. None of it was about software.' },
+          { label: 'Take a "bathroom" break and never come back', effect: { focus: -0.5, capital: -0.5, burnout: 1, morale: 2 }, log: 'You stood up like you needed the bathroom and just… kept walking. Marcus DM\'d "u ok?" You said yes. You were not in the recording.' },
+        ],
+      },
+      chant_back: {
+        description: 'You yell it. "DEVELOPERS!" The keynote freezes. He locks eyes with you. The room goes silent for one full second. Then he points at you and screams: "THIS GUY GETS IT." The CEO is filming on his phone now. So is Marcus. So is Logan.',
+        choices: [
+          { label: 'Commit to the bit — yell it again', effect: { focus: -2, capital: 2, burnout: 7, morale: -4 }, log: 'You committed. The keynote ran 14 minutes longer than scheduled because of "audience energy." You are in the recruiting clip. Your father will see it.' },
+          { label: 'Sit down immediately, regret', effect: { focus: -1, capital: 0.5, burnout: 4, morale: -2 }, log: 'You sat down fast. The keynote moved on. Marcus DM\'d you "🤣🤣🤣" eight times. The clip will surface in your next interview elsewhere.' },
+        ],
+      },
+      slip_out: {
+        description: 'You stand quietly and walk to the side door. The fire warden — the alternate, the serious one — is standing there. He shakes his head at you, slowly. He does not move. The keynote, behind you, is now yelling DEVELOPERS while doing what can only be described as a controlled fall toward the audience.',
+        choices: [
+          { label: '"I have a meeting."', effect: { focus: -0.5, capital: -1, burnout: 3, morale: 3 }, log: 'You held the lie. The warden let you pass. You worked for the next 45 minutes in a phone booth. Best 45 minutes of your week.' },
+          { label: 'Sit back down, defeated', effect: { focus: -2, burnout: 7, morale: -4 }, log: 'You returned. The keynote was on its second wind. The CEO had joined him onstage and was attempting to high-five rhythmically. You are in the recording.' },
+        ],
+      },
+    },
+  },
+  {
     id: 'all_hands', icon: Users,
     title: 'All-hands meeting',
     // Fire on odd sprints — about half the calendar — and lean on the

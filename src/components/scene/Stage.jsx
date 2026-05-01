@@ -23,7 +23,7 @@ export const Stage = ({ subPhase, currentEvent, debt, burnout, morale, atHome, s
     // (Zoom call / livestreamed deck). Keep events that are explicitly
     // outdoor/exec-only on their dedicated scenes.
     const meetingIds = ['quick_sync','one_on_one','initiative_cancelled','standup_debug','interview','new_hire','backlog_refinement','daily_standup','meeting_cascade','requirements_changed'];
-    const auditoriumIds = ['town_hall','all_hands','values_refresh','compliance','inclusion_workshop','mental_health','reorg','engagement_survey'];
+    const auditoriumIds = ['town_hall','all_hands','values_refresh','compliance','inclusion_workshop','mental_health','reorg','engagement_survey','dev_summit'];
     const boardroomIds = ['ai_initiative_kickoff','sales_pincer','cto_skiplevel'];
 
     if (homeMode && (meetingIds.includes(eid) || auditoriumIds.includes(eid) || boardroomIds.includes(eid))) {

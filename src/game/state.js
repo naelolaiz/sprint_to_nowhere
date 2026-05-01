@@ -157,6 +157,9 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     // Slack flame-war / cross-department friction. Light weight: it should
     // feel inevitable but not dominate the disruption pool.
     if (e.id === 'holy_war') w = 2;
+    // Rare guest-keynote spectacle. Don't make it common — its impact relies on
+    // surprise. Sprint-2+ only (gated in event.requires too).
+    if (e.id === 'dev_summit') w = 1;
     for (let i = 0; i < w; i++) weighted.push(e);
   }
   if (weighted.length === 0) return EVENTS.find(e => e.id === 'quick_sync');

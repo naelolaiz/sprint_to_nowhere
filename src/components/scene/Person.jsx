@@ -7,6 +7,9 @@ const personColors = {
   brad: C.rust, marcus: C.sage, generic: C.textDim,
   doug: C.amberDim, engineer: C.blue, karen: C.burnout,
   vp: C.amber, intern: C.sage,
+  // "evangelist" = the Ballmer-archetype guest keynote speaker. Sweat-soaked
+  // polo, mid-yell, energy of a man about to lift the podium over his head.
+  evangelist: C.rust,
 };
 
 export const PersonAccessory = ({ type }) => {
@@ -96,6 +99,25 @@ export const PersonAccessory = ({ type }) => {
       {/* ID badge on lanyard */}
       <line x1="-1" y1="-5" x2="-1" y2="2" stroke={C.sage} strokeWidth="0.3"/>
       <rect x="-2.2" y="2" width="2.4" height="2.2" fill={C.surface2} stroke={C.sage} strokeWidth="0.4"/>
+    </g>
+  );
+  if (type === 'evangelist') return (
+    <g>
+      {/* polo collar — open neck, drenched */}
+      <polygon points="-2.8,-3 2.8,-3 2.4,1.8 -2.4,1.8" fill={C.rust} opacity="0.55" stroke={C.rust} strokeWidth="0.4"/>
+      <polygon points="-1.4,-3 0,-1.5 1.4,-3" fill={C.bg} stroke={C.rust} strokeWidth="0.4"/>
+      {/* armpit sweat patches */}
+      <ellipse cx="-3.4" cy="-2" rx="1.4" ry="2" fill={C.burnoutDim} opacity="0.7"/>
+      <ellipse cx="3.4" cy="-2" rx="1.4" ry="2" fill={C.burnoutDim} opacity="0.7"/>
+      {/* shouting mouth — wide-open O on the head */}
+      <ellipse cx="0" cy="-7.7" rx="0.9" ry="1.4" fill="#000" stroke={C.rust} strokeWidth="0.3"/>
+      {/* clenched fists held high */}
+      <circle cx="-5.2" cy="-2.5" r="0.9" fill={C.rust}/>
+      <circle cx="5.2" cy="-2.5" r="0.9" fill={C.rust}/>
+      {/* radiating sweat droplets */}
+      <path d="M -5 -10 Q -4.5 -9 -5 -8.4 Q -5.5 -9 -5 -10 Z" fill={C.burnout}/>
+      <path d="M 5 -10 Q 5.5 -9 5 -8.4 Q 4.5 -9 5 -10 Z" fill={C.burnout}/>
+      <path d="M 0 -14 Q 0.6 -13 0 -12.4 Q -0.6 -13 0 -14 Z" fill={C.burnout}/>
     </g>
   );
   return null;
