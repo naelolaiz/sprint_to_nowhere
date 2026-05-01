@@ -29,4 +29,8 @@ export const EVENT_CAST_RULES = {
   cto_skiplevel:        { dev: 'engineers' },  // alternate candidate the CTO offers it to
   partner_demo_panic:   { bro: 'bros' },       // sales engineer drowning on the call
   platform_deprecation: { dev: 'engineers' },  // platform-team person + cross-team ally
+  holy_war:             { dev: 'engineers', objector: 'dougs' },  // the two camps in the Slack flame-war
+  // dev_summit is in flight on a separate PR; cast rule registered here so its
+  // {dev} placeholder substitutes correctly the moment that event lands.
+  dev_summit:           { dev: 'engineers' },  // teammate visibly losing it next to you
 };
