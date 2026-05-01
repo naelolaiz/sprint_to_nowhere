@@ -979,14 +979,19 @@ export const EVENTS = [
           '#engineering-general: {dev} posted "JIF" in a thread about animated images. {objector}: "I will die on the GIF hill." Eight people piled in within ninety seconds. None of them are working.',
           '#engineering-general: a poll titled "dark mode or light mode for the new dashboard." 47 votes for dark. 3 for light. The 3 will be cited in the design review as "not a clear preference."',
           // ----- cross-department friction -----
-          '#engineering-and-qa: {objector} (QA): "the build broke production." {dev} (eng): "the test was flaky." {objector}: "the test caught a real bug. that\'s its job." Marcus is reacting with 🙏 to both messages.',
-          '#engineering-and-sales: {objector} (sales): "the customer asked when the SSO feature ships." {dev} (eng): "we don\'t have an SSO feature." {objector}: "the demo I gave them last week DID have one." The demo was Figma.',
+          // For cross-dept openers, use department-name labels (QA, Sales,
+          // Legal, etc.) for the non-engineering side instead of substituting
+          // {objector} from a generic name pool — "Bob (QA)" reads as "Bob
+          // who happens to be in QA" and conflicts with the cast pool.
+          // {dev} stays as the engineering voice because that one matches.
+          '#engineering-and-qa: QA: "the build broke production." {dev}: "the test was flaky." QA: "the test caught a real bug. that\'s its job." Marcus is reacting with 🙏 to both messages.',
+          '#engineering-and-sales: Sales: "the customer asked when the SSO feature ships." {dev}: "we don\'t have an SSO feature." Sales: "the demo I gave them last week DID have one." The demo was Figma.',
           '#engineering-and-legal: Legal posts in #eng-leadership: "we cannot ship the data-flow change until I\'ve reviewed the new diagram." {dev}: "the diagram IS the change." Legal: "I will need a diagram of the diagram."',
           '#engineering-and-infra: a Slack message from infra: "your service consumed 14% of our quarterly compute budget on `setTimeout`." {dev}: "...that\'s not possible." Infra posts a flame graph. It is, in fact, possible.',
-          '#engineering-and-build: {objector} (build/CI team): "your PR added 11 minutes to CI." {dev}: "the test catches a real bug." {objector}: "11 minutes per PR. across the org. is two engineers full time." Both are right. Nothing will change.',
-          '#engineering-and-research: {objector} (research): "the model you trained doesn\'t fit our latency budget." {dev} (eng): "the latency budget you gave us was for the OLD model." {objector}: "the new model IS the old model." It is not.',
-          '#qa-and-product: {objector} (QA): "the spec doesn\'t describe the empty state." {dev} (PM): "there isn\'t an empty state — the user always has data." {objector}: "the user is, statistically, always new." The thread is 41 messages long.',
-          '#engineering-and-product: {objector} (PM): "the feature was supposed to feel premium." {dev} (eng): "what does premium feel like?" {objector}: "you know — premium." This sub-thread is now an entire meeting.',
+          '#engineering-and-build: Build: "your PR added 11 minutes to CI." {dev}: "the test catches a real bug." Build: "11 minutes per PR. across the org. is two engineers full time." Both are right. Nothing will change.',
+          '#engineering-and-research: Research: "the model you trained doesn\'t fit our latency budget." {dev}: "the latency budget you gave us was for the OLD model." Research: "the new model IS the old model." It is not.',
+          '#qa-and-product: QA: "the spec doesn\'t describe the empty state." Product: "there isn\'t an empty state — the user always has data." QA: "the user is, statistically, always new." The thread is 41 messages long.',
+          '#engineering-and-product: Product: "the feature was supposed to feel premium." {dev}: "what does premium feel like?" Product: "you know — premium." This sub-thread is now an entire meeting.',
         ],
         choices: [
           { label: 'Pick a side and post the strong opinion', next: 'pick_side' },
