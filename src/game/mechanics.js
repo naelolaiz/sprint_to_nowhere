@@ -407,7 +407,7 @@ export const applyContextSwitch = (state, switchesSoFar) => {
   };
 };
 
-export const workOnTicket = (state, ticketId) => {
+export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
   let s = { ...state, sprintPlan: state.sprintPlan.map(t => ({ ...t })) };
   const idx = s.sprintPlan.findIndex(t => t.id === ticketId);
   if (idx < 0) return s;
@@ -438,7 +438,8 @@ export const workOnTicket = (state, ticketId) => {
   const speed = debtPen * burnPen * focusMul * moraleMul * bonus;
   const hoursAvailable = s.dayFocusRemaining;
   const hoursNeeded = t.effort - t.progress;
-  const hoursWorked = Math.min(hoursAvailable, Math.ceil(hoursNeeded / Math.max(0.1, speed)));
+  // The next calendar item caps the sitting: you work until it lands.
+  const hoursWorked = Math.max(0, Math.min(hoursAvailable, Math.ceil(hoursNeeded / Math.max(0.1, speed)), maxHours));
   const effective = hoursWorked * speed;
   t.progress = Math.min(t.effort, t.progress + effective);
   t.assignedTo = pairedInWith ? `you & ${pairedInWith}` : 'you';

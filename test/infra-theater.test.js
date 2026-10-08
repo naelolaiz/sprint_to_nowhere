@@ -27,7 +27,8 @@ describe('queueEvent', () => {
     // velocity_audit needs sprint 3; this is sprint 2.
     const s = applyChoice(midSprint({ currentDay: 2, sprint: 2 }), { effect: { queueEvent: 'velocity_audit' } });
     const morning = flow.nextDay(s);
-    expect(morning.currentEvent.id).not.toBe('velocity_audit');
+    expect(morning.currentEvent?.id).not.toBe('velocity_audit');
+    expect(morning.scheduledEvents.some(e => e.id === 'velocity_audit')).toBe(false);
     expect(morning.pendingEvents).toEqual([]);
   });
 

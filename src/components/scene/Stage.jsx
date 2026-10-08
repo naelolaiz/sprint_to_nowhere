@@ -10,7 +10,7 @@ import { KitchenScene } from './KitchenScene.jsx';
 import { BoardroomScene } from './BoardroomScene.jsx';
 import { OfficeOverview } from './OfficeOverview.jsx';
 
-export const Stage = ({ subPhase, currentEvent, debt, burnout, morale, atHome, stayedLate }) => {
+export const Stage = ({ subPhase, currentEvent, debt, burnout, morale, atHome, stayedLate, clock }) => {
   const eid = currentEvent?.id;
   // Once the player is working from home, the stage is the apartment for any
   // event that isn't itself a "you went somewhere else" location (boardroom,
@@ -27,33 +27,33 @@ export const Stage = ({ subPhase, currentEvent, debt, burnout, morale, atHome, s
     const boardroomIds = ['ai_initiative_kickoff','sales_pincer','cto_skiplevel'];
 
     if (homeMode && (meetingIds.includes(eid) || auditoriumIds.includes(eid) || boardroomIds.includes(eid))) {
-      return <HomeDeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate}/>;
+      return <HomeDeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate} clock={clock}/>;
     }
 
     if (boardroomIds.includes(eid)) {
-      return <BoardroomScene event={currentEvent}/>;
+      return <BoardroomScene event={currentEvent} clock={clock}/>;
     }
     if (meetingIds.includes(eid)) {
-      return <MeetingScene event={currentEvent}/>;
+      return <MeetingScene event={currentEvent} clock={clock}/>;
     }
     if ([...auditoriumIds, 'volunteer_day'].includes(eid)) {
-      if (eid === 'volunteer_day') return <OutdoorScene event={currentEvent}/>;
+      if (eid === 'volunteer_day') return <OutdoorScene event={currentEvent} clock={clock}/>;
       return <AuditoriumScene event={currentEvent}/>;
     }
-    if (eid === 'fire_drill') return <OutdoorScene event={currentEvent}/>;
-    if (eid === 'morning_arrival') return <OutdoorScene event={currentEvent}/>;
-    if (eid === 'ceo_idea') return <ExecutiveScene/>;
+    if (eid === 'fire_drill') return <OutdoorScene event={currentEvent} clock={clock}/>;
+    if (eid === 'morning_arrival') return <OutdoorScene event={currentEvent} clock={clock}/>;
+    if (eid === 'ceo_idea') return <ExecutiveScene clock={clock}/>;
     if (eid === 'kitchen_karen') return <KitchenScene/>;
     if (homeMode || ['home_neighbor','home_appliance','home_doorbell','home_household'].includes(eid)) {
-      return <HomeDeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate}/>;
+      return <HomeDeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate} clock={clock}/>;
     }
-    return <DeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate}/>;
+    return <DeskScene event={currentEvent} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate} clock={clock}/>;
   }
   if (subPhase === 'work' || subPhase === 'day-summary') {
     if (homeMode) {
-      return <HomeDeskScene event={null} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate}/>;
+      return <HomeDeskScene event={null} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate} clock={clock}/>;
     }
-    return <DeskScene event={null} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate}/>;
+    return <DeskScene event={null} debt={debt} burnout={burnout} morale={morale} stayedLate={stayedLate} clock={clock}/>;
   }
   return <OfficeOverview burnout={burnout}/>;
 };

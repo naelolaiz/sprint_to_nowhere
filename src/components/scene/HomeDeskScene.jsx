@@ -3,11 +3,14 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { Desk } from './Desk.jsx';
+import { SkyPane } from './Sky.jsx';
+import { skyFor } from './sky.js';
+import { minutesToClock } from '../../game/clock.js';
 
 // Working-from-home variant of DeskScene. Same player + same screen vocabulary,
 // different surroundings: warm wall, kitchen counter behind the desk, a
 // houseplant that doesn't wilt, no fluorescent ceiling, no cubicle.
-export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLate = false }) => {
+export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 10 * 60 }) => {
   const eid = event?.id;
   // When WFH, meetings, all-hands and boardroom-style events become a Zoom
   // tile grid on the home monitor.
@@ -30,7 +33,8 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, staye
 
   const moraleLow = morale < 30;
   const debtCritical = debt > 70;
-  const isLate = stayedLate;
+  const sky = skyFor(clock);
+  const isLate = sky.phase === 'night';
   const fireAlert = eid === 'production_fire' || eid === 'on_call' || eid === 'dependency';
 
   return (
@@ -43,10 +47,6 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, staye
         <linearGradient id="home-floor-grad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#3a2a1c"/>
           <stop offset="100%" stopColor="#1f160e"/>
-        </linearGradient>
-        <linearGradient id="home-window-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={isLate ? '#0a0c14' : '#9ec0d6'}/>
-          <stop offset="100%" stopColor={isLate ? '#1a1814' : '#c8d9aa'}/>
         </linearGradient>
         <radialGradient id="home-alert-glow">
           <stop offset="0%" stopColor={C.rust} stopOpacity="0.5"/>
@@ -75,19 +75,17 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, staye
         <line x1="14" y1="20" x2="148" y2="20" stroke="#1a120a" strokeWidth="1"/>
         <circle cx="14" cy="20" r="1.2" fill="#1a120a"/>
         <circle cx="148" cy="20" r="1.2" fill="#1a120a"/>
-        {/* glass */}
-        <rect x="22" y="22" width="118" height="64" fill="url(#home-window-grad)" stroke="#1a120a" strokeWidth="0.8"/>
+        {/* glass: the sky follows the clock */}
+        <SkyPane id="home" x={22} y={22} w={118} h={64} clock={clock} skyline={false} stroke="#1a120a"/>
         {/* outside scene — tree silhouette + a neighbor's roofline */}
-        <g opacity={isLate ? 0.85 : 0.7}>
+        <g opacity={isLate ? 0.9 : 0.75}>
           <rect x="22" y="78" width="118" height="8" fill={isLate ? '#0e0a06' : '#7a8e5a'}/>
           <polygon points="60,78 80,52 100,78" fill={isLate ? '#0a0806' : '#3a4a30'}/>
           <polygon points="95,78 112,60 130,78" fill={isLate ? '#0a0806' : '#3a4a30'}/>
           <circle cx="40" cy="64" r="14" fill={isLate ? '#0a0806' : '#5a7038'}/>
           <line x1="40" y1="64" x2="40" y2="80" stroke={isLate ? '#06040a' : '#3a2820'} strokeWidth="1"/>
-          {/* moon when it's late */}
-          {isLate && <circle cx="120" cy="38" r="5" fill="#e6dcb8" opacity="0.85"/>}
-          {/* sun glow when it's day */}
-          {!isLate && <circle cx="120" cy="38" r="6" fill="#f0d680" opacity="0.5"/>}
+          {/* a neighbor's window, lit after dark */}
+          {isLate && <rect x="104" y="70" width="3" height="3" fill={C.amber} opacity="0.7"/>}
         </g>
         {/* mullion */}
         <line x1="81" y1="22" x2="81" y2="86" stroke="#1a120a" strokeWidth="0.6"/>
@@ -244,7 +242,7 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, staye
 
       {/* ----- Title strip ----- */}
       <text x="395" y="14" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>
-        JARED'S APARTMENT · {isLate ? '21:47' : '10:14'} · COMMUTE: 0M
+        JARED'S APARTMENT · {minutesToClock(clock)} · COMMUTE: 0M
       </text>
       {debtCritical && (
         <text x="10" y="172" fontSize="4.5" fontFamily={FONT} fill={C.rust} letterSpacing="1">

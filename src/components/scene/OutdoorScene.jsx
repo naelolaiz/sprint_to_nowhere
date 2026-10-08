@@ -3,14 +3,17 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
+import { SkyPane } from './Sky.jsx';
+import { skyFor } from './sky.js';
+import { minutesToClock } from '../../game/clock.js';
 
-export const OutdoorScene = ({ event }) => {
+export const OutdoorScene = ({ event, clock = 9 * 60 + 14 }) => {
   const eid = event?.id;
   const isFireDrill = eid === 'fire_drill';
   const isMorning = eid === 'morning_arrival';
   const banner =
     isFireDrill ? '🔥 FIRE DRILL · ALL HANDS PARKING LOT · ETA 25 MIN' :
-    isMorning ? 'MORNING ARRIVAL · LOT B · 9:14 AM' :
+    isMorning ? `MORNING ARRIVAL · LOT B · ${minutesToClock(clock)}` :
     '"GIVING BACK" — Q3 IMPACT DAY';
   const bannerColor = isFireDrill ? C.rust : isMorning ? C.blue : C.amber;
   const footer =
@@ -20,12 +23,22 @@ export const OutdoorScene = ({ event }) => {
 
   return (
     <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
-      <rect x="0" y="0" width="400" height="120" fill={C.surface}/>
-      <rect x="0" y="120" width="400" height="60" fill={C.surface2}/>
+      {/* Sky over the lot, by the clock; a distant skyline behind the building */}
+      <SkyPane id="lot" x={0} y={0} w={400} h={120} clock={clock} stroke="none" sunX={0.955} sunY={0.5} moonX={0.955} moonY={0.5}
+        buildings={[[0.0, 0.84, 0.05], [0.05, 0.78, 0.04], [0.1, 0.9, 0.08], [0.84, 0.8, 0.05], [0.9, 0.86, 0.06], [0.96, 0.76, 0.04]]}/>
+      <rect x="0" y="120" width="400" height="60" fill={skyFor(clock).phase === 'night' ? '#1f1c17' : C.surface2}/>
       <line x1="0" y1="120" x2="400" y2="120" stroke={C.borderHi} strokeWidth="0.8"/>
+      {/* Lot lights come on after dark */}
+      {skyFor(clock).phase === 'night' && [60, 340].map((lx, i) => (
+        <g key={i}>
+          <line x1={lx} y1="120" x2={lx} y2="70" stroke={C.borderHi} strokeWidth="1"/>
+          <rect x={lx - 4} y="66" width="8" height="3" fill={C.amber} opacity="0.8"/>
+          <ellipse cx={lx} cy="121" rx="26" ry="5" fill={C.amber} opacity="0.08"/>
+        </g>
+      ))}
 
 {/* Banner */}
-      <rect x="40" y="22" width="320" height="26" fill={C.surface2} stroke={bannerColor} strokeWidth="0.8"/>
+      <rect x="40" y="22" width="320" height="26" fill={C.surface2} opacity="0.92" stroke={bannerColor} strokeWidth="0.8"/>
       <text x="200" y="38" textAnchor="middle" fontSize={isFireDrill ? 7 : isMorning ? 7 : 9} fontFamily={FONT} fill={bannerColor} fontWeight="700" letterSpacing="2">{banner}</text>
 
       {isFireDrill ? (

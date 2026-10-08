@@ -14,8 +14,13 @@ import {
 } from './state.js';
 import { applyChoice, workOnTicket, applyContextSwitch, contextSwitchCost, tickDailyTaxes } from './mechanics.js';
 import { applyTeammateContributions } from './team.js';
+import { applyAction } from './actions.js';
+import { usedMinutes, clockText, scheduleMinute } from './clock.js';
+import { whenOf } from '../data/schedule.js';
 
-const quickSync = () => EVENTS.find(e => e.id === 'quick_sync');
+// Events that open the day, in the order pickDayEvents slots them. Everything
+// else the roll produces is given a minute on the clock instead.
+const MORNING_IDS = new Set(['morning_arrival', 'backlog_refinement', 'daily_standup', 'standup_debug']);
 
 // Put an event on stage: lock its cast + opener variant, log the title, and
 // remember it so the next picks avoid repeating it.
@@ -47,9 +52,33 @@ const stageMeltdown = (s) => ({
   eventQueue: [],
 });
 
-// Roll the day's events and put the first one on stage. Anything a reply
-// queued for "tomorrow" (a production fire from testing in prod, say) goes
-// in ahead of the roll.
+// Fire whatever the calendar has reached. Called whenever the clock has
+// moved and you are back at your desk: after a sitting, after a break,
+// after the last dialog of a chain. The first due item goes on stage; any
+// others queue behind it. Items that no longer apply (you went home) drop.
+export const fireDue = (s) => {
+  if (s.subPhase === 'event') return s;
+  const used = usedMinutes(s);
+  const sched = s.scheduledEvents || [];
+  const due = sched.filter(e => e.at <= used);
+  if (due.length === 0) return s;
+  const rest = sched.filter(e => e.at > used);
+  const evs = due
+    .map(e => EVENTS.find(ev => ev.id === e.id))
+    .filter(ev => ev && eventApplicable(ev, s));
+  const base = { ...s, scheduledEvents: rest };
+  if (evs.length === 0) return base;
+  const [first, ...more] = evs;
+  return {
+    ...stageEvent(base, first, `— ${clockText(s)}: `),
+    eventQueue: [...more, ...(s.eventQueue || [])],
+  };
+};
+
+// Roll the day's events. The ceremonies (and a locked door) open the day;
+// every disruption gets a minute on the clock and lands when the day
+// reaches it. Anything a reply queued for "tomorrow" (a production fire
+// from testing in prod, say) opens the morning ahead of the roll.
 const beginDay = (s) => {
   const queued = (s.pendingEvents || [])
     .map(id => EVENTS.find(e => e.id === id))
@@ -59,9 +88,28 @@ const beginDay = (s) => {
   const rollFrom = queued.length > 0
     ? { ...s, recentEventIds: [...(s.recentEventIds || []), ...queued.map(ev => ev.id)] }
     : s;
-  const queue = [...queued, ...pickDayEvents(rollFrom)];
-  const first = queue[0] || quickSync();
-  return { ...stageEvent({ ...s, pendingEvents: [] }, first), eventQueue: queue.slice(1) };
+  const rolled = pickDayEvents(rollFrom);
+  const morning = rolled.filter(ev => MORNING_IDS.has(ev.id));
+  const later = rolled.filter(ev => !MORNING_IDS.has(ev.id));
+  const budgetMinutes = Math.round((s.dayFocus || 9) * 60);
+  const scheduled = later
+    .map(ev => ({ id: ev.id, at: scheduleMinute(whenOf(ev), budgetMinutes) }))
+    .sort((a, b) => a.at - b.at);
+  const queue = [...queued, ...morning];
+  const base = {
+    ...s,
+    pendingEvents: [],
+    scheduledEvents: scheduled,
+    resumeTicketId: null,
+    leaving: false,
+    eventQueue: [],
+  };
+  if (queue.length === 0) {
+    // Nothing on the calendar at nine. Straight to the desk, unless the
+    // first item is already due.
+    return fireDue({ ...base, subPhase: 'work', dialogNode: 'start' });
+  }
+  return { ...stageEvent(base, queue[0]), eventQueue: queue.slice(1) };
 };
 
 export const startGame = (prev) => ({
@@ -162,18 +210,24 @@ export const chooseEvent = (prev, choice) => {
     const [nextEv, ...rest] = queue;
     return { ...stageEvent(newState, nextEv, '— and then: '), eventQueue: rest };
   }
-  // Otherwise, off to work.
-  return { ...newState, subPhase: 'work', dialogNode: 'start', eventQueue: [] };
+  // Otherwise, back to the desk: whatever the clock has reached fires now.
+  // If you were on your way out, the summary is where you were going.
+  const desk = fireDue({ ...newState, subPhase: 'work', dialogNode: 'start', eventQueue: [] });
+  if (desk.subPhase === 'event') return desk;
+  return newState.leaving ? { ...desk, subPhase: 'day-summary' } : desk;
 };
 
 // Sit down on a ticket. The first one of the day is free to start; every
-// later one pays the context-switch tax first. The day ends when the hours
-// are gone or nothing is left to work on; otherwise you are back at your
-// desk with whatever is left of the afternoon.
+// later one pays the context-switch tax first, unless you are sitting back
+// down on the ticket an interruption pulled you off. The next calendar item
+// caps how long you get to sit: you work until it lands, it fires, and the
+// ticket waits. The day ends when the hours are gone or nothing is left to
+// work on; otherwise you are back at your desk with whatever is left.
 export const work = (prev, id) => {
+  const resuming = !!prev.resumeTicketId && prev.resumeTicketId === id;
   const switches = prev.actionsToday?.work || 0;
   let s = prev;
-  if (switches > 0) {
+  if (switches > 0 && !resuming) {
     if (prev.dayFocusRemaining <= contextSwitchCost(switches).hours) {
       return {
         ...prev,
@@ -183,14 +237,45 @@ export const work = (prev, id) => {
     }
     s = applyContextSwitch(prev, switches);
   }
-  s = workOnTicket(s, id);
-  s = { ...s, actionsToday: { ...(s.actionsToday || {}), work: switches + 1 } };
-  const open = s.sprintPlan.some(t => !t.shipped && t.progress < t.effort);
+  const nextAt = (s.scheduledEvents || [])[0]?.at;
+  const cap = nextAt == null ? Infinity : Math.max(0, (nextAt - usedMinutes(s)) / 60);
+  if (cap <= 0) {
+    // The switch ate the time before the next item. It lands as you sit.
+    return fireDue({ ...s, resumeTicketId: id, dayLog: [...s.dayLog, 'You sat down. Before the first keystroke:'] });
+  }
+  s = workOnTicket(s, id, cap);
+  const t = s.sprintPlan.find(x => x.id === id);
+  const interrupted = cap < Infinity && usedMinutes(s) >= nextAt
+    && t && !t.shipped && t.progress < t.effort && s.dayFocusRemaining > 0;
+  s = {
+    ...s,
+    actionsToday: { ...(s.actionsToday || {}), work: resuming ? switches : switches + 1 },
+    resumeTicketId: interrupted ? id : null,
+  };
+  const open = s.sprintPlan.some(x => !x.shipped && x.progress < x.effort);
   const more = s.dayFocusRemaining > 0 && open;
-  return { ...s, subPhase: more ? 'work' : 'day-summary' };
+  return fireDue({ ...s, subPhase: more ? 'work' : 'day-summary' });
 };
 
-export const skipWork = (prev) => ({ ...prev, subPhase: 'day-summary' });
+// A break, a favor, a walk: the action itself, then whatever the clock has
+// reached while you were away from the keyboard.
+export const action = (prev, kind) => fireDue(applyAction(prev, kind));
+
+// Call it a day. Whatever was still on the calendar lands on your way out:
+// leaving early has never once cancelled a meeting.
+export const skipWork = (prev) => {
+  const left = (prev.scheduledEvents || []).filter(e => e.at > usedMinutes(prev));
+  if (left.length === 0) return { ...prev, subPhase: 'day-summary', leaving: false };
+  const lastAt = left[left.length - 1].at;
+  const spent = Math.min(prev.dayFocusRemaining, Math.max(0, lastAt - usedMinutes(prev)) / 60);
+  const out = {
+    ...prev,
+    leaving: true,
+    dayFocusRemaining: Math.max(0, prev.dayFocusRemaining - spent),
+    dayLog: [...(prev.dayLog || []), 'You started packing up. The calendar had other plans.'],
+  };
+  return fireDue(out);
+};
 
 export const nextDay = (prev) => {
   const snapshot = { day: prev.currentDay, hours: totalRemaining(prev.sprintPlan), kind: 'eod' };
@@ -253,6 +338,9 @@ export const nextDay = (prev) => {
     actionsToday: {},
     askTaxToday: 0,
     boothClosedToday: false,
+    scheduledEvents: [],
+    resumeTicketId: null,
+    leaving: false,
     dayLog: [...team.log, ...tax.log],
     subPhase: 'event',
     dialogNode: 'start',

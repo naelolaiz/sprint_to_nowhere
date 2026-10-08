@@ -4,8 +4,11 @@ import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { Desk } from './Desk.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
+import { SkyPane } from './Sky.jsx';
+import { skyFor } from './sky.js';
+import { minutesToClock } from '../../game/clock.js';
 
-export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLate = false }) => {
+export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 10 * 60 }) => {
   const eid = event?.id;
   const screen =
     eid === 'production_fire' || eid === 'dependency' ? 'fire' :
@@ -34,8 +37,11 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLat
   const canCount = burnout > 80 ? 3 : burnout > 60 ? 2 : burnout > 40 ? 1 : 0;
   const moraleLow = morale < 30;
   const debtCritical = debt > 70;
-  // Window goes dark only when the player actually stayed late tonight.
-  const isLate = stayedLate;
+  // The window follows the clock: dark once the evening is over, which is
+  // where staying late puts you.
+  const sky = skyFor(clock);
+  const isLate = sky.phase === 'night';
+  const isDusk = sky.phase === 'evening';
   const fireAlert = eid === 'production_fire' || eid === 'on_call' || eid === 'dependency';
 
   return (
@@ -49,10 +55,6 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLat
         <linearGradient id="floor-grad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={C.surface}/>
           <stop offset="100%" stopColor={C.surface2}/>
-        </linearGradient>
-        <linearGradient id="window-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={isLate ? '#0a0c14' : '#3a4a5c'}/>
-          <stop offset="100%" stopColor={isLate ? '#1a1814' : '#586a7c'}/>
         </linearGradient>
         {/* Pulse animation for the fire alert */}
         <radialGradient id="alert-glow">
@@ -85,30 +87,18 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLat
         <rect x="0" y="0" width="400" height="180" fill={C.burnout} opacity="0.05"/>
       )}
 
-      {/* ----- Window at left, with skyline ----- */}
+      {/* ----- Window at left: the sky outside follows the clock ----- */}
       <g>
-        <rect x="22" y="22" width="78" height="60" fill="url(#window-grad)" stroke={C.borderHi} strokeWidth="0.8"/>
-        {/* Skyline silhouette */}
-        <g opacity={isLate ? 0.85 : 0.5}>
-          <rect x="22" y="62" width="14" height="20" fill="#1a1c20"/>
-          <rect x="36" y="55" width="9" height="27" fill="#1a1c20"/>
-          <rect x="45" y="48" width="20" height="34" fill="#1a1c20"/>
-          <rect x="65" y="60" width="11" height="22" fill="#1a1c20"/>
-          <rect x="76" y="52" width="24" height="30" fill="#1a1c20"/>
-          {/* Lit windows in those buildings — small dots */}
-          {isLate && [
-            [48, 60], [56, 65], [50, 72], [82, 60], [88, 70], [40, 70],
-          ].map((p, i) => (
-            <rect key={i} x={p[0]} y={p[1]} width="1" height="1" fill={C.amber} opacity="0.7"/>
-          ))}
-        </g>
+        <SkyPane id="desk" x={22} y={22} w={78} h={60} clock={clock}/>
         {/* Window frame crossbars */}
         <line x1="61" y1="22" x2="61" y2="82" stroke={C.borderHi} strokeWidth="0.5"/>
         <line x1="22" y1="52" x2="100" y2="52" stroke={C.borderHi} strokeWidth="0.5"/>
         {/* Faint reflection on the glass */}
-        <line x1="26" y1="26" x2="38" y2="48" stroke="#fff" strokeWidth="0.3" opacity="0.08"/>
+        <line x1="26" y1="26" x2="38" y2="48" stroke="#fff" strokeWidth="0.3" opacity="0.12"/>
+        {/* Daylight spill on the wall under the window */}
+        {!isLate && <rect x="18" y="82" width="86" height="6" fill={sky.bottom} opacity="0.08"/>}
         <text x="61" y="92" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.textDimmer}>
-          {isLate ? 'IT IS DARK NOW' : 'SOUTH FACING'}
+          {isLate ? 'IT IS DARK NOW' : isDusk ? 'GOLDEN HOUR, ALLEGEDLY' : 'SOUTH FACING'}
         </text>
       </g>
 
@@ -356,7 +346,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, stayedLat
 
       {/* ----- Title strip ----- */}
       <text x="395" y="14" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>
-        JARED'S DESK · OPEN PLAN · {isLate ? '21:47' : '10:14'}
+        JARED'S DESK · OPEN PLAN · {minutesToClock(clock)}
       </text>
       {debtCritical && (
         <text x="10" y="172" fontSize="4.5" fontFamily={FONT} fill={C.rust} letterSpacing="1">

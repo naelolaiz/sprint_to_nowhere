@@ -2,29 +2,7 @@
 
 import { CAST_POOLS, EVENT_CAST_RULES } from '../data/cast.js';
 import { EVENTS } from '../data/events.js';
-
-// Workday is modeled as 9 AM start; dayFocus hours of focus + 1h lunch fit
-// into the wall-clock day. We linearly map "focus hours used" onto wall time
-// so descriptions like "It is 2:14 PM" can be computed dynamically from the
-// current state instead of being hard-coded to a specific hour.
-const WORKDAY_START_MIN = 9 * 60;
-const minutesToClock = (totalMinutesSinceMidnight) => {
-  const m = ((totalMinutesSinceMidnight % (24 * 60)) + 24 * 60) % (24 * 60);
-  const hour24 = Math.floor(m / 60);
-  const minute = m % 60;
-  const isPM = hour24 >= 12;
-  const hour12 = ((hour24 + 11) % 12) + 1;
-  return `${hour12}:${String(minute).padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
-};
-
-// Compute "minutes elapsed since 9 AM" from a state snapshot. Each hour of
-// dayFocusRemaining consumed = one wall-clock hour past the start.
-const stateBaseMinutes = (state) => {
-  const dayBudget = state.dayFocus || 9;
-  const remaining = state.dayFocusRemaining ?? dayBudget;
-  const usedHours = Math.max(0, dayBudget - remaining);
-  return Math.round(usedHours * 60);
-};
+import { WORKDAY_START_MIN, minutesToClock, usedMinutes } from './clock.js';
 
 // Locked at event-fire time in cast._baseMin so the in-event timeline doesn't
 // drift if the player burns focus during the dialog. Pass an offset (minutes)
@@ -78,7 +56,7 @@ export const sampleEventCast = (eid, recentIdxs = [], state = {}) => {
   // Lock the wall-clock baseline so descriptions can render dynamic times
   // ("It is 2:14 PM") that match the actual in-game time when the event fires
   // — not a hard-coded afternoon when it's actually morning.
-  cast._baseMin = stateBaseMinutes(state);
+  cast._baseMin = usedMinutes(state);
   const pool = eventDescPool(eid);
   const eligible = pool
     .map((d, i) => (isDescEligible(d, state) ? i : -1))

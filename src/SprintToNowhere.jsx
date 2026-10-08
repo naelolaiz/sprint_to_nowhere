@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { C, FONT } from './data/theme.js';
 import { initialState } from './game/state.js';
 import * as flow from './game/flow.js';
-import { applyAction } from './game/actions.js';
 import { HUD } from './components/common/HUD.jsx';
 import { MenuPhase } from './components/phases/MenuPhase.jsx';
 import { PlanningPhase } from './components/phases/PlanningPhase.jsx';
@@ -28,7 +27,7 @@ export default function SprintToNowhere() {
   const chooseEvent = (choice) => setS(prev => flow.chooseEvent(prev, choice));
   const work = (id) => setS(prev => flow.work(prev, id));
   const skipWork = () => setS(flow.skipWork);
-  const action = (kind) => setS(prev => applyAction(prev, kind));
+  const action = (kind) => setS(prev => flow.action(prev, kind));
   const nextDay = () => setS(flow.nextDay);
   const nextSprint = () => setS(flow.nextSprint);
   const restart = () => setS(flow.restart());
