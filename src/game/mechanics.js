@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-import { URGENT_FEATURES, LEGACY_TICKETS } from '../data/tickets.js';
+import { URGENT_FEATURES, LEGACY_TICKETS, BUGS } from '../data/tickets.js';
 import { EVENTS } from '../data/events.js';
 import { mkTicket, firstUnstarted } from './backlog.js';
 import { renderCast } from './cast.js';
@@ -216,6 +216,47 @@ export const applyChoice = (state, choice) => {
     }
   }
 
+  // The demo found a bug, the migration found a bug: a bug ticket, urgent,
+  // on top of everything else.
+  if (e.addUrgentBug) {
+    const tpl = BUGS[Math.floor(Math.random() * BUGS.length)];
+    const t = mkTicket(tpl, 'bug', { urgent: true });
+    s.sprintPlan = [...s.sprintPlan, t];
+    log.push(`🐛 New bug forced into sprint: "${t.title}".`);
+  }
+
+  // Something ate part of the work on the ticket you were furthest along
+  // on: an update that rebooted mid-change, a reset environment. Capped, so
+  // it stings without zeroing the card the way `wasteProgress` does.
+  if (e.loseProgress) {
+    const candidates = s.sprintPlan
+      .map((t, i) => ({ t, i }))
+      .filter(({ t }) => !t.shipped && t.progress > 0);
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => b.t.progress - a.t.progress);
+      const { t: target, i: idx } = candidates[0];
+      const lost = Math.min(e.loseProgress, target.progress);
+      s.sprintPlan[idx].progress = Math.max(0, target.progress - lost);
+      log.push(`↩ "${target.title}" lost ${lost.toFixed(1)}h of progress.`);
+    }
+  }
+
+  // Tomorrow morning opens with this event, whatever else the day rolls.
+  if (e.queueEvent) s.pendingEvents = [...(s.pendingEvents || []), e.queueEvent];
+
+  // Asking a colleague costs more for the rest of today: their tools are
+  // logged out too, or the answer is in a channel nobody can find.
+  if (e.askTax) s.askTaxToday = (s.askTaxToday || 0) + e.askTax;
+
+  // A ticket queued for next sprint's kickoff, like the overnight chaos ones.
+  if (e.addCleanup) {
+    const c = e.addCleanup;
+    s.pendingCleanups = [...(s.pendingCleanups || []), {
+      title: c.title, effort: c.effort, debt: c.debt ?? 0, type: c.type || 'refactor', urgent: !!c.urgent,
+    }];
+    log.push(`📋 Queued for next sprint: "${c.title}" (${c.effort}h).`);
+  }
+
   // A recurring cost that starts tomorrow: hours taken off the top of each
   // morning for `days` days (the sprint boundary clears it regardless).
   if (e.dailyTax) {
@@ -266,6 +307,8 @@ export const applyChoice = (state, choice) => {
   if (e.scopeCreep) auto += 2;          // the feature grew, you didn't agree to it
   if (e.inflateAll) auto += 3;          // every ticket got longer by decree
   if (e.splitTicket) auto += 2;         // your estimate was "resolved" by cutting the card
+  if (e.addUrgentBug) auto += 4;        // a bug nobody planned for is now yours
+  if (e.loseProgress) auto += 5;        // work you did is gone again
   if (auto > 0) s.morale = Math.max(0, s.morale - auto);
 
   // Track scope changes in the burn-up chart with a fractional-day timestamp.

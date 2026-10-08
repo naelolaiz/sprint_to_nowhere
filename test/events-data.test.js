@@ -15,6 +15,7 @@ const KNOWN_EFFECTS = new Set([
   'pivotTicket', 'wasteProgress', 'addLegacy', 'promise', 'clearPromise',
   'goHome', 'returnOffice',
   'chance', 'dailyTax', 'inflateAll', 'splitTicket', 'foldEstimate', 'velocityCommit',
+  'addUrgentBug', 'loseProgress', 'queueEvent', 'askTax', 'addCleanup',
 ]);
 const KNOWN_CHOICE_KEYS = new Set(['label', 'effect', 'log', 'next', 'requires', 'logByDesc', 'meltdownEnding']);
 
@@ -108,6 +109,9 @@ describe('event data', () => {
           const t = c.effect.dailyTax;
           expect(t.hours > 0 && t.days > 0 && typeof t.label === 'string', `${id}/${key}: malformed dailyTax`).toBe(true);
         }
+        const nested = { ...(c.effect || {}), ...(c.effect?.chance?.effect || {}) };
+        if (nested.queueEvent) expect(ALL.some(e => e.id === nested.queueEvent), `${id}/${key}: queueEvent -> ${nested.queueEvent}`).toBe(true);
+        if (nested.addCleanup) expect(typeof nested.addCleanup.title === 'string' && nested.addCleanup.effort > 0, `${id}/${key}: malformed addCleanup`).toBe(true);
         if (c.next) expect(ev.nodes?.[c.next], `${id}/${key}: next -> ${c.next}`).toBeTruthy();
         expect(!!(c.next || c.effect || c.meltdownEnding), `${id}/${key}: "${c.label}" does nothing`).toBe(true);
         if (c.logByDesc) {
@@ -187,6 +191,18 @@ describe('event data', () => {
       const text = textOf(d)(st, { _baseMin: 0 });
       expect(text.includes('"Reactions on comments"'), `poker opener without the card: ${text.slice(0, 70)}`).toBe(true);
       expect(/\b3\b/.test(text), `poker opener without the 3: ${text.slice(0, 70)}`).toBe(true);
+    }
+  });
+
+  // The staging replies rebuild data, test in prod, or wait for "the demo",
+  // so every opener has to set up both the lost data and the demo.
+  it('every staging opener mentions the demo and the lost data', () => {
+    const ev = EVENTS.find(e => e.id === 'staging_booked');
+    for (const d of ev.nodes.open.descriptions) {
+      const t = textOf(d);
+      const text = typeof t === 'function' ? t(CONTEXTS.office, { _baseMin: 0 }) : t;
+      expect(/demo/i.test(text), `staging opener without the demo: ${text.slice(0, 70)}`).toBe(true);
+      expect(/test data|fixtures|re-seed|wiped/i.test(text), `staging opener without the lost data: ${text.slice(0, 70)}`).toBe(true);
     }
   });
 

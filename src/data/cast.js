@@ -40,4 +40,9 @@ export const EVENT_CAST_RULES = {
   agile_coach:          { coach: 'bros' },     // the transformation consultant
   sprint_goal_changed:  { bro: 'bros' },       // the 🚀 reaction
   no_meeting_wednesday: { doug: 'dougs' },     // reply-all about whether a sync is a meeting
+  // ----- infrastructure theater -----
+  staging_booked:       { bro: 'bros' },       // the presenter with the sticker
+  ci_queue:             { dev: 'engineers' },  // owner of the "CI (again)" thread
+  security_scanner:     { dev: 'engineers' },  // tried to suppress the finding
+  channel_migration:    { jin: 'jins' },       // still searching the old channel
 };

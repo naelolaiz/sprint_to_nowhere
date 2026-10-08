@@ -3605,6 +3605,154 @@ export const EVENTS = [
       { label: 'Attend the retro, skip the exceptions', effect: { focus: -1.5, capital: -0.5, burnout: 1 }, log: 'The retro on No-Meeting Wednesday concluded that it was a success, pending the exceptions. The exceptions were rescheduled to Thursday, which is a meeting day anyway.' },
     ],
   },
+  // =====================================================================
+  // INFRASTRUCTURE THEATER — the tools that all the process assumes exist.
+  // They exist. They are booked, queued, logged out, defaulted, updating,
+  // scanning themselves, or in the old channel.
+  // =====================================================================
+  {
+    id: 'staging_booked', icon: Wrench,
+    title: 'Staging is booked',
+    requires: (s) => s.currentDay >= 2 && s.sprintPlan.some(t => !t.shipped && t.progress > 0),
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Staging was reset last night "for the sales demo." Your test data is gone. The demo is at 2 PM, on staging, using your half-finished feature, with a sticker over the broken button. The sticker says "coming soon." {bro} put it there.',
+          (s, c) => `A message in #platform at ${T(c)}: "Heads up, staging has been wiped and re-seeded for a customer demo 🙏 please don't deploy until EOD." Your test data was on staging. Your branch is deployed to staging. The customer will see your branch. The branch has a button that does nothing.`,
+          'The staging environment has a booking calendar now. It is fully booked by sales through Thursday. Your slot is "Friday, 7 AM to 7:30 AM." Your test data was deleted during the re-seed. The demo running right now is clicking through your feature and narrating the parts that do not exist yet.',
+          'Staging is "frozen for a demo." Frozen means someone restored a two-week-old snapshot over it. Your fixtures are gone. Your migration is gone. Your feature is half there, which is the half {bro} is showing a prospect right now, from the slide that says "live in production."',
+          'Platform: "Reminder that staging is a shared resource 🙂 We reset it nightly now." Nobody was reminded before the first reset. Your test data lasted eleven hours. Sales has booked staging for the afternoon, for a demo of the feature you have not finished, with the broken button hidden behind the presenter\'s cursor.',
+        ],
+        choices: [
+          { label: 'Rebuild the test data', effect: { focus: -2, burnout: 2 }, log: 'Two hours of seeding, by hand, from a script that "used to work." The data will be wiped again tonight. You know that now. You will do it again tomorrow.' },
+          { label: 'Test in prod. Read-only. Carefully.', next: 'prod' },
+          { label: 'Wait for the demo to finish', next: 'wait' },
+        ],
+      },
+      prod: {
+        description: 'You test in production. Read-only. You say the words "read-only" out loud, to no one. The feature flag is off in prod, so you flip it for your user only. The flag service applies "your user" by matching on email domain. Everyone at the company now has the feature. The broken button is live.',
+        choices: [
+          { label: 'Flip it back. Quietly.', effect: { focus: -1.5, debt: 8, burnout: 3, chance: { p: 0.25, effect: { queueEvent: 'production_fire' }, log: 'Someone clicked the button in those four minutes. Something happened to a real account. Tomorrow starts with it.', elseLog: 'Nobody clicked the button in the four minutes it was live. You will not be that lucky twice.' } }, log: 'Flipped back. Four minutes of "read-only" testing in prod. There is now a row in a real table with your name in it.' },
+          { label: 'Leave it. Nobody will notice.', effect: { focus: -1, debt: 10, burnout: 2, capital: -0.5, chance: { p: 0.5, effect: { queueEvent: 'production_fire' }, log: 'Someone noticed. A customer, specifically. Tomorrow starts with it.', elseLog: 'Nobody noticed today. The button is still live. This is now an incident with a start date and no end date.' } }, log: 'You left it on. "It\'s basically a soft launch." Nobody agreed to a soft launch.' },
+        ],
+      },
+      wait: {
+        description: 'You wait. The demo runs long. Through the wall you hear "and this part is live" about a part that is not live. Then a pause. Then "huh." Then a Slack message to you: "quick one, the button on staging throws a 500, is that known?" It is known. It is yours. It is not finished.',
+        choices: [
+          { label: 'Explain that it is not finished', effect: { focus: -3, addUrgentBug: true, morale: -2 }, log: 'You explained. The explanation became a bug ticket titled with the prospect\'s name. Priority: "before they sign." The afternoon was gone anyway.' },
+          { label: '"Known. Fix incoming."', effect: { focus: -3, addUrgentBug: true, debt: 3, burnout: 2 }, log: 'A fix is now "incoming." A ticket was created with your words as the title. The afternoon went to the demo\'s follow-up questions, in a thread, with the prospect CC\'d.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'ci_queue', icon: Clock,
+    title: 'The CI queue',
+    descriptions: [
+      'You push. The pipeline runs the full suite on every change, including the README. The queue is two hours. There is a fast lane. The fast lane needs a ticket. The ticketing system is down.',
+      (s, c) => `Pushed at ${T(c)}. Position in queue: 41. Estimated start: ${T(c, 118)}. Ahead of you: a typo fix, a branch called "test-do-not-merge" that has been merging for three weeks, and a nightly job that runs at noon.`,
+      'The CI queue is two hours because someone added a "quick smoke test" that spins up the whole platform, per commit, per branch. The person who added it has left. The test has never found anything. Removing it needs a change, which needs CI, which is a two-hour queue.',
+      'Pipeline status: "queued (runner capacity)." Runner capacity was cut "for cost reasons" in the same email that announced the "ship daily" initiative. The email had a rocket emoji. The queue has a two-hour ETA and a rocket emoji.',
+      'Your PR has been waiting for a runner for 90 minutes. The runners are busy running the pipeline for a bot that updates the pipeline. The bot\'s PR is also waiting for a runner. {dev} has started a thread about it, titled "CI (again)." It has 212 messages and no owner.',
+    ],
+    choices: [
+      { label: 'Wait it out', effect: { focus: -2, burnout: 1 }, log: 'Two hours watching a spinner. It went green. You merged. The next person\'s two hours started.' },
+      { label: 'Merge on red. "It\'s just the flaky one."', effect: { focus: -0.25, debt: 6, capital: -0.5, chance: { p: 0.5, effect: { queueEvent: 'production_fire' }, log: 'It was not just the flaky one. Tomorrow starts with what it was.', elseLog: 'It was, this time, just the flaky one. You have now trained yourself to believe that.' } }, log: 'Merged on red. The flaky test was red. So was one other test. You did not look at the other test.' },
+      { label: 'Fix the pipeline instead', effect: { focus: -3, debt: -3, morale: 2, burnout: 2, chance: { p: 0.5, effect: { capital: -0.5 }, log: 'The fix needs two approvals. The team has two engineers. One is on leave. The fix is now a draft, "for visibility."', elseLog: 'The fix got its two approvals from one person with two accounts. Nobody asked. The queue is forty minutes shorter.' } }, log: 'You spent the afternoon on the pipeline. Your ticket did not move. The pipeline did, a little.' },
+    ],
+  },
+  {
+    id: 'sso_reauth', icon: Wrench,
+    title: 'Please sign in again',
+    descriptions: [
+      'IT shortened the SSO session to 15 minutes "for security." Every tool logs you out mid-command. The terminal, the wiki, the ticket tracker, the tool that lets you ask IT about it. The MFA app wants your face. Your face is tired.',
+      (s, c) => `${T(c)}: signed out. ${T(c, 15)}: signed out. ${T(c, 30)}: signed out of a page that was telling you how to stay signed in. The security announcement calls this "frictionless."`,
+      'A new security posture: "zero trust." It means every tool trusts you for a quarter of an hour. Your deploy script needs four tools. It takes sixteen minutes. The last tool asks you to sign in again, and the deploy starts over, and so do you.',
+      'Slack from IT: "You may notice more frequent sign-in prompts today. This is expected and improves our security score 🔒." The security score is a number on a dashboard. The dashboard needs you to sign in. Twice.',
+      'The password manager has logged you out. Its password is in the password manager. The recovery email went to an inbox that needs SSO. SSO needs the MFA app. The MFA app needs a Wi-Fi network that needs SSO. You write your password on a sticky note, which is the thing the policy was for.',
+    ],
+    choices: [
+      { label: 'Keep signing in. All day.', effect: { focus: -0.5, focusPct: -10, askTax: 0.25 }, log: 'Thirty-one sign-ins. Your face in the MFA camera got progressively less recognisable. Everyone you could ask for help was signing in too, so every answer took a quarter hour longer.' },
+      { label: 'File a ticket with IT', effect: { focus: -0.5, focusPct: -5, askTax: 0.25, capital: -0.25 }, log: 'Ticket closed in 40 minutes: "Working as designed." The design is signing in. You signed in to read the closure. So did everyone you asked for help today.' },
+    ],
+  },
+  {
+    id: 'flags_down', icon: Wrench,
+    title: 'Feature flags are down',
+    descriptions: [
+      'The flag service is unreachable. Every flag is now its default. Your feature\'s default is on in production and off in staging, because the defaults were set by two different people in two different years. Customers are seeing a thing nobody has tested. Testers cannot see it at all.',
+      (s, c) => `At ${T(c)} the feature-flag service stopped answering. Every flag fell back to its default. Yours defaults to on in prod, "for the demo," and off everywhere else, "for safety." The safe environments are safe. The customers are the demo.`,
+      'Platform: "flag service is degraded, flags may evaluate to defaults 🙏." The defaults were written in 2023 by someone optimising for a different product. Your half-built feature has a default of "true," written as a placeholder, in a file nobody reads, which is now the only file that matters.',
+      'The flag service is down. The runbook says to flip the flags in the admin UI. The admin UI is behind a flag. Someone suggests deploying with the flag hard-coded off. Deploys are gated on a flag check. The gate is down, so deploys are, cautiously, also off.',
+      'The flag vendor had an outage. Their status page says "operational." Your feature is live for everyone in production and invisible on staging. Support has questions. QA has a different set of questions. Neither set can be answered without the flag service.',
+    ],
+    choices: [
+      { label: 'Hotfix the defaults', effect: { focus: -2, debt: 4, burnout: 2 }, log: 'You changed the defaults in code, which needed a deploy, which needed a flag, which you also hard-coded. The hotfix will be the default forever now. That is what hotfixes are.' },
+      { label: 'Wait for the platform team', effect: { focus: -1.5, chance: { p: 0.5, effect: { queueEvent: 'production_fire' }, log: 'The platform team restored the service at 6 PM. By then a customer had used the untested feature on real data. Tomorrow opens with the result.', elseLog: 'The platform team restored the service mid-afternoon. The window closed before anyone important clicked anything. The postmortem will call this "a near miss" and schedule nothing.' } }, log: 'You waited. The platform team was also waiting, for the vendor, who was waiting for a different vendor.' },
+    ],
+  },
+  {
+    id: 'os_update', icon: Wrench,
+    title: 'Mandatory update: "about 7 minutes"',
+    descriptions: [
+      'A dialog: "Your device must restart to install a required security update. Estimated time: 7 minutes." There is no "later." There was a "later" yesterday. You pressed it. The update remembers.',
+      (s, c) => `${T(c)}. "Restarting in 60 seconds to apply a required update." Your terminal has a change you have not committed. Your editor has a tab you have not saved. The countdown does not care about either. Estimated time: 7 minutes. It will be 90.`,
+      'IT pushed an update "with no user impact." The user impact is a forced restart, a 90-minute "optimising your apps" bar, and a new default browser. The browser is the one with the AI sidebar. The sidebar opens on every page. It wants to summarise your terminal.',
+      'The device management tool has decided it is time. "Installing update 1 of 4." Each one needs a restart. Each restart needs your password, which is in the password manager, which needs the update to finish. The progress bar reaches 100% and starts over, as a courtesy.',
+      { text: 'The laptop restarts itself in the middle of a sentence. On the lock screen: "Working on updates. 3%. Do not turn off your computer." Your branch had uncommitted changes. The office has a loaner laptop. It is a 2019 model with the previous version of everything, including the update.', requires: OFFICE },
+      { text: 'The laptop restarts itself in the middle of a sentence. On the lock screen: "Working on updates. 3%. Do not turn off your computer." Your branch had uncommitted changes. You have one laptop. The kitchen has a kettle. You watch the kettle. It is faster than the update.', requires: REMOTE },
+    ],
+    choices: [
+      { label: 'Let it run', effect: { focus: -1.5, burnout: 1, chance: { p: 0.4, effect: { loseProgress: 2 }, log: 'The restart ate the uncommitted change. The stash was not where you thought. Up to two hours of the current ticket, back to where they were this morning.', elseLog: 'The uncommitted change survived, by luck. "Estimated time: 7 minutes" took 90. The release notes say "performance improvements."' } }, log: 'Ninety minutes of a progress bar that reached 99% three times.' },
+      { label: 'Postpone it. Again.', effect: { focus: -0.25, burnout: 1, dailyTax: { hours: 1.5, days: 1, label: 'The update that could not be postponed again' } }, log: 'Postponed. The dialog says "tomorrow, 9 AM, no further postponement." Tomorrow morning is already shorter.' },
+    ],
+  },
+  {
+    id: 'security_scanner', icon: AlertTriangle,
+    title: 'The new security scanner',
+    once: true,
+    requires: (s) => s.sprint >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A scanner has been enabled "to shift security left." It flags 312 findings in legacy code and blocks every PR until they are fixed, including the PR that tunes the scanner. The security team\'s dashboard shows the number going up. They are pleased with the visibility.',
+          (s, c) => `Since ${T(c)}, every PR is blocked by a new "security gate." It found 312 issues, 300 of them in a vendored library from 2019 and 12 in the scanner's own config file. The fix for the config file is a PR. The PR is blocked by the gate.`,
+          'Security: "Great news, we\'ve enabled continuous scanning on all repos 🛡️." Continuous means every push. The scan takes 25 minutes and fails on the test fixtures, which contain the string "password" as a test of the password field. Every PR is red. The scanner has a PR to fix this. It is red.',
+          'A "shift-left" initiative has landed a scanner in CI. It has found 312 things. It has blocked merging. The security team offers a two-hour "findings triage workshop" to "empower" the team. The workshop is next Tuesday. Merging is today.',
+          'The new scanner has flagged your PR for "hard-coded secret." The secret is the word "example" in a comment. It also flagged the README, the license, and itself. {dev} tried to suppress the finding. The suppression file is flagged for "disabling security controls." The scanner is now reviewing its own review. Nothing merges.',
+        ],
+        choices: [
+          { label: 'Triage all 312', effect: { focus: -3, burnout: 6, debt: -2 }, log: 'You triaged all 312. Nine were real, in code nobody owns. You own them now. The other 303 are "accepted risk," in a spreadsheet, which the scanner will flag tomorrow.' },
+          { label: 'Suppress with a baseline file', effect: { focus: -1, debt: 5, morale: -1 }, log: 'A baseline file: 312 findings marked "existing." New findings are compared to the baseline. The baseline is now the security policy. It has a typo that excludes the auth module. Nobody will notice until it matters.' },
+          { label: 'Escalate: this blocks every PR', next: 'escalate' },
+        ],
+      },
+      escalate: {
+        description: 'You escalate. The security lead agrees that blocking every PR is "not the intent." The intent is in a deck. The deck is not in the scanner. A meeting is called with you, security, platform, and someone from Legal who was on the invite by mistake and stays.',
+        choices: [
+          { label: 'Push for turning it off until it is tuned', effect: { focus: -1.5, capital: -1, chance: { p: 0.5, effect: { addCleanup: { title: 'Re-enable the security scanner "properly this time"', effort: 6, debt: -2, type: 'refactor' } }, log: 'The scanner is "temporarily" off. Re-enabling it is a ticket for next sprint, assigned to you, because you turned it off.', elseLog: 'The scanner stays on, "in warn mode." Warn mode blocks merging with a yellow icon instead of a red one. The deck has been updated to call the rollout a success.' } }, log: 'An hour and a half of meeting about the scanner. Legal asked whether "shift-left" is a legal term. It is not. It is in the minutes.' },
+          { label: 'Ask for an exception for your repo', effect: { focus: -1, capital: -1.5, debt: 2 }, log: 'Your repo has an exception. It is listed on the dashboard as "non-compliant (exception)." The dashboard is reviewed by leadership. Your name is on the exception.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'channel_migration', icon: MessageSquare,
+    title: 'The channel has moved',
+    descriptions: [
+      'The team channel is now called #team-platform-v2-final-use-this-one. History was not migrated. The pinned onboarding doc links to the old channel. The old channel is archived, which means you can read it but nobody will answer. Three people are still posting there.',
+      (s, c) => `At ${T(c)} a bot announces: "This channel is being migrated to the new workspace structure 🎉 Please move to #eng-team-platform-2." The link goes to a channel with no members. The old channel will be archived "at EOD." The thread with the deploy steps is in the old channel. It is not pinned. It never was.`,
+      'Workspace re-org. Every channel has a new prefix, a new owner, and no history. The announcement is in the old channel, which you can no longer post in. The new channel\'s description says "see old channel for context."',
+      'IT consolidated "redundant" channels. The on-call channel and the bake-sale channel have been merged, because they had "similar membership." The runbook link now resolves to a photo of a lemon drizzle. The lemon drizzle has 14 reactions.',
+      'Slack: "#team-platform has been renamed to #team-platform-OLD-DO-NOT-USE." A new channel exists. Its name is #team-platform. It is empty. The thread that explained why the deploy script needs the VPN is in the OLD-DO-NOT-USE one. {jin} is searching for it. {jin} has been searching for forty minutes.',
+    ],
+    choices: [
+      { label: 'Find the new channel. Pin what you can.', effect: { focus: -0.5, focusPct: -8, morale: -2, askTax: 0.25 }, log: 'You joined the new channel and pinned three links. Two go to the old channel. Every question you asked today ended with "it was in the old channel."' },
+      { label: 'Keep posting in the old one', effect: { focus: -0.25, focusPct: -8, morale: -2, capital: -0.5, askTax: 0.25 }, log: 'You posted in the old channel. Nobody answered, because everyone who could answer was looking for the new one. Every ask today cost the extra time to find the right room first.' },
+    ],
+  },
 ];
 
 export const MELTDOWN_EVENT = {

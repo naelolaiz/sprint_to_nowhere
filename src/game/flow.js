@@ -47,11 +47,21 @@ const stageMeltdown = (s) => ({
   eventQueue: [],
 });
 
-// Roll the day's events and put the first one on stage.
+// Roll the day's events and put the first one on stage. Anything a reply
+// queued for "tomorrow" (a production fire from testing in prod, say) goes
+// in ahead of the roll.
 const beginDay = (s) => {
-  const queue = pickDayEvents(s);
+  const queued = (s.pendingEvents || [])
+    .map(id => EVENTS.find(e => e.id === id))
+    .filter(ev => ev && eventApplicable(ev, s));
+  // The roll treats the queued ids as recent, so the same disruption does
+  // not open the morning and then come straight back as the day's draw.
+  const rollFrom = queued.length > 0
+    ? { ...s, recentEventIds: [...(s.recentEventIds || []), ...queued.map(ev => ev.id)] }
+    : s;
+  const queue = [...queued, ...pickDayEvents(rollFrom)];
   const first = queue[0] || quickSync();
-  return { ...stageEvent(s, first), eventQueue: queue.slice(1) };
+  return { ...stageEvent({ ...s, pendingEvents: [] }, first), eventQueue: queue.slice(1) };
 };
 
 export const startGame = (prev) => ({
@@ -115,6 +125,7 @@ export const startSprint = (prev) => {
     stayedLate: false,
     pendingCleanups: [],
     velocityCommit: false,
+    askTaxToday: 0,
     hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
     dialogNode: 'start',
     atHome: false,
@@ -239,6 +250,7 @@ export const nextDay = (prev) => {
     stayedLate: false,
     atHome: false,
     actionsToday: {},
+    askTaxToday: 0,
     dayLog: [...team.log, ...tax.log],
     subPhase: 'event',
     dialogNode: 'start',
