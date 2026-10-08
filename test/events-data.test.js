@@ -1,0 +1,122 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+// Structural checks over the dialog data. Anything that fails here would show
+// up in play as a dead button, a missing opener, a literal "{dev}" on screen,
+// or a choice whose effect silently does nothing.
+
+import { describe, it, expect } from 'vitest';
+import { EVENTS, MELTDOWN_EVENT } from '../src/data/events.js';
+import { EVENT_CAST_RULES } from '../src/data/cast.js';
+import { initialState } from '../src/game/state.js';
+
+const KNOWN_EFFECTS = new Set([
+  'focus', 'focusPct', 'debt', 'capital', 'burnout', 'morale',
+  'bumpRefactor', 'scopeCreep', 'addUrgentFeature', 'cancelInitiative',
+  'pivotTicket', 'wasteProgress', 'addLegacy', 'promise', 'clearPromise',
+  'goHome', 'returnOffice',
+]);
+const KNOWN_CHOICE_KEYS = new Set(['label', 'effect', 'log', 'next', 'requires', 'logByDesc', 'meltdownEnding']);
+
+const base = initialState();
+const CONTEXTS = {
+  office: { ...base, phase: 'execution', sprint: 3, currentDay: 2, atHome: false, sprintPlan: [] },
+  home:   { ...base, phase: 'execution', sprint: 3, currentDay: 2, atHome: true,  sprintPlan: [] },
+};
+
+const ALL = [...EVENTS, MELTDOWN_EVENT];
+
+const placeholders = (text) => {
+  const out = new Set();
+  if (typeof text === 'string') for (const m of text.matchAll(/\{(\w+)\}/g)) out.add(m[1]);
+  return out;
+};
+
+const textOf = (d) => (d && typeof d === 'object' && 'text' in d ? d.text : d);
+
+const nodesOf = (ev) => (ev.nodes
+  ? Object.entries(ev.nodes).map(([key, node]) => ({ key, node }))
+  : [{ key: 'flat', node: { description: ev.description, descriptions: ev.descriptions, choices: ev.choices } }]);
+
+describe('event data', () => {
+  it('has unique ids', () => {
+    const ids = ALL.map(e => e.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('every cast rule points at a real event', () => {
+    const ids = new Set(ALL.map(e => e.id));
+    for (const id of Object.keys(EVENT_CAST_RULES)) expect(ids.has(id), `cast rule for ${id}`).toBe(true);
+  });
+
+  it.each(ALL.map(e => [e.id, e]))('%s is well-formed', (id, ev) => {
+    expect(typeof ev.title).toBe('string');
+    if (ev.nodes) {
+      const startKey = ev.start || 'start';
+      expect(ev.nodes[startKey], `${id}: start node`).toBeTruthy();
+      // every node reachable from start
+      const seen = new Set([startKey]);
+      const stack = [startKey];
+      while (stack.length) {
+        const k = stack.pop();
+        for (const c of ev.nodes[k].choices || []) {
+          if (c.next && !seen.has(c.next)) { seen.add(c.next); stack.push(c.next); }
+        }
+      }
+      for (const k of Object.keys(ev.nodes)) expect(seen.has(k), `${id}/${k}: unreachable node`).toBe(true);
+    }
+    const used = placeholders(ev.title);
+    for (const { key, node } of nodesOf(ev)) {
+      // some opener text exists, in every context
+      const hasText = !!node.description || (Array.isArray(node.descriptions) && node.descriptions.length > 0)
+        || (Array.isArray(ev.descriptions) && ev.descriptions.length > 0);
+      expect(hasText, `${id}/${key}: no description`).toBe(true);
+      const pool = Array.isArray(node.descriptions) ? node.descriptions : [];
+      for (const [name, st] of Object.entries(CONTEXTS)) {
+        if (pool.length > 0) {
+          const eligible = pool.filter(d => !(d && typeof d === 'object' && d.requires) || d.requires(st));
+          expect(eligible.length, `${id}/${key}: no eligible opener in ${name}`).toBeGreaterThan(0);
+        }
+      }
+      for (const d of pool) {
+        const t = textOf(d);
+        const rendered = typeof t === 'function' ? t(CONTEXTS.office, { _baseMin: 0 }) : t;
+        expect(typeof rendered, `${id}/${key}: description type`).toBe('string');
+        for (const p of placeholders(rendered)) used.add(p);
+      }
+      for (const p of placeholders(node.description)) used.add(p);
+
+      // choices
+      expect(Array.isArray(node.choices) && node.choices.length > 0, `${id}/${key}: no choices`).toBe(true);
+      for (const [name, st] of Object.entries(CONTEXTS)) {
+        const left = node.choices.filter(c => !c.requires || c.requires(st));
+        expect(left.length, `${id}/${key}: no choice available in ${name}`).toBeGreaterThan(0);
+      }
+      for (const c of node.choices) {
+        expect(typeof c.label, `${id}/${key}: choice label`).toBe('string');
+        for (const k of Object.keys(c)) expect(KNOWN_CHOICE_KEYS.has(k), `${id}/${key}: unknown choice key "${k}"`).toBe(true);
+        for (const k of Object.keys(c.effect || {})) expect(KNOWN_EFFECTS.has(k), `${id}/${key}: unknown effect "${k}"`).toBe(true);
+        if (c.next) expect(ev.nodes?.[c.next], `${id}/${key}: next -> ${c.next}`).toBeTruthy();
+        expect(!!(c.next || c.effect || c.meltdownEnding), `${id}/${key}: "${c.label}" does nothing`).toBe(true);
+        if (c.logByDesc) {
+          const openerPool = pool.length > 0 ? pool : (ev.descriptions || []);
+          for (const k of Object.keys(c.logByDesc)) {
+            expect(Number(k) < openerPool.length, `${id}/${key}: logByDesc[${k}] out of range`).toBe(true);
+          }
+          for (const v of Object.values(c.logByDesc)) for (const p of placeholders(v)) used.add(p);
+        }
+        for (const p of placeholders(c.label)) used.add(p);
+        for (const p of placeholders(c.log)) used.add(p);
+      }
+    }
+    const rules = EVENT_CAST_RULES[id] || {};
+    for (const p of used) expect(rules[p], `${id}: placeholder {${p}} has no cast rule`).toBeTruthy();
+    if (ev.requires) for (const st of Object.values(CONTEXTS)) expect(() => ev.requires(st)).not.toThrow();
+  });
+
+  it('home-only events are tagged and in-office events are not also home-only', () => {
+    for (const ev of EVENTS) {
+      if (ev.id.startsWith('home_')) expect(ev.atHome, `${ev.id} should be atHome`).toBe(true);
+      expect(ev.atHome && ev.inOffice, `${ev.id} cannot be both`).toBeFalsy();
+    }
+  });
+});

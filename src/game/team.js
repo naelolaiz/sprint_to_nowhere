@@ -25,6 +25,10 @@ const teamMoraleForShip = (t) => {
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+// "you" or "you & X" both mean the player is on the ticket. Teammate activity
+// on such a ticket never transfers it to them.
+const keepsOwnership = (t) => typeof t.assignedTo === 'string' && t.assignedTo.startsWith('you');
+
 const REGRESSION_TITLES = [
   'REGRESSION: that bug-fix from a few sprints back',
   'REGRESSION: the onboarding flow you "finished" two sprints ago',
@@ -131,7 +135,7 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
         progress: 0,
         effort: Math.round(plan[idx].effort * 1.5),
         scopeCreep: (plan[idx].scopeCreep || 0) + 1,
-        assignedTo: 'Marcus',
+        assignedTo: keepsOwnership(plan[idx]) ? plan[idx].assignedTo : 'Marcus',
       };
       deltas.morale -= 3;
       deltas.capital -= 0.5;
@@ -670,6 +674,10 @@ export const applyTeammateContributions = (state) => {
     if (room <= 0) return 0;
     const allowed = Math.min(bump, room);
     const newProgress = t.progress + allowed;
+    // Chipping in on a ticket the player is already on is help, not a
+    // takeover: ownership stays with "you", so continuing your own work
+    // tomorrow doesn't count as stealing it back from a teammate.
+    const owner = keepsOwnership(t) ? t.assignedTo : who;
     if (newProgress >= t.effort) {
       // Teammate finished the ticket overnight.
       let debtChange = t.debtImpact;
@@ -684,7 +692,7 @@ export const applyTeammateContributions = (state) => {
       deltas.morale += teamMoraleForShip(t);
       log.push(`Overnight: ${who} shipped "${t.title}". You'll deal with the PR in the morning.`);
     } else {
-      plan[idx] = { ...t, progress: newProgress, assignedTo: who };
+      plan[idx] = { ...t, progress: newProgress, assignedTo: owner };
     }
     return allowed;
   };
