@@ -12,6 +12,11 @@ export const mkTicket = (tpl, type, extra = {}) => ({
   ...extra,
 });
 
+// The ticket a sizing ceremony is "about": the first one on the board that
+// nobody has touched yet. Dialog text and the split mechanic both use this so
+// the card named in the conversation is the card that gets cut in two.
+export const firstUnstarted = (plan = []) => plan.find(t => !t.shipped && t.progress === 0) || null;
+
 export const sample = (arr, n) => {
   const copy = [...arr]; const out = [];
   for (let i = 0; i < n && copy.length > 0; i++)

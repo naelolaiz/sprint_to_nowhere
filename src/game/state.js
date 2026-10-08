@@ -78,6 +78,10 @@ export const initialState = () => {
     shippedTitles: [],             // every distinct ticket title shipped this run; excluded from new backlogs
     recentEventIds: [],            // last few main events fired; pickEvent avoids them
     recentDescIdx: {},             // { eventId: [last few description indices] } — avoids same opener back-to-back
+    onceFired: [],                 // ids of `once: true` events that already fired this run
+    dailyTaxes: [],                // [{ hours, days, label }] — hours taken off each morning; cleared each sprint
+    foldedEstimates: 0,            // times an 8 was logged as a 3; makes the velocity audit likelier
+    velocityCommit: false,         // "20% more next sprint" — raises capacity and forces an extra ticket
   };
 };
 
@@ -88,6 +92,7 @@ export const eventApplicable = (ev, state) => {
   if (!ev) return false;
   if (ev.atHome && !state.atHome) return false;
   if (state.atHome && ev.inOffice) return false;
+  if (ev.once && (state.onceFired || []).includes(ev.id)) return false;
   if (ev.requires && !ev.requires(state)) return false;
   return true;
 };
@@ -99,6 +104,7 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     if (!allowRecent && recentSet.has(e.id)) return false;
     if (e.atHome && !state.atHome) return false;
     if (state.atHome && e.inOffice) return false;
+    if (e.once && (state.onceFired || []).includes(e.id)) return false;
     if (e.requires && !e.requires(state)) return false;
     return true;
   });
@@ -160,6 +166,16 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     // Rare guest-keynote spectacle. Don't make it common — its impact relies on
     // surprise. Sprint-2+ only (gated in event.requires too).
     if (e.id === 'dev_summit') w = 1;
+    // ----- SCRUM THEATER — the ceremonies, done in theory. Mid-table weights:
+    // they should colour most sprints without crowding out the scope machine.
+    if (e.id === 'sprint_review') w = 3;
+    if (e.id === 'retro_action_items') w = 2;
+    if (e.id === 'planning_poker') w = 2;
+    if (e.id === 'dod_v7') w = 2;
+    if (e.id === 'agile_coach') w = 2;
+    if (e.id === 'velocity_audit') w = (state.foldedEstimates || 0) > 0 ? 5 : 2;
+    if (e.id === 'sprint_goal_changed') w = 3;
+    if (e.id === 'no_meeting_wednesday') w = 2;
     for (let i = 0; i < w; i++) weighted.push(e);
   }
   if (weighted.length === 0) return EVENTS.find(e => e.id === 'quick_sync');

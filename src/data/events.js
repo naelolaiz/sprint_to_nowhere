@@ -2,6 +2,7 @@
 
 import { Wrench, AlertTriangle, Zap, MessageSquare, Users, Coffee, XCircle, Flame, Briefcase, Clock, Archive, Sparkles, Heart, Megaphone } from 'lucide-react';
 import { formatClock } from '../game/cast.js';
+import { firstUnstarted } from '../game/backlog.js';
 
 // Context predicates for choices and descriptions that only fit one location.
 // REMOTE: player is working from home (Zoom/Slack-huddle dynamics apply —
@@ -26,6 +27,10 @@ const refactorName = (s) => {
   const r = (s?.sprintPlan || []).find(t => t.type === 'refactor' && !t.shipped && t.progress < t.effort);
   return r ? `"${r.title}"` : 'the refactor';
 };
+
+// The card a sizing ceremony argues about: the first untouched one on the
+// board, the same one `splitTicket` cuts in two if the argument is "resolved".
+const pokerTitle = (s) => firstUnstarted(s?.sprintPlan)?.title || 'the next ticket';
 
 export const EVENTS = [
   {
@@ -3388,6 +3393,217 @@ export const EVENTS = [
         ],
       },
     },
+  },
+  // =====================================================================
+  // SCRUM THEATER — the ceremonies, as practiced. Each one protects the
+  // team's time by taking it.
+  // =====================================================================
+  {
+    id: 'sprint_review', icon: Megaphone,
+    title: 'Sprint review — "demo to stakeholders"',
+    requires: (s) => s.currentDay >= 4,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Sprint review. Marcus reads the sprint goal aloud from a slide he did not write. He reads it twice, because the first time it did not sound like a goal. The stakeholders nod. One of them asks for the thing that was descoped on day one. Marcus: "Great question." He turns to you. "Want to demo where we are?"',
+          (s, c) => `Sprint review at ${T(c)}. Eleven stakeholders. Four are "optional." All four came. The deck is titled "Sprint ${s.sprint} Review (FINAL) (v3)." Slide 2 is the sprint goal, edited since Monday to match what got built. Slide 3 says "DEMO" and has your name on it.`,
+          '"Quick review, no pressure, just show what we\'ve got." The VP of Sales has joined. He has brought a customer. The customer has brought a list. The top item on the list was descoped on Monday "to protect the sprint." Marcus looks at you. "Shall we demo?"',
+          { text: 'Sprint review in the big room. The HDMI cable works, which is suspicious. The sprint goal is on the screen with a typo that has survived three reviews. A stakeholder asks whether the typo is a feature. Then they ask to see the thing nobody built. Then everyone looks at you. "Can we get a quick demo?"', requires: OFFICE },
+          { text: 'Sprint review on Zoom. Marcus is sharing the wrong window: last sprint\'s retro board. Action item 3 reads "fewer surprises in reviews." A stakeholder asks for a surprise, specifically the feature that was descoped on day one. Marcus: "I\'ll let the team speak to that." The team is you. You are asked to share your screen and demo.', requires: REMOTE },
+          'Sprint review. The agenda says "demo (10 min), feedback (5 min), next steps (5 min)." Feedback starts before the demo. Next steps started before the sprint. A director asks why the thing that was cut on Monday is not in the demo. Marcus: "Totally fair. Want to show where we are?"',
+        ],
+        choices: [
+          { label: 'Demo what actually works', next: 'works' },
+          { label: 'Demo the happy path on your laptop', next: 'laptop' },
+          { label: '"It is not ready to demo."', next: 'not_ready' },
+        ],
+      },
+      works: {
+        description: 'You demo the thing that works. It works. The room goes quiet in the way rooms go quiet when the thing works and it is not the thing they wanted. A stakeholder: "Love it. Small follow-up: can it also do the other thing?" Marcus, already typing: "I\'ll create a ticket. Tiny one." The ticket exists before you stop sharing.',
+        choices: [
+          { label: 'Nod. Keep sharing. Say nothing.', effect: { focus: -1.5, addUrgentFeature: true, burnout: 2 }, log: 'The "small follow-up" was in the sprint before the review ended. It has the same deadline as everything else.' },
+          { label: '"That is a different feature."', effect: { focus: -1.5, capital: -1, addUrgentFeature: true }, log: 'Everyone agreed it was a different feature. It was added anyway, "as a follow-up," with the same deadline. Your tone was noted.' },
+        ],
+      },
+      laptop: {
+        description: 'You demo the happy path on your laptop. Local branch, seeded data, the one flow that works. It works beautifully. Nobody asks about the other flows. The VP: "This looks done to me." Marcus does not correct him. Marcus is typing.',
+        choices: [
+          { label: 'Let them believe it', effect: { focus: -1, chance: { p: 0.5, effect: { debt: 6 }, log: 'By the end of the day the demo branch was "the release candidate." Someone filed a ticket to "just productionize it." The ticket is a 2.', elseLog: 'Nobody followed up. The demo is already forgotten. The feature is still not done, and now nobody is worried about it, which is worse.' } }, log: 'It worked on your machine. That sentence has never once helped anyone.' },
+          { label: '"To be clear, this is my laptop, not production."', effect: { focus: -1, capital: -0.5, chance: { p: 0.3, effect: { debt: 6 }, log: 'The clarification went in the notes. The notes were not read. By Friday the demo branch was the release candidate anyway.', elseLog: 'The clarification landed. The VP said "sure, sure." He looked disappointed in a way that will come back.' } }, log: 'You added the asterisk. Asterisks are not read aloud.' },
+        ],
+      },
+      not_ready: {
+        description: 'You say it. "It is not ready to demo." The room does the small collective inhale, the one from refinement. The VP: "That\'s fine, that\'s fine, we\'re agile." Marcus: "I\'ll take the action to re-plan." A re-plan is when a feature grows.',
+        choices: [
+          { label: 'Let Marcus re-plan', effect: { focus: -1, capital: -1, morale: -3, scopeCreep: true }, log: 'Marcus re-planned. The feature now has a "phase 2" inside it, which is the part that was descoped on Monday, back under a different name.' },
+          { label: 'Offer a date instead', effect: { focus: -1.5, capital: -0.5, morale: -3, scopeCreep: true, burnout: 2 }, log: 'You said "Thursday." It is now on a slide. The slide is in the board deck. The feature grew to fit the slide.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'retro_action_items', icon: Clock,
+    title: 'Retro action item: "reduce meetings"',
+    requires: (s) => s.sprint >= 2,
+    descriptions: [
+      'Last retro\'s action item was "reduce meetings." It has become a weekly 60-minute meeting called Meeting Reduction Sync. There is a working group. The working group has a kickoff. You have been named the owner, because you raised it.',
+      (s, c) => `A calendar invite lands at ${T(c)}: "Meeting Reduction Sync (weekly)." Organizer: Marcus. Required: 9 people. Agenda: "align on the meeting reduction framework." The description thanks you for "championing this." You said one sentence in a retro. You are now the owner.`,
+      'Slack from Marcus: "great news, leadership loved the retro action item on meeting load! They want a recurring forum to track it." The forum is a meeting. It is weekly. It is yours. The first agenda item is choosing a name for the meeting.',
+      'The retro board has been exported to a Confluence page titled "Action Items (Owned)." Item 1: "Reduce meetings. Owner: you. Status: In progress. Mechanism: weekly sync." The weekly sync has a pre-read. The pre-read is about the pre-read.',
+      'Marcus: "quick one — since you flagged meeting fatigue, you\'re the natural owner for the Meeting Reduction Sync. It\'s only an hour a week. Plus the prep. Plus the follow-ups. Plus a short readout at the all-hands." That is four meetings about fewer meetings.',
+    ],
+    choices: [
+      { label: 'Own it. Someone has to.', effect: { focus: -1, morale: -2, dailyTax: { hours: 0.5, days: 5, label: 'Meeting Reduction Sync prep, follow-ups and "quick reads"' } }, log: 'You own the Meeting Reduction Sync. It costs half an hour every morning in prep and follow-ups. The working group\'s first finding is that there are too many meetings.' },
+      { label: '"I don\'t think a meeting is the mechanism."', effect: { focus: -0.5, capital: -1, morale: -1 }, log: 'Noted "for the retro on the retro." The sync happens anyway, owned by someone who has never attended a retro. Its first action item is to add a meeting.' },
+    ],
+  },
+  {
+    id: 'planning_poker', icon: MessageSquare,
+    title: 'Planning poker, with a reveal',
+    requires: (s) => !!firstUnstarted(s.sprintPlan),
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          (s) => `Planning poker on "${pokerTitle(s)}". Marcus, before anyone votes: "I was thinking 3?" Everyone reveals. Everyone shows 8. Marcus: "Interesting. So, 3?"`,
+          (s) => `Poker. The ticket is "${pokerTitle(s)}". The tool is the new one, where the cards take four seconds to flip. Marcus flips first: 3. Then he says "no peeking!" Everyone else flips: 8, 8, 8, 13. Marcus: "Let's split the difference. 3."`,
+          (s) => `Marcus opens "${pokerTitle(s)}" and says "gut feel, no overthinking. I'm hearing 3 from the business side." Nobody from the business side is in the call. The reveal is a wall of 8s. Marcus types 3 into the field and says "we can always re-estimate."`,
+          (s, c) => `Poker at ${T(c)}. "${pokerTitle(s)}" comes up. {dev}: "that's the one with the migration, right?" Marcus: "Tiny migration. I was thinking 3." Reveal: 8, 8, 8, and a "?" from the one person who read the ticket. Marcus logs a 3.`,
+          (s) => `Planning poker. "${pokerTitle(s)}". {bro} from sales has joined "to listen" and votes 2. Engineers vote 8. Marcus averages the room, listener included, and gets "about a 3." The tool does not support decimals, which is the only thing stopping him.`,
+        ],
+        choices: [
+          { label: '"It is an 8. Every engineer said 8."', next: 'hold' },
+          { label: 'Fold. Let it be a 3.', next: 'fold' },
+        ],
+      },
+      hold: {
+        description: 'You hold. "Every engineer in this call said 8. That is the estimate." Marcus: "Totally hear you. Let\'s not get stuck on numbers." He opens a side conversation with the PM lead in chat. You can see him typing. He types for a long time.',
+        choices: [
+          { label: 'Hold the line', effect: { focus: -1, capital: -1, chance: { p: 0.4, effect: { splitTicket: true }, log: 'Resolution: the ticket was split into "two 3s" so the 8 would go away. The two 3s are bigger than the 8.', elseLog: 'The 8 stayed. Marcus wrote "(team estimate)" next to it, in a tone.' } }, log: 'You held at 8. The meeting ran twenty minutes over, discussing whether 8 was "a mindset."' },
+          { label: '"Fine, 3. But write down who said 3."', effect: { focus: -0.5, capital: -0.5, foldEstimate: true, morale: -3 }, log: 'The ticket is logged as a 3 with a comment that says "estimate: product." The comment will be deleted before the velocity audit.' },
+        ],
+      },
+      fold: {
+        description: 'You fold. The 3 goes in. {dev} DMs you a single period. Marcus: "Great, that was fast! See, poker works when we trust each other." The ticket is still the ticket. The hours are still the hours. Only the number changed, and the number is the one leadership reads.',
+        choices: [
+          { label: 'Close the DM. Move on.', effect: { focus: -0.5, foldEstimate: true, morale: -3 }, log: 'The 8 is logged as a 3. The velocity chart now says you are fast. You will be asked to be faster.' },
+          { label: 'Reply to {dev}: "I know."', effect: { focus: -0.5, foldEstimate: true, morale: -1, burnout: 1 }, log: '{dev} replied "we all know." The 8 is logged as a 3. The velocity chart is pleased.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'dod_v7', icon: Briefcase,
+    title: 'Definition of Done, v7',
+    once: true,
+    requires: (s) => s.sprint >= 2 && s.sprintPlan.some(t => !t.shipped && t.progress < t.effort),
+    descriptions: [
+      'Email from the Agile Center of Excellence: "Definition of Done v7 is now in effect." Every ticket now needs an accessibility audit, a security review and a Confluence page. The accessibility reviewer is on leave. The security reviewer is the accessibility reviewer. The Confluence template is in a space you cannot see.',
+      'Marcus pastes a link in the channel: "DoD v7 — please read, effective immediately, applies retroactively." Retroactively means your open tickets. Each one now needs a threat model, an a11y checklist and a "decision record." The decision record template has a required field called "decision." It is 200 characters max.',
+      'All-team Slack: "To raise our quality bar, Definition of Done v7 adds three lightweight gates." The three lightweight gates are three reviews by two people who are on leave. The gates apply to everything already in flight. The message ends with a 🎉.',
+      'A pinned message from the Quality Guild: "v7 of the DoD simplifies the process." v6 had four gates. v7 has seven, each "simplified." The approvers are listed. Two are on sabbatical. One left in March. One is a Slack bot that answers "LGTM" to everything, which is the only working part of the process.',
+      (s, c) => `At ${T(c)} the Definition of Done changed under you. v7 adds an accessibility sign-off, a security sign-off and a documentation page per ticket. The sign-off form asks for the ticket's Confluence page. The Confluence template asks for the sign-off. Nobody has reviewed the process for circularity. There is no gate for that.`,
+    ],
+    choices: [
+      { label: 'Comply. Every ticket, every gate.', effect: { focus: -1.5, inflateAll: 2, burnout: 3 }, log: 'Every open ticket now carries two more hours of forms, reviews and a page in a space you cannot see. Quality has been raised. Nothing else has.' },
+      { label: 'Ask for an exception for in-flight work', effect: { focus: -0.75, capital: -1, chance: { p: 0.5, effect: { inflateAll: 2 }, log: 'The exception was "escalated." The escalation was denied by the bot. v7 applies to everything you were already doing.', elseLog: 'The exception was granted, "this once," with a note in your file. In-flight work stays as it was. Everything you start next will need all seven gates.' } }, log: 'You asked for an exception. Exceptions are reviewed by the Exceptions Working Group. It meets monthly.' },
+      { label: 'Comply on paper. Fill every form with "N/A."', effect: { focus: -0.75, debt: 5, morale: -1 }, log: 'Seven gates, seven "N/A"s, one LGTM from the bot. The quality bar has been raised, and you walked under it.' },
+    ],
+  },
+  {
+    id: 'agile_coach', icon: Sparkles,
+    title: 'The agile coach arrives',
+    once: true,
+    requires: (s) => s.sprint >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A transformation consultant has been engaged "to help the team scale agile." {coach} has a lanyard and a framework. The framework has a train. The train has a two-day planning event in a hotel with no Wi-Fi, next week, attendance "strongly voluntary." Your sprint commitment is unchanged.',
+          (s, c) => `All-team invite at ${T(c)}: "Agile Transformation Kickoff with {coach}." {coach} opens with "I'm not here to add process." Slide 4 is the process. It has 23 ceremonies. One of them is the ceremony for retiring ceremonies. It has never been held. The first real one is a two-day planning offsite.`,
+          '{coach}, the new agile coach, introduces himself by asking everyone for "one word for how the team feels." Eleven people say "fine." He writes FINE on a sticky note and says "we have work to do." The work is a two-day planning offsite. Your tickets are not invited.',
+          'A deck titled "Scaling Agile @ Initech." {coach} explains that the team will join a "release train." The train has a "train engineer." The train engineer is Marcus. The first stop is a two-day planning event in a conference hotel with a "no laptops" rule and a "bring your laptop" reminder.',
+          '{coach} has been with the company for four days and has already renamed the sprint. It is now an "iteration." The standup is a "daily sync." The retro is "inspect and adapt." Nothing else changed. He has booked two days in a hotel to plan the next ten weeks. The room has no Wi-Fi, so people can "be present."',
+        ],
+        choices: [
+          { label: 'Attend the two-day planning offsite', next: 'attend' },
+          { label: 'Dial in from your desk', next: 'dial_in' },
+          { label: 'Skip it. You have a sprint.', next: 'skip' },
+        ],
+      },
+      attend: {
+        description: 'Two days in a hotel ballroom. Day one: a vision speech, a "confidence vote" by fist of five, a lunch where the vegetarian option is bread. Day two: your team\'s "program board" is a wall of red string. {coach} calls this "healthy tension." The Wi-Fi password is on a slide nobody shared.',
+        choices: [
+          { label: 'Be present. Hold the string.', effect: { focus: -2, burnout: 6, morale: -4, dailyTax: { hours: 2, days: 1, label: 'Day two of the planning offsite' } }, log: 'Two days of planning for ten weeks of work. Your tickets are on the program board under a different name with a different date. The confidence vote was a 3. "Great energy."' },
+          { label: 'Work on your laptop under the table', effect: { focus: -1.5, burnout: 5, morale: -2, capital: -0.5, dailyTax: { hours: 1.5, days: 1, label: 'Day two of the planning offsite, under the table' } }, log: 'You got some real work done under a table. {coach} noticed. He mentioned "psychological safety" while looking at you.' },
+        ],
+      },
+      dial_in: {
+        description: 'You dial in. The room has one laptop pointed at a whiteboard. The audio is a ceiling microphone from 2011. You hear chairs. Someone writes your name on a sticky note and moves it to a column you cannot read.',
+        choices: [
+          { label: 'Stay on the call, muted, all day', effect: { focus: -2, burnout: 2, chance: { p: 0.6, effect: { capital: -1 }, log: 'You were the only one on the call. The room could not hear you. Your team was planned without you, and it was noted that you "didn\'t engage."', elseLog: 'Three others dialed in. Together you formed a breakout room nobody visited. You planned your own quarter. It was not adopted.' } }, log: 'You dialed in. The room was a rumour of voices and the squeak of a marker.' },
+          { label: 'Drop after an hour', effect: { focus: -1, capital: -1, burnout: 1 }, log: 'You dropped at the "confidence vote." Your confidence was recorded as a 5 in your absence. It is the highest on the team.' },
+        ],
+      },
+      skip: {
+        description: 'You skip it. You have a sprint. On day two a photo lands in the channel: the program board, fully strung, and in the corner a sticky note with your team\'s name and the word REPRIORITIZED. {coach}: "Great session! The release train has aligned the backlog!"',
+        choices: [
+          { label: 'Open the "aligned" backlog', effect: { focus: -0.5, capital: -2, pivotTicket: true }, log: 'The release train re-prioritized your tickets while you worked. The most-progressed one is "deferred to the next increment." It was replaced with the train\'s top item.' },
+          { label: 'Ask what "aligned" means', effect: { focus: -1, capital: -2, pivotTicket: true, burnout: 1 }, log: 'The answer took forty minutes and contained the word "cadence." Your most-progressed ticket is gone either way. The train does not stop for questions.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'velocity_audit', icon: Briefcase,
+    title: 'Velocity audit',
+    requires: (s) => s.sprint >= 3,
+    descriptions: [
+      'A chart of your velocity is in the leadership deck, next to a team of twelve. Your line is lower. Nobody normalized by headcount because the deck is "directional." Marcus: "They\'d love us to commit to 20% more next sprint. We believe in you."',
+      (s) => `"Velocity Review — Sprint ${s.sprint}." A director shares a chart with two lines. One is your team. One is "Platform (12 engineers)." The axes are unlabeled. The conclusion is labeled: "Commit +20%." Marcus, in chat: "we got this 💪".`,
+      'Marcus forwards a slide from the ops review. Title: "Velocity Opportunity." It is your burn chart with a dotted line drawn 20% higher in PowerPoint. The dotted line is called "ambition." The ask is to hit the dotted line. It was drawn by someone who has never seen a ticket.',
+      'The velocity audit found your points per sprint are "below peer." The peer is a team that logs every 8 as a 3. The recommendation is to commit to 20% more. The recommendation does not mention the 3s. Marcus: "Honestly, it\'s a compliment. They think we can."',
+      'A "data-driven" review. The data is story points, which the same deck calls "not a measure of productivity" on slide 2 and uses as one on slides 3 through 19. Slide 20: "Team commits to +20%." The slide was made before the meeting. The meeting is to agree with it.',
+      { text: 'The velocity audit has noticed that your team is "fast." It noticed because last sprint\'s 8s were logged as 3s. Fast teams get stretch goals. Marcus: "They want 20% more. Which, based on the numbers, we can totally do." The numbers are the 3s.', requires: (s) => (s.foldedEstimates || 0) > 0 },
+    ],
+    choices: [
+      { label: '"Fine. 20% more."', effect: { focus: -0.5, velocityCommit: true, morale: -3, burnout: 2 }, log: 'You committed to 20% more. The commitment is in the deck. Next sprint\'s plan will arrive with the 20% already in it.' },
+      { label: 'Push back with data', effect: { focus: -1.5, capital: -1, chance: { p: 0.5, effect: { velocityCommit: true }, log: 'Your data was "appreciated." Marcus committed to the 20% on your behalf "to keep momentum." The data is in an appendix.', elseLog: 'Your data landed. The commitment was "parked." The chart will be back next quarter with a new dotted line.' } }, log: 'You spent the afternoon building the chart that shows the chart is wrong.' },
+    ],
+  },
+  {
+    id: 'sprint_goal_changed', icon: AlertTriangle,
+    title: 'The sprint goal has changed',
+    requires: (s) => s.currentDay === 3 && s.sprintPlan.some(t => !t.shipped && t.progress > 0),
+    descriptions: [
+      'Wednesday. Marcus: "Small update from leadership: the sprint goal is now the other thing." The tickets are the same tickets. The goal is a different goal. He asks everyone to "re-anchor." Nobody knows what the other thing is yet. It will be in a doc.',
+      (s, c) => `${T(c)}, day three. A Slack announcement: "Sprint goal updated ✏️." The new goal is a sentence from the CEO's all-hands, pasted whole. It contains the word "delight." Your in-progress ticket does not delight anyone. It is now "off-goal."`,
+      'Marcus edits the sprint goal in place. The board keeps history. Monday: "Ship the export." Wednesday: "Enable growth through platform excellence." The tickets did not change. The way they are judged did. The retro will praise the team\'s adaptability.',
+      'A new pinned message: "Mid-sprint goal refresh — same tickets, new focus 🎯." The new focus is the opposite of the old focus. {bro} from sales reacts with 🚀. The ticket you have spent two days on is now "a distraction from the goal."',
+      'Marcus, apologetic: "I know we\'re mid-sprint. Leadership re-prioritized. The goal is now the other thing. The tickets don\'t change, we just... emphasize differently." The emphasis is that your most-progressed ticket is the wrong one.',
+    ],
+    choices: [
+      { label: 'Re-anchor. Pivot to the new goal.', effect: { focus: -1, pivotTicket: true, morale: -4 }, log: 'You re-anchored. Two days of work are "deferred to a future sprint" that does not exist. The retro will call this adaptability.' },
+      { label: 'Keep working the old goal, quietly', effect: { focus: -0.5, capital: -1.5, debt: 3, morale: -2 }, log: 'You kept going. Your ticket is "off-goal" on every dashboard. At the retro you will be praised for adaptability anyway, because the template only has that column.' },
+    ],
+  },
+  {
+    id: 'no_meeting_wednesday', icon: Clock,
+    title: 'No-Meeting Wednesday',
+    requires: (s) => s.currentDay === 3,
+    descriptions: [
+      'No-Meeting Wednesday was announced in a meeting. Your Wednesday now holds an "exception sync," a "quick alignment" and the retrospective on No-Meeting Wednesday. All three have "[no-meeting]" in the invite title, in brackets, as a courtesy.',
+      (s, c) => `It is Wednesday, ${T(c)}. The calendar is clear, as promised. Then three invites arrive in one minute: "[NMW exception] Sync," "[NMW exception] Quick alignment," and "[NMW] Retro on No-Meeting Wednesday." The last one is 90 minutes.`,
+      'Slack from Marcus: "Reminder: No-Meeting Wednesday 🙌 — protecting focus time! (Two small exceptions today, plus a short one to discuss how NMW is going.)" The short one is longer than the two exceptions combined.',
+      'No-Meeting Wednesday has a steering committee. It meets on Wednesdays. Today\'s agenda: "exception policy," "alignment on alignment," and "NMW retro." Attendance is "optional (please attend)." {doug} has already replied-all asking whether the exception sync counts as a meeting.',
+      'The "focus day" has arrived. It has a kickoff. The kickoff is a meeting. It is followed by a "working session," which is a meeting with laptops, and a "retro on focus day," which is a meeting about the meeting. All three invites say "no agenda, just vibes."',
+    ],
+    choices: [
+      { label: 'Attend all three', effect: { focus: -3, burnout: 2, morale: -2 }, log: 'No-Meeting Wednesday contained three meetings and a survey about meeting load. You answered "too many." The survey thanked you for your focus.' },
+      { label: 'Decline all three', effect: { focus: -0.5, capital: -1.5, morale: -1, dailyTax: { hours: 1, days: 1, label: 'The "quick alignment" that moved to 8 AM' } }, log: 'You declined. "Not a team player," said the person who scheduled three meetings on no-meeting day. The quick alignment has moved to tomorrow at 8 AM.' },
+      { label: 'Attend the retro, skip the exceptions', effect: { focus: -1.5, capital: -0.5, burnout: 1 }, log: 'The retro on No-Meeting Wednesday concluded that it was a success, pending the exceptions. The exceptions were rescheduled to Thursday, which is a meeting day anyway.' },
+    ],
   },
 ];
 
