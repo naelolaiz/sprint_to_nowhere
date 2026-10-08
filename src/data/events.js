@@ -16,6 +16,13 @@ const OFFICE = (s) => !s.atHome;
 // `T(cast, 8)` = 8 minutes after the event fired.
 const T = formatClock;
 
+// Name the refactor ticket a manager is about to bump, so the opener matches
+// the card on the board instead of a hard-coded "auth-module refactor".
+const refactorName = (s) => {
+  const r = (s?.sprintPlan || []).find(t => t.type === 'refactor' && !t.shipped && t.progress < t.effort);
+  return r ? `"${r.title}"` : 'the refactor';
+};
+
 export const EVENTS = [
   {
     id: 'quick_sync', icon: MessageSquare,
@@ -71,25 +78,25 @@ export const EVENTS = [
     nodes: {
       pitch: {
         descriptions: [
-          'PM Marcus leans on your desk holding a coffee. "Hey, tiny tweak — can the new feature also let users tip each other in crypto? CEO mentioned it. Should be quick, right?"',
+          { text: 'PM Marcus leans on your desk holding a coffee. "Hey, tiny tweak — can the new feature also let users tip each other in crypto? CEO mentioned it. Should be quick, right?"', requires: OFFICE },
           'Marcus DMs you a Loom: 7 minutes. The Loom\'s entire content is "so what if it ALSO sent users a personalized AI-generated congratulations email when they convert? Tiny add."',
-          'Marcus walks up: "Real quick — can the dashboard also show a leaderboard? Customers love leaderboards. The CEO saw a tweet about gamification, and — honestly, I think it\'s a layup."',
+          { text: 'Marcus walks up: "Real quick — can the dashboard also show a leaderboard? Customers love leaderboards. The CEO saw a tweet about gamification, and — honestly, I think it\'s a layup."', requires: OFFICE },
           'A "quick chat?" Slack ping from Marcus. You jump on. "So — design wants the new flow to also support white-labeling. For one specific customer. They said by EOQ. It\'s on the roadmap now."',
-          'Marcus stops by holding his phone: "OK so — same feature, but, hear me out — what if we ALSO let it import from CSVs? And maybe Excel? And maybe — Google Sheets? Wait, can it do all three?"',
+          { text: 'Marcus stops by holding his phone: "OK so — same feature, but, hear me out — what if we ALSO let it import from CSVs? And maybe Excel? And maybe — Google Sheets? Wait, can it do all three?"', requires: OFFICE },
           'Marcus, with the energy of someone who has had three espressos: "What if the feature ALSO had a shareable Wrapped-style year-in-review? With Spotify-y animations? Just the MVP version. We can iterate."',
-          'Marcus brings a Figma link to your desk. The Figma is the same feature, but with a chatbot. The chatbot is named "Skye." Skye has a personality bible. The personality bible is 14 pages.',
+          { text: 'Marcus brings a Figma link to your desk. The Figma is the same feature, but with a chatbot. The chatbot is named "Skye." Skye has a personality bible. The personality bible is 14 pages.', requires: OFFICE },
           'Marcus: "small ask — can it ALSO be backwards compatible with the V1 API we deprecated 18 months ago? One customer is still on it. They\'re a strategic logo. They are not paying us."',
-          'Marcus, holding a printout (a printout!): "we were thinking — what if the feature was also voice-activated? Just for accessibility. Just MVP. The CEO\'s mom uses screen readers, btw, so it\'s personal for him."',
+          { text: 'Marcus, holding a printout (a printout!): "we were thinking — what if the feature was also voice-activated? Just for accessibility. Just MVP. The CEO\'s mom uses screen readers, btw, so it\'s personal for him."', requires: OFFICE },
           'Marcus opens with: "before you say no — what if it ALSO worked offline? With sync. Like Linear. Customers expect it now." You do not have an offline storage layer. You have never had one.',
           'Marcus has joined your standup. "Real quick — I was thinking, does the feature support multi-tenant white-label embedding? Anduril asked. Well, an Anduril intern asked. But still."',
           'Marcus pings: "OK hear me out — what if the feature was a Slack bot? In addition to a web app. And an iOS app. Same backend. Should be free, right?"',
-          'Marcus, in the kitchen, while you are getting coffee: "tiny one — can we add SOC 2 audit logs to this feature? I told a customer we already had them. They\'re renewing in 6 weeks."',
+          { text: 'Marcus, in the kitchen, while you are getting coffee: "tiny one — can we add SOC 2 audit logs to this feature? I told a customer we already had them. They\'re renewing in 6 weeks."', requires: OFFICE },
           'Marcus: "I had a thought in the shower. What if the feature ALSO surfaced a personalized recommendation, powered by AI, that nudged users toward the upgrade tier? And the prompt was, like, deeply human? I wrote a draft prompt. It\'s 2,000 words."',
           'Marcus: "small thing — can the feature ALSO send a webhook to our partner ecosystem? We have eleven partners. Each one wants a slightly different schema. They\'re all on different versions of OAuth."',
           'Marcus: "I want to flag a tiny opportunity — what if this feature was also our entry point for the agentic AI strategy? Like, an MCP server? Just for partners? The CEO said \'MCP\' in the all-hands and I think we should run with it."',
         ],
         choices: [
-          { label: '"Sure, no problem."', effect: { scopeCreep: true, debt: 3 }, log: 'You agreed. The feature grew by 6 hours. The crypto integration alone has six known bugs.' },
+          { label: '"Sure, no problem."', effect: { scopeCreep: true, debt: 3 }, log: 'You agreed. The feature grew by 6 hours. The "tiny tweak" alone has six known bugs.' },
           { label: '"That\'s a separate ticket."', next: 'pushback_a' },
           { label: '"How would that even work?"', next: 'rabbit_hole' },
           { label: '"Did the CEO actually say that?"', next: 'check_source' },
@@ -380,7 +387,7 @@ export const EVENTS = [
         ],
       },
       pickleball: {
-        description: '{person}: "Right? So the instructor — actually, before I get into it — have you seen the documentary? The pickleball one? On Hulu? Three episodes."',
+        description: '{person}: "Right? So — actually, before I get into it — have you seen the documentary? There\'s a documentary about this. On Hulu. Three episodes. It changed me."',
         choices: [
           { label: '"I have not."', next: 'doc' },
           { label: '"I really need to focus right now."', next: 'deflect' },
@@ -388,15 +395,15 @@ export const EVENTS = [
         ],
       },
       doc: {
-        description: '{person}: "OK so you HAVE to watch it. The third one made me cry. Anyway — Ojai. There\'s this guy, his name is Stefan."',
+        description: '{person}: "OK so you HAVE to watch it. The third one made me cry. Anyway — where was I. Right. There\'s this guy. His name is Stefan."',
         choices: [
           { label: '"{person}. I\'m on a deadline."', next: 'deflect' },
           { label: '"Tell me about Stefan."', next: 'stefan' },
-          { label: '"Why is everything always Ojai with you?"', next: 'ojai' },
+          { label: '"Why is there always a Stefan?"', next: 'ojai' },
         ],
       },
       stefan: {
-        description: '{person}: "STEFAN. Stefan was olympic-adjacent. He has this thing he does with the paddle, kind of a — actually, can I show you on YouTube? I have a clip."',
+        description: '{person}: "STEFAN. Stefan was olympic-adjacent. Different sport, doesn\'t matter. He has this thing he does, kind of a — actually, can I show you on YouTube? I have a clip."',
         choices: [
           { label: '"Maybe later."', next: 'maybe_later' },
           { label: '"Sure, show me."', next: 'youtube' },
@@ -405,19 +412,19 @@ export const EVENTS = [
       youtube: {
         description: '{person} pulls up a 14-minute YouTube video and starts at the beginning. The volume is on full because his AirPods are dead.',
         choices: [
-          { label: 'Endure the entire video', effect: { focus: -2, capital: 1 }, log: 'You watched 14 minutes of pickleball footage. You now have Stefan\'s number, his Instagram, and an open invitation.' },
+          { label: 'Endure the entire video', effect: { focus: -2, capital: 1 }, log: 'You watched 14 minutes of Stefan footage. You now have Stefan\'s number, his Instagram, and an open invitation.' },
           { label: '"{person}. I have to go."', effect: { focus: -1, capital: -1 }, log: 'You cut the video. {person} sighed audibly. The whole pod heard.' },
         ],
       },
       maybe_later: {
-        description: '{person}: "Sure, sure. But like — when? Let\'s grab lunch. Let\'s get the team together. Pickleball happy hour?"',
+        description: '{person}: "Sure, sure. But like — when? Let\'s grab lunch. Let\'s get the team together. Happy hour? Stefan might come."',
         choices: [
           { label: '"Sure, sounds great"', effect: { focus: -1, capital: 1 }, log: 'You agreed in principle. {person} will follow up. Often. He has put it in the team calendar.' },
           { label: '"I really do have to focus."', effect: { focus: -0.75, capital: -0.5 }, log: 'You finally extracted yourself. {person} will mention this in the next 1:1 retro.' },
         ],
       },
       ojai: {
-        description: '{person} pauses, genuinely thinking. "I... don\'t know. I think it\'s the energy? Sarah and I went last summer and she said the same thing about the energy."',
+        description: '{person} pauses, genuinely thinking. "I... don\'t know. I think it\'s the energy? Sarah met him once and said the same thing about the energy."',
         choices: [
           { label: '"OK."', next: 'stefan' },
           { label: '"That\'s deeply un-introspective."', effect: { focus: -0.5, capital: -1 }, log: '{person} blinked twice. He went back to his desk visibly confused.' },
@@ -433,13 +440,13 @@ export const EVENTS = [
       deflect: {
         description: '{person}: "Oh totally, totally. Yeah, no, I get it. ... So this Stefan guy though —"',
         choices: [
-          { label: '"BRAD."', effect: { focus: -0.5, capital: -1 }, log: 'You raised your voice. Two pods turned to look. {person} slunk back to his desk wounded.' },
+          { label: '"{person}."', effect: { focus: -0.5, capital: -1 }, log: 'You raised your voice. Two pods turned to look. {person} slunk back to his desk wounded.' },
           { label: 'Listen anyway', next: 'stefan' },
           { label: 'Just turn back to your screen', effect: { focus: -0.75, capital: -0.5 }, log: 'You silently disengaged. {person} got the message after another minute. The minute counted.' },
         ],
       },
       lied: {
-        description: '{person} lights up. "Oh my god, RIGHT? OK so the cinematography in that part — you\'re the only person who gets it. Wait til I tell you about Ojai."',
+        description: '{person} lights up. "Oh my god, RIGHT? OK so the cinematography in that part — you\'re the only person who gets it. Wait til I tell you about Stefan."',
         choices: [
           { label: 'Listen', next: 'stefan' },
           { label: '"Actually, I gotta jump."', effect: { focus: -0.5, capital: 1 }, log: 'You bailed on a friendly note. The lie about the docu held. You earned a tiny ally and one hour back.' },
@@ -470,12 +477,12 @@ export const EVENTS = [
         ],
         choices: [
           { label: 'Wait politely', next: 'wait' },
-          { label: '"{person}, who are you talking to?"', next: 'who' },
+          { label: '"{person}, what are you doing?"', next: 'who' },
           { label: 'Just leave', effect: { focus: -0.25, burnout: 1 }, log: 'You retreated. {person} will mention this in the engagement survey under "psychological safety."' },
         ],
       },
       wait: {
-        description: '{person} turns to you. "Have you been having issues with the milk? Tell me you\'ve been having issues with the milk."',
+        description: '{person} turns to you. Whatever this was about, it is now about the milk. "Have you been having issues with the milk? Tell me you\'ve been having issues with the milk."',
         choices: [
           { label: '"...no?"', next: 'no_milk' },
           { label: '"Yes, definitely."', next: 'yes_milk' },
@@ -483,7 +490,7 @@ export const EVENTS = [
         ],
       },
       who: {
-        description: '{person}, without breaking eye contact with the machine: "Slack. I have voice-to-text on. Don\'t interrupt the loop, boss."',
+        description: '{person}, without looking up: "Dictating. Slack. Voice-to-text. Don\'t interrupt the loop, boss." You had not noticed he was dictating. He has been dictating the whole time. It is about the milk.',
         choices: [
           { label: 'Back away slowly', effect: { focus: -0.5, burnout: 2 }, log: 'You retreated. {person} kept dictating. The milk thing remains unresolved.' },
           { label: 'Stay and watch', next: 'watch' },
@@ -765,11 +772,11 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          'Manager stops by your desk. "Quick one — the auth-module refactor. We need to bump it for now. Marketing is asking when the new export feature ships and we need to focus."',
-          'Manager DMs: "hey got 5? need to talk re: priorities for this sprint." You jump on. "So — the refactor. Can we move it? Sales has a deal that needs the dashboards-V2 work."',
-          'Manager pulls you aside in the morning. "Look — between us — leadership saw the velocity dip last sprint. We can\'t do another sprint that\'s mostly cleanup. Refactor needs to wait."',
-          'Manager writes one of those long DMs that ends with "thoughts?" The DM\'s actual content is: "we need to bump the refactor in favor of the new pricing-page work."',
-          'Manager joins your async refactor doc with a comment: "Can we discuss this 1:1?" The 1:1 was scheduled six minutes ago.',
+          { text: (s) => `Manager stops by your desk. "Quick one — ${refactorName(s)}. We need to bump it for now. Sales is asking when the feature they promised ships and we need to focus."`, requires: OFFICE },
+          (s) => `Manager DMs: "hey got 5? need to talk re: priorities for this sprint." You jump on. "So — ${refactorName(s)}. Can we move it? Sales has a deal that needs the feature they promised."`,
+          { text: 'Manager pulls you aside in the morning. "Look — between us — leadership saw the velocity dip last sprint. We can\'t do another sprint that\'s mostly cleanup. The refactor needs to wait. The feature sales promised can\'t."', requires: OFFICE },
+          (s) => `Manager writes one of those long DMs that ends with "thoughts?" The DM's actual content is: "we need to bump ${refactorName(s)} in favor of the feature sales promised."`,
+          'Manager joins your async refactor doc with a comment: "Can we discuss this 1:1?" The 1:1 was scheduled six minutes ago. The agenda, added four minutes ago, is one line: "the feature sales promised."',
         ],
         choices: [
           { label: '"...okay."', effect: { bumpRefactor: true }, log: 'The refactor was replaced with a feature. Next sprint, they said. They always say next sprint.' },
@@ -779,7 +786,7 @@ export const EVENTS = [
         ],
       },
       three_sprints: {
-        description: 'Manager: "I know. I get it. But the auth code isn\'t broken right now. The export feature is what the deal-of-the-quarter is asking for."',
+        description: 'Manager: "I know. I get it. But the code you want to refactor isn\'t broken right now. The feature sales promised is what the deal-of-the-quarter is asking for."',
         choices: [
           { label: '"It IS broken. We have three open Sentry alerts."', next: 'sentry' },
           { label: '"What about the deal AFTER this one?"', next: 'next_deal' },
@@ -817,7 +824,7 @@ export const EVENTS = [
         ],
       },
       collapse: {
-        description: 'Manager: "Yeah. I know. I\'ll bring it up. But not this sprint. This sprint we ship export."',
+        description: 'Manager: "Yeah. I know. I\'ll bring it up. But not this sprint. This sprint we ship the feature sales promised."',
         choices: [
           { label: '"Fine. But I\'m blocking time on next sprint for it."', effect: { bumpRefactor: true, capital: 1 }, log: 'You held the line on the principle and lost the battle. Net: the refactor still died.' },
         ],
@@ -831,7 +838,7 @@ export const EVENTS = [
         ],
       },
       process_fix: {
-        description: 'Manager: "Yeah, I keep saying that. Bring it up at retro? But also we still have to ship export."',
+        description: 'Manager: "Yeah, I keep saying that. Bring it up at retro? But also we still have to ship the feature."',
         choices: [
           { label: '"OK"', effect: { bumpRefactor: true }, log: 'You folded with the assurance that you\'d "bring it up at retro." You will not.' },
           { label: '"I\'ll bring it up at retro AND I want this sprint to keep the refactor."', next: 'have_both' },
@@ -853,13 +860,13 @@ export const EVENTS = [
         ],
       },
       add_doc: {
-        description: 'Manager: "Sure. You\'re added. Anyway — export feature?"',
+        description: 'Manager: "Sure. You\'re added. Anyway — the feature?"',
         choices: [
           { label: '"OK."', effect: { bumpRefactor: true, capital: 1 }, log: 'The refactor died but you have an audit trail. That will, at minimum, feel good in retro.' },
         ],
       },
       on_the_side: {
-        description: 'Manager: "Honestly? I\'d rather you didn\'t — if it breaks something we won\'t have you on the export. Can it just wait one sprint?"',
+        description: 'Manager: "Honestly? I\'d rather you didn\'t — if it breaks something we won\'t have you on the feature. Can it just wait one sprint?"',
         choices: [
           { label: '"It\'s waited four sprints already."', next: 'four_sprints' },
           { label: '"Fine."', effect: { bumpRefactor: true }, log: 'You backed off from the side-quest plan. The refactor died officially.' },
@@ -1149,7 +1156,7 @@ export const EVENTS = [
       'Volunteer Day at the food bank. The food bank told the company they\'re fully staffed already. The company sent everyone anyway.',
     ],
     choices: [
-      { label: 'Attend with a smile', effect: { focus: -4, burnout: 5 }, log: 'You sorted cans for four hours. There were photos. You were in three of them. Your t-shirt was tucked in for one of them.' },
+      { label: 'Attend with a smile', effect: { focus: -4, burnout: 5 }, log: 'You volunteered for four hours. There were photos. You were in three of them. Your t-shirt was tucked in for one of them.' },
       { label: 'Show up for the photo, leave during the lunch', effect: { focus: -1.5, capital: -0.5, burnout: 2 }, log: 'You stayed for the photo and the company-branded sandwich. You were back at your desk by 1:15. The photo is uncropped on the careers page.' },
       { label: 'Skip — you have actual work', effect: { capital: -1, burnout: 1, morale: -2 }, log: 'Your "low engagement score" was noted somewhere. The next engagement-survey deck will reference it indirectly.' },
     ],
@@ -1595,10 +1602,10 @@ export const EVENTS = [
       },
       // Real blocker — the IRONIC version of "take it offline" was Marcus\'s deflection in the openers
       real_blocker: {
-        description: 'Marcus: "totally — and that\'s exactly the kind of thing we should — uh — take offline?" {dev}: "It\'s the dashboard. Customers can\'t see it. Right now." Marcus, recalibrating in real time: "OK so — quick exception today — let\'s actually surface it."',
+        description: 'Marcus: "totally — and that\'s exactly the kind of thing we should — uh — take offline?" {dev}, flatly: "It is not offline material. It is broken. Right now. People are looking at it right now." Marcus, recalibrating in real time: "OK so — quick exception today — let\'s actually surface it."',
         choices: [
-          { label: 'Volunteer to look at it now', effect: { focus: -3, burnout: 5, debt: -2, capital: 1 }, log: 'You took the dashboard fire. You shipped a real fix. Marcus posted in #wins. He spelled your name wrong.' },
-          { label: '"It\'s the platform team\'s service. Page them."', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You held the line. The platform team eventually got paged. Marcus felt you "weren\'t a team player today" and will say so in your 1:1, gently.' },
+          { label: 'Volunteer to look at it now', effect: { focus: -3, burnout: 5, debt: -2, capital: 1 }, log: 'You took the fire. You shipped a real fix. Marcus posted in #wins. He spelled your name wrong.' },
+          { label: '"That\'s not ours. Page whoever owns it."', effect: { focus: -0.5, capital: -1, burnout: 3 }, log: 'You held the line. The owning team eventually got paged. Marcus felt you "weren\'t a team player today" and will say so in your 1:1, gently.' },
           { label: 'Suggest the on-call rotation', effect: { focus: -1, capital: -0.5, burnout: 2 }, log: 'You found the right person. They were already on it. The only damage was 6 minutes of your morning.' },
         ],
       },
@@ -1623,17 +1630,18 @@ export const EVENTS = [
         description: 'Marcus: "totally totally — let\'s take that — offline." Then, 4 seconds later: "actually, since everyone\'s here, super quick — could you just walk us through it now?" Six minutes pass. Nothing has been taken offline.',
         choices: [
           { label: '"Marcus, you literally just said offline."', effect: { focus: -1, capital: -1, burnout: 3 }, log: 'You held him to his own words. Marcus did the "totally fair" thing. The conversation continued anyway, slightly muted, for 4 more minutes.' },
-          { label: 'Drop off and DM the right people directly', effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You bailed and resolved the actual issue async in 8 minutes. Marcus DM\'d you "great hustle today!"' },
+          { label: 'Drop off and DM the right people directly', requires: REMOTE, effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You bailed and resolved the actual issue async in 8 minutes. Marcus DM\'d you "great hustle today!"' },
+          { label: 'Walk back to your desk and DM the right people directly', requires: OFFICE, effect: { focus: -0.5, capital: 0.5, burnout: 2 }, log: 'You left the huddle and resolved the actual issue async in 8 minutes. Marcus DM\'d you "great hustle today!"' },
         ],
       },
       // ----- your_update path: branches by what happens AFTER you give a clean update -----
       your_update: {
         descriptions: [
           'You give a clean 30-second update. Marcus: "love that — quick question for you, real quick — could you also look at the export thing this week?" The export thing is not on your sprint.',
-          'You give a clean 30-second update. {offliner}: "Building on what they just said — I think there\'s actually a bigger question here, which is — what does success look like?"',
+          'You give a clean 30-second update. {offliner}: "Building on what they just said — I think there\'s actually a bigger question here, which is — what does success look like? Could you put together a quick success-metrics doc for the team? Nothing big. By Thursday?" Nobody has defined success. There is now a deadline for it.',
           { text: 'You give a clean 30-second update. Logan, who has been silent on mute, unmutes for the first time and says: "🎯 — quick one — could you write that up in a doc by EOD? Just a one-pager. For my readout." Logan re-mutes.', requires: REMOTE },
           { text: 'You give a clean 30-second update. Logan, who has been silent the whole standup, looks up from his phone for the first time and says: "🎯 — quick one — could you write that up in a doc by EOD? Just a one-pager. For my readout." Logan looks back down.', requires: OFFICE },
-          'You give a clean 30-second update. Marcus, immediately: "amazing — and totally aligned with what we discussed in our 1:1." You did not have a 1:1 about this.',
+          'You give a clean 30-second update. Marcus, immediately: "amazing — and totally aligned with what we discussed in our 1:1. So you\'re good to also pick up the onboarding tweak this week, like we said?" You did not have a 1:1 about this. Nobody has said the words "onboarding tweak" to you before.',
         ],
         choices: [
           { label: '"Sure, I\'ll add it to the sprint."', effect: { addUrgentFeature: true, capital: 0.5, burnout: 4 }, log: 'You absorbed the new ticket and thanked them for it. Marcus celebrated your "energy."' },
@@ -1644,10 +1652,10 @@ export const EVENTS = [
         ],
       },
       triage_attempt: {
-        description: 'Marcus: "totally — but it\'s coming from a customer ask, so realistically we have to do it this sprint? Triage feels like — a process answer to a customer question."',
+        description: 'Marcus: "totally — but it\'s coming from above, so realistically we have to do it this sprint? Triage feels like — a process answer to a people question."',
         choices: [
           { label: '"Process exists for a reason."', effect: { focus: -1, capital: -1, burnout: 4 }, log: 'You held. Marcus called you "principled" in a tone he uses when he means "difficult."' },
-          { label: 'Sigh and absorb it', effect: { addUrgentFeature: true, burnout: 5 }, log: 'You folded. The feature was added. The customer is, as ever, a friend of the CEO\'s from college.' },
+          { label: 'Sigh and absorb it', effect: { addUrgentFeature: true, burnout: 5 }, log: 'You folded. The ticket was added. The ask traces back, as ever, to "a conversation" nobody can find.' },
         ],
       },
       what_drop: {
@@ -1734,20 +1742,20 @@ export const EVENTS = [
       open: {
         descriptions: [
           'A consultant named {facilitator} (your "Wellness Facilitator," hired during the hiring freeze) opens with: "Before we begin, let\'s do a body scan. Notice your jaw. Notice your shoulders. Notice the tension."\n\nYour Slack pings. It is your manager: "u up? quick q before EOD."\n\nThe slide deck is 78 slides. Two coworkers were laid off this quarter for "performance."',
-          '{facilitator} opens with a slide that says "BURNOUT IS A SYSTEMS ISSUE — and that\'s why we\'re giving YOU the tools." She does not address the systems part again.\n\nYour Slack pings. Marcus: "hey can you hop on a quick thing rn 🙏"',
-          'A "Burnout & Boundaries" workshop. {facilitator} smiles warmly: "I want to start by acknowledging — this work is HARD." She lets it sit. The HR rep behind her is checking email.\n\nYour calendar pings. A meeting was just added during this workshop. The organizer is your skip-level.',
-          '{facilitator}: "Resilience is a muscle. We build it through practice. Let\'s practice." The exercise is naming three things you\'re grateful for at work.\n\nThe person next to you cannot think of three. Neither can you.',
-          '"Mental Wellness in the Modern Workplace." {facilitator} starts: "Show of hands — who feels like the pace right now is sustainable?" Three hands go up. All three are leadership.',
+          '{facilitator} opens with a slide that says "BURNOUT IS A SYSTEMS ISSUE — and that\'s why we\'re giving YOU the tools." She does not address the systems part again.\n\nYour Slack pings. Your manager: "hey can you hop on a quick thing rn 🙏"',
+          'A "Burnout & Boundaries" workshop. {facilitator} smiles warmly: "I want to start by acknowledging — this work is HARD." She lets it sit. The HR rep behind her is checking email.\n\nYour calendar pings. A meeting was just added during this workshop. The organizer is your skip-level. Your manager DMs: "saw the invite — can you take it? i\'m double-booked 🙏"',
+          '{facilitator}: "Resilience is a muscle. We build it through practice. Let\'s practice." The exercise is naming three things you\'re grateful for at work.\n\nThe person next to you cannot think of three. Neither can you.\n\nYour Slack pings. Your manager: "u around? quick favor before EOD."',
+          '"Mental Wellness in the Modern Workplace." {facilitator} starts: "Show of hands — who feels like the pace right now is sustainable?" Three hands go up. All three are leadership.\n\nYour phone buzzes. Your manager: "quick q when you\'re out. not urgent. (kind of urgent.)"',
         ],
         choices: [
-          { label: 'Do the body scan', next: 'body_scan' },
+          { label: 'Do the exercise, eyes closed', next: 'body_scan' },
           { label: 'Reply to your manager', next: 'reply_mgr' },
           { label: '"Is the EAP actually accessible?"', next: 'eap' },
           { label: '"Is this happening because of the layoffs?"', next: 'layoffs' },
         ],
       },
       body_scan: {
-        description: '{facilitator}: "Notice the tension and just... let it go." You cannot let it go because the Slack pings keep coming. {facilitator} continues: "Mental health is everyone\'s responsibility. We\'re here to give you the TOOLS."',
+        description: '{facilitator}: "Whatever you\'re holding — just... let it go." You cannot let it go because the Slack pings keep coming. {facilitator} continues: "Mental health is everyone\'s responsibility. We\'re here to give you the TOOLS."',
         choices: [
           { label: '"What tools?"', next: 'tools' },
           { label: 'Just nod', effect: { focus: -1.5, burnout: 6 }, log: 'You nodded. The body scan ended. The tension did not go.' },
@@ -1835,7 +1843,7 @@ export const EVENTS = [
     title: '1:1 with your manager — career growth',
     descriptions: [
       'Your manager asks where you see yourself in two years. Wants to "set you up for success." Asks what would excite you. They have a notebook open. They are nodding.',
-      'Manager opens the 1:1 with: "Let\'s set aside the tactical stuff today and talk career." They have a Notion page titled "{your name} — Growth." Three of the bullet points are aspirational. Two are blank.',
+      'Manager opens the 1:1 with: "Let\'s set aside the tactical stuff today and talk career." They have a Notion page titled "Jared — Growth." Three of the bullet points are aspirational. Two are blank.',
       'Quarterly career chat. Manager: "What\'s a stretch project that would energize you? Forget what we\'re currently doing — what\'s YOUR thing?"',
       'Manager pulls up a "growth framework" doc. The doc was created last Friday. The doc has more rubric than substance, but they really want to "ground this conversation in something concrete."',
       'Manager: "Look, I want to be intentional this quarter about your trajectory. What\'s a skill you\'d want to develop? What\'s a project you\'d find meaningful?" They sound earnest. They might mean it.',
@@ -1865,7 +1873,7 @@ export const EVENTS = [
             platform: "you'll own the AngularJS 1.x dashboard from the 2017 acquisition. We're not investing in greenfield this year.",
           };
           const what = swap[s.promise] || "an inherited maintenance project from a wound-down team.";
-          return `Manager catches you at your desk. "Hey — got some good news. Remember in your 1:1 you said you wanted to grow? HQ has a project for your team. ${what} Your manager — me — thinks it'll be a great learning opportunity."`;
+          return `Manager finds you. "Hey — got some good news. Remember in your 1:1 you said you wanted to grow? HQ has a project for your team. ${what} Your manager — me — thinks it'll be a great learning opportunity."`;
         },
         choices: [
           { label: '"...sure."', effect: { addLegacy: true, clearPromise: true, capital: -1 }, log: 'A legacy project was assigned. The promise has been... reframed.' },
@@ -1976,10 +1984,10 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          'Marcus stops by your desk. He looks tired. "Hey. So. Leadership had an offsite last weekend. They\'re re-thinking the whole approach for what you\'re working on. They want to go in a different direction. We\'re probably scrapping the current one."',
+          { text: 'Marcus stops by your desk. He looks tired. "Hey. So. Leadership had an offsite last weekend. They\'re re-thinking the whole approach for what you\'re working on. They want to go in a different direction. We\'re probably scrapping the current one."', requires: OFFICE },
           'A surprise calendar invite, no agenda, between Marcus and a VP you\'ve never spoken to. The meeting opens with Marcus saying "thanks for joining — we have some new context." There is always new context.',
           'Marcus DMs: "got 10 min? need to share something — leadership wants to take a different angle on what you\'ve been building. wanted you to hear it from me first."',
-          'Marcus walks over. He doesn\'t sit. "OK so — and please hear me out — but the customer feedback came in and we think we need to rethink the approach. From the ground up."',
+          { text: 'Marcus walks over. He doesn\'t sit. "OK so — and please hear me out — but the customer feedback came in and we think we need to rethink the approach. From the ground up."', requires: OFFICE },
           'Marcus, wincing: "I\'m really sorry to do this — but the strategy team had a session yesterday and your project is, uh, getting reframed. They want a totally different direction. I just got told this morning."',
         ],
         choices: [
@@ -2184,10 +2192,10 @@ export const EVENTS = [
       open: {
         descriptions: [
           'You\'re integrating @company/auth-sdk v2.4 — the library platform-team owns. Your integration test fails: "TypeError: Cannot read properties of undefined (reading \'token\')." The error message links to a Stack Overflow question from 2018 with no answers.',
-          'You upgrade @company/data-client from 3.1.0 to 3.1.1 because Renovate told you to. The minor bump silently changed return types. 14 of your tests fail with cryptic "Expected: object, Received: object" errors.',
-          'Your CI just turned red across the org. Someone published @company/shared-utils 4.0.0 to the internal registry without docs, without changelog, without a heads-up. The Slack thread asking "is this intentional?" has 47 messages.',
-          'The platform team\'s @company/api-mocker package is now hard-requiring Node 22. Your service is on 18. The migration doc says "should be straightforward." It will not be straightforward.',
-          'You import @company/forms-kit. The autocomplete suggests an API. The API does not exist at runtime. The package was rewritten last quarter. The TypeScript types were not updated. The README has a banner: "🚧 Migration in progress."',
+          'You upgrade @company/auth-sdk from 2.4.0 to 2.4.1 because Renovate told you to. The patch bump silently changed return types. 14 of your tests fail with cryptic "Expected: object, Received: object" errors.',
+          'Your CI just turned red across the org. Someone published @company/auth-sdk 2.5.0 to the internal registry without docs, without changelog, without a heads-up. The Slack thread asking "is this intentional?" has 47 messages.',
+          'The platform team\'s @company/auth-sdk is now hard-requiring Node 22. Your service is on 18. The migration doc says "should be straightforward." It will not be straightforward.',
+          'You import @company/auth-sdk. The autocomplete suggests an API. The API does not exist at runtime. The package was rewritten last quarter. The TypeScript types were not updated. The README has a banner: "🚧 Migration in progress."',
         ],
         choices: [
           { label: 'File a ticket with platform-team', next: 'ticket' },
@@ -2244,7 +2252,7 @@ export const EVENTS = [
       dm_lead: {
         description: '{dev} replies 3 hours later: "Hey! Thanks for flagging — yeah, known issue. Patch coming in v3 (in flight). For now I\'d just patch around it on your end."',
         choices: [
-          { label: '"How do I patch around a DI bug?"', next: 'how_patch' },
+          { label: '"How do I patch around a bug that lives inside your package?"', next: 'how_patch' },
           { label: 'Fork and patch it', next: 'fork' },
         ],
       },
@@ -2305,7 +2313,7 @@ export const EVENTS = [
         ],
       },
       refresh: {
-        description: 'Same error every time: "Server error: please try again." The page background flickers between white and gray. The vendor\'s status page has been "monitoring" for 2 hours.',
+        description: 'Same error every time: "Server error: please try again." The page background flickers between white and gray. The status page has been "monitoring" for 2 hours.',
         choices: [
           { label: 'Keep refreshing', effect: { focus: -2, focusPct: -15, burnout: 7 }, log: 'You refreshed for 40 minutes. The system came back, then went down again. You did not get any work done.' },
           { label: 'Move on, code from memory', next: 'code_blind' },
@@ -2505,20 +2513,26 @@ export const EVENTS = [
         ],
       },
       wait: {
-        description: (s, c) => `At ${T(c, 11)}, {bro} from sales walks in carrying a coffee. "Sorry sorry — Doug is having TROUBLE at the espresso bar." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally arrives, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`,
+        descriptions: [
+          { text: (s, c) => `At ${T(c, 11)}, {bro} from sales walks in carrying a coffee. "Sorry sorry — Doug is having TROUBLE at the espresso bar." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally arrives, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`, requires: OFFICE },
+          { text: (s, c) => `At ${T(c, 11)}, {bro} from sales joins, audio first, video later, holding a coffee. "Sorry sorry — the espresso bar had a whole thing." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally joins, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`, requires: REMOTE },
+        ],
         choices: [
           { label: 'Push to start anyway', next: 'start' },
           { label: 'Wait for the agenda', next: 'no_agenda' },
         ],
       },
       coffee_grab: {
-        description: (s, c) => `You go to the kitchen. Doug is there, mid-dictation about the milk. By the time you extract yourself it's ${T(c, 13)}. Back in the conference room the meeting has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`,
+        descriptions: [
+          { text: (s, c) => `You go to the kitchen. Doug is there, mid-dictation about the milk. By the time you extract yourself it's ${T(c, 13)}. Back in the conference room the meeting has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`, requires: OFFICE },
+          { text: (s, c) => `You go to your kitchen. The dishwasher needs emptying. You empty it. You wipe the counter. By the time you're back it's ${T(c, 13)} and the call has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`, requires: REMOTE },
+        ],
         choices: [
           { label: 'Sit down quietly', effect: { focus: -1, burnout: 5 }, log: 'You missed the first 8 minutes. The first 8 minutes were the only useful 8 minutes. The next 50 were not.' },
         ],
       },
       dm_marcus: {
-        description: (s, c) => `Marcus DMs back at ${T(c, 12)}: "omg sorry running 5 min late — actually 10. our prev is going long bc Brad raised something." At ${T(c, 23)} Marcus arrives. The prev ran 53 minutes over. This meeting was scheduled to end at ${T(c, 30)}.`,
+        description: (s, c) => `Marcus DMs back at ${T(c, 12)}: "omg sorry running 5 min late — actually 10. our prev is going long bc Brad raised something." At ${T(c, 23)} Marcus joins. The prev ran 53 minutes over. This meeting was scheduled to end at ${T(c, 30)}.`,
         choices: [
           { label: 'Sigh, push to start', next: 'start' },
         ],
@@ -2630,7 +2644,7 @@ export const EVENTS = [
         choices: [
           { label: 'Try a different browser', next: 'other_browser' },
           { label: 'Just email facilities', next: 'email_facilities' },
-          { label: 'Give up', effect: { focus: -2, burnout: 6 }, log: 'You spent 30 minutes on the SSO loop. The issue is unfiled. The bathroom is still broken.' },
+          { label: 'Give up', effect: { focus: -2, burnout: 6 }, log: 'You spent 30 minutes on the SSO loop. The issue is unfiled. The building is still broken.' },
         ],
       },
       other_browser: {
@@ -3308,20 +3322,20 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          'A 14-paragraph email from the platform team lands in your inbox: "Notice: @company/auth-sdk v2 is being sunset on [date 30 days out]. v3 has a different API surface. Migration guide attached. Please confirm you\'re on the new version by EOD on [date]." Your service uses v2 for everything.',
-          'Slack #platform-announcements: "🚨 DEPRECATION 🚨 the events-firehose package is end-of-life on [date 30 days out]. Replacement is a Kafka-based system you have not been onboarded to. Migration support: read the docs and good luck." 47 people 😢-react. None of them are on the platform team.',
-          'Email from the platform-team lead, you, and 14 other consumers: "small heads-up — we\'re sunsetting v2 of the data-client. Yes, we know we said it would be supported through Q4. Yes, we know we said the same thing two quarters ago. The timeline is now 30 days. We appreciate your flexibility."',
+          'A 14-paragraph email from the platform team lands in your inbox: "Notice: @company/auth-sdk v2 is being sunset on [date 30 days out]. v3 has a different API surface. Migration guide attached. Please confirm you\'re on the new version by EOD on [date]." Your service uses v2 for everything. Twenty minutes later a bot named "Migrator-9000" opens a 1,400-line PR against your repo titled "[automated] Migrate to auth-sdk v3." It breaks 41 tests. It is set to auto-merge in 30 days unless blocked.',
+          'Slack #platform-announcements: "🚨 DEPRECATION 🚨 the events-firehose package is end-of-life on [date 30 days out]. Replacement is a Kafka-based system you have not been onboarded to. Migration support: read the docs and good luck." 47 people 😢-react. None of them are on the platform team. A bot named "Migrator-9000" has already opened a PR against your repo titled "[automated] Migrate to Kafka." It has no description. It is set to auto-merge in 30 days unless blocked.',
+          'Email from the platform-team lead, you, and 14 other consumers: "small heads-up — we\'re sunsetting v2 of the data-client. Yes, we know we said it would be supported through Q4. Yes, we know we said the same thing two quarters ago. The timeline is now 30 days. We appreciate your flexibility." Attached, helpfully, is a link to a PR a bot named "Migrator-9000" has opened against your repo. 1,400 lines. CI is red. It will auto-merge in 30 days unless blocked.',
           'The platform team\'s deprecation bot opens a PR against your repo titled: "[automated] Migrate to data-client v3." The PR has 1,400 lines, no description, and breaks 41 tests. The CI build is red. The PR is set to "auto-merge after 30 days unless blocked." It is signed by a bot named "Migrator-9000."',
         ],
         choices: [
           { label: 'Read the migration guide', next: 'guide' },
-          { label: 'Reply: "this timeline isn\'t feasible — we have 14 services on v2."', next: 'pushback_dep' },
+          { label: 'Reply: "this timeline isn\'t feasible — we have 14 services on the old version."', next: 'pushback_dep' },
           { label: 'Block Migrator-9000\'s PR until further notice', next: 'block_pr' },
           { label: 'Quietly do the migration before the deadline', next: 'just_do_it' },
         ],
       },
       guide: {
-        description: 'The migration guide is 47 pages. Step 1 references a config flag that does not exist in v3. Step 7 references a method that has been renamed in v3. The "common gotchas" section has one bullet: "if you encounter issues, please file a ticket."',
+        description: 'The migration guide is 47 pages. Step 1 references a config flag that does not exist in the new version. Step 7 references a method that has been renamed in the new version. The "common gotchas" section has one bullet: "if you encounter issues, please file a ticket."',
         choices: [
           { label: 'File a ticket about the bad guide', next: 'file_ticket' },
           { label: 'Reply-all with the inaccuracies', next: 'pushback_dep' },
@@ -3329,7 +3343,7 @@ export const EVENTS = [
         ],
       },
       pushback_dep: {
-        description: 'The platform-team lead replies-all 4 hours later: "we hear you. unfortunately the timeline is set by leadership. v3 has security improvements that v2 does not. we\'d love to push the date but we cannot." {dev} from another team replies: "+1 — we have similar concerns." Six other +1s land in the next 20 minutes.',
+        description: 'The platform-team lead replies-all 4 hours later: "we hear you. unfortunately the timeline is set by leadership. the new version has security improvements the old one does not. we\'d love to push the date but we cannot." {dev} from another team replies: "+1 — we have similar concerns." Six other +1s land in the next 20 minutes.',
         choices: [
           { label: 'Organize the consumers — propose a 90-day timeline', next: 'organize' },
           { label: 'Sigh, accept the 30 days', next: 'just_do_it' },
@@ -3337,7 +3351,7 @@ export const EVENTS = [
         ],
       },
       organize: {
-        description: 'You start a "v2 Sunset — Cross-Team Concern" doc. 11 engineers from 7 teams sign on within an hour. The platform-team lead joins the doc and reads silently for 14 minutes. Then they post: "OK. We\'ll go to 60 days. With phased rollout. Thank you for the doc."',
+        description: 'You start a "Platform Sunset — Cross-Team Concern" doc. 11 engineers from 7 teams sign on within an hour. The platform-team lead joins the doc and reads silently for 14 minutes. Then they post: "OK. We\'ll go to 60 days. With phased rollout. Thank you for the doc."',
         choices: [
           { label: 'Accept the win, plan a real migration', effect: { focus: -1.5, capital: 2, morale: 5, burnout: 3, debt: -2 }, log: 'A rare cross-team win. The migration was real, paced, and clean. The platform team noted you in their post-mortem as "constructive." Your manager mentioned it in calibration.' },
         ],
@@ -3346,7 +3360,7 @@ export const EVENTS = [
         description: 'Your manager talks to the platform team\'s manager. Two days of meeting-tag. The result: a "phased migration" with the same 30-day deadline but a "softer enforcement." Nobody knows what "softer enforcement" means.',
         choices: [
           { label: 'Just do the migration', next: 'just_do_it' },
-          { label: 'Wait out "softer enforcement"', effect: { focus: -1, capital: -1, debt: 5, burnout: 5, addUrgentFeature: true }, log: 'You waited. On day 31, your service started 502\'ing. The "soft enforcement" turned out to be a sunset. A new ticket: "[hotfix] Auth SDK v2 EOL." On you.' },
+          { label: 'Wait out "softer enforcement"', effect: { focus: -1, capital: -1, debt: 5, burnout: 5, addUrgentFeature: true }, log: 'You waited. On day 31, your service started 502\'ing. The "soft enforcement" turned out to be a sunset. A new ticket: "[hotfix] deprecated package EOL." On you.' },
         ],
       },
       block_pr: {
@@ -3359,7 +3373,7 @@ export const EVENTS = [
       just_do_it: {
         description: 'You spend the next two weeks migrating. You hit four undocumented gotchas. You file three tickets. You write a real migration guide for the next team to do this. The deadline is met by 4 hours.',
         choices: [
-          { label: 'Ship it', effect: { focus: -3.5, capital: 1, debt: -2, burnout: 8 }, log: 'You ate the migration. The codebase is on v3. The platform team thanked you in passing. Three other teams used your guide. Their managers do not know you exist.' },
+          { label: 'Ship it', effect: { focus: -3.5, capital: 1, debt: -2, burnout: 8 }, log: 'You ate the migration. The codebase is on the new version. The platform team thanked you in passing. Three other teams used your guide. Their managers do not know you exist.' },
         ],
       },
       file_ticket: {

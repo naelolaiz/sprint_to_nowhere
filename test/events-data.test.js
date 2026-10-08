@@ -113,6 +113,44 @@ describe('event data', () => {
     if (ev.requires) for (const st of Object.values(CONTEXTS)) expect(() => ev.requires(st)).not.toThrow();
   });
 
+  it('has no unresolved template artifacts in any text', () => {
+    // A placeholder is exactly {word}; anything else inside braces ("{your
+    // name}") would render literally on screen.
+    const check = (text, where) => {
+      if (typeof text !== 'string') return;
+      for (const m of text.matchAll(/\{[^}]*\}/g)) {
+        expect(/^\{\w+\}$/.test(m[0]), `${where}: template artifact ${m[0]}`).toBe(true);
+      }
+    };
+    const render = (d) => (typeof d === 'function' ? d(CONTEXTS.office, { _baseMin: 0 }) : d);
+    for (const ev of ALL) {
+      check(ev.title, ev.id);
+      for (const { key, node } of nodesOf(ev)) {
+        const where = `${ev.id}/${key}`;
+        const pool = Array.isArray(node.descriptions) ? node.descriptions
+          : (Array.isArray(ev.descriptions) ? ev.descriptions : []);
+        for (const d of pool) check(render(textOf(d)), where);
+        check(render(node.description), where);
+        for (const c of node.choices || []) {
+          check(c.label, where);
+          check(c.log, where);
+          for (const v of Object.values(c.logByDesc || {})) check(v, where);
+        }
+      }
+    }
+  });
+
+  // Regression: every opener of the standup "your update" node must ask you
+  // for something, because all of its replies answer a request. Two openers
+  // used to be pure commentary, which left the replies answering nothing.
+  it('standup follow-up openers each contain an ask', () => {
+    const ev = EVENTS.find(e => e.id === 'daily_standup');
+    for (const d of ev.nodes.your_update.descriptions) {
+      const text = textOf(d);
+      expect(/\?/.test(text), `your_update opener without an ask: ${text.slice(0, 70)}`).toBe(true);
+    }
+  });
+
   it('home-only events are tagged and in-office events are not also home-only', () => {
     for (const ev of EVENTS) {
       if (ev.id.startsWith('home_')) expect(ev.atHome, `${ev.id} should be atHome`).toBe(true);
