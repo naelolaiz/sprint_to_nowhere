@@ -229,4 +229,27 @@ describe('event data', () => {
       expect(ev.atHome && ev.inOffice, `${ev.id} cannot be both`).toBeFalsy();
     }
   });
+  // The five events that carry most days each have a big opener pool, and
+  // their replies are written once for the whole pool. So no opener may
+  // repeat, Marcus must be in every "tiny tweak" pitch (the replies talk
+  // back to him), and every refinement opener has to put the player in the
+  // meeting Marcus is running, because "engage" has him moving to the next
+  // ticket.
+  it('the busiest events keep their opener pools distinct and on topic', () => {
+    const render = (d) => { const t = textOf(d); return typeof t === 'function' ? t(CONTEXTS.office, { _baseMin: 0 }) : t; };
+    const pools = {
+      production_fire: 20, scope_change: 20, all_hands: 40, backlog_refinement: 30, daily_standup: 40,
+    };
+    for (const [id, min] of Object.entries(pools)) {
+      const ev = EVENTS.find(e => e.id === id);
+      const pool = (ev.descriptions || ev.nodes[ev.start].descriptions).map(render);
+      expect(pool.length, id).toBeGreaterThanOrEqual(min);
+      expect(new Set(pool).size, `${id}: duplicate opener`).toBe(pool.length);
+      for (const text of pool) {
+        if (id === 'scope_change') expect(/Marcus/.test(text), `pitch without Marcus: ${text.slice(0, 70)}`).toBe(true);
+        if (id === 'backlog_refinement') expect(/Marcus|Refinement/.test(text), `refinement opener off topic: ${text.slice(0, 70)}`).toBe(true);
+        if (id === 'daily_standup') expect(/Marcus|standup|huddle|update/i.test(text), `standup opener off topic: ${text.slice(0, 70)}`).toBe(true);
+      }
+    }
+  });
 });
