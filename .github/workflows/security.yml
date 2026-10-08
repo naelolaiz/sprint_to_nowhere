@@ -1,0 +1,71 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Mondays, early. Advisories do not wait for a PR to be opened.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  codeql:
+    name: CodeQL (JavaScript)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:javascript-typescript
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 22
+
+      # What ships to the browser (react, react-dom, lucide-react) must be
+      # clean. Audits the lockfile against the advisory database; no install
+      # needed.
+      - name: Audit shipped dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      # Build-time tooling is reported but does not block: every remaining
+      # finding today is a DoS in Tailwind 3's glob/selector parsers, only
+      # fixable by the Tailwind 4 major. Dependabot keeps the rest current.
+      - name: Audit build tooling (informational)
+        continue-on-error: true
+        run: npm audit --audit-level=high
