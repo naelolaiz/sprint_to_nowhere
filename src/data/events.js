@@ -14,7 +14,11 @@ const OFFICE = (s) => !s.atHome;
 // Shorthand for descriptions that need to render the actual in-game time.
 // `T(cast)` = current wall-clock when the event fired.
 // `T(cast, 8)` = 8 minutes after the event fired.
-const T = formatClock;
+// Resolved at call time, not at import time: this module and game/cast.js
+// import each other, so whichever loads second sees the other's exports as
+// undefined while it evaluates. A direct alias would be undefined forever if
+// game/cast.js happened to load first.
+const T = (cast, offsetMin) => formatClock(cast, offsetMin);
 
 // Name the refactor ticket a manager is about to bump, so the opener matches
 // the card on the board instead of a hard-coded "auth-module refactor".
