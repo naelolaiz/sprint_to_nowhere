@@ -12,7 +12,7 @@ import {
   initialState, totalRemaining, pickDayEvents, dailyFocusBudget,
   eventApplicable, pushRecentEvent, pushRecentDesc,
 } from './state.js';
-import { applyChoice, workOnTicket } from './mechanics.js';
+import { applyChoice, workOnTicket, applyContextSwitch, contextSwitchCost } from './mechanics.js';
 import { applyTeammateContributions } from './team.js';
 
 const quickSync = () => EVENTS.find(e => e.id === 'quick_sync');
@@ -139,7 +139,29 @@ export const chooseEvent = (prev, choice) => {
   return { ...newState, subPhase: 'work', dialogNode: 'start', eventQueue: [] };
 };
 
-export const work = (prev, id) => ({ ...workOnTicket(prev, id), subPhase: 'day-summary' });
+// Sit down on a ticket. The first one of the day is free to start; every
+// later one pays the context-switch tax first. The day ends when the hours
+// are gone or nothing is left to work on; otherwise you are back at your
+// desk with whatever is left of the afternoon.
+export const work = (prev, id) => {
+  const switches = prev.actionsToday?.work || 0;
+  let s = prev;
+  if (switches > 0) {
+    if (prev.dayFocusRemaining <= contextSwitchCost(switches).hours) {
+      return {
+        ...prev,
+        subPhase: 'day-summary',
+        dayLog: [...prev.dayLog, 'You opened the next ticket, read the description twice, and the day was over. It will still be there tomorrow. So will the description.'],
+      };
+    }
+    s = applyContextSwitch(prev, switches);
+  }
+  s = workOnTicket(s, id);
+  s = { ...s, actionsToday: { ...(s.actionsToday || {}), work: switches + 1 } };
+  const open = s.sprintPlan.some(t => !t.shipped && t.progress < t.effort);
+  const more = s.dayFocusRemaining > 0 && open;
+  return { ...s, subPhase: more ? 'work' : 'day-summary' };
+};
 
 export const skipWork = (prev) => ({ ...prev, subPhase: 'day-summary' });
 

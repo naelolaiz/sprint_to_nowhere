@@ -23,6 +23,7 @@ export const MenuPhase = ({ onStart }) => (
         <div className="mb-1.5">→ Each sprint, choose tickets from the backlog (60-pt default capacity, configurable)</div>
         <div className="mb-1.5">→ Each day, an event fires. Choose how to handle it.</div>
         <div className="mb-1.5">→ Then pick a ticket, or pair, hide, ask for help, or get coffee.</div>
+        <div className="mb-1.5">→ Hours left after a ticket? Pick another. Switching costs you an hour-plus. Nobody tracks it.</div>
         <div className="mb-1.5">→ Refactors lower debt. Features and rushed work raise it.</div>
         <div className="mb-1.5">→ Every interaction also raises burnout. Weekends recover some.</div>
         <div className="mb-1.5">→ Above 50% debt or burnout, you work slower.</div>

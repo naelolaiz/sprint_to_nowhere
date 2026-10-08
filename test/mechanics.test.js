@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { applyChoice, workOnTicket, debtSpeedPenalty, burnoutSpeedPenalty, dayFrac } from '../src/game/mechanics.js';
+import { applyChoice, workOnTicket, debtSpeedPenalty, burnoutSpeedPenalty, dayFrac, contextSwitchCost, applyContextSwitch } from '../src/game/mechanics.js';
 import { EVENTS } from '../src/data/events.js';
 import { midSprint, ticket } from './helpers.js';
 
@@ -188,5 +188,25 @@ describe('workOnTicket', () => {
     const out = workOnTicket(crept, crept.sprintPlan[0].id);
     expect(out.sprintShipped[0].debtChange).toBe(6 + 4);
     expect(clean.sprintShipped[0].debtChange).toBe(1);
+  });
+});
+
+describe('context switching', () => {
+  it('costs more with every switch', () => {
+    const a = contextSwitchCost(1), b = contextSwitchCost(2), c = contextSwitchCost(3);
+    expect(a).toEqual({ hours: 1, focus: 10, burnout: 1.5 });
+    expect(b.hours).toBeGreaterThan(a.hours);
+    expect(c.hours).toBeGreaterThan(b.hours);
+    expect(c.focus).toBeGreaterThan(a.focus);
+    expect(contextSwitchCost(0).hours).toBe(1);
+  });
+  it('takes hours, focus and burnout, and never goes below zero hours', () => {
+    const s = midSprint({ dayFocusRemaining: 0.5, focus: 50, burnout: 99 });
+    const out = applyContextSwitch(s, 1);
+    expect(out.dayFocusRemaining).toBe(0);
+    expect(out.focus).toBe(40);
+    expect(out.burnout).toBe(100);
+    expect(out.dayLog.length).toBe(s.dayLog.length + 1);
+    expect(out.dayLog.at(-1)).toMatch(/0\.5h/);
   });
 });

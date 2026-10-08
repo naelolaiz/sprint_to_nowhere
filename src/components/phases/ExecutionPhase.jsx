@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { C, FONT } from '../../data/theme.js';
 import { renderCast } from '../../game/cast.js';
 import { resolveEventText } from '../../game/dialog.js';
+import { contextSwitchCost } from '../../game/mechanics.js';
 import { TicketCard } from '../common/TicketCard.jsx';
 import { BurnDown } from '../common/BurnDown.jsx';
 import { Btn } from '../common/Btn.jsx';
@@ -30,6 +31,11 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
   const Ev = s.currentEvent;
   const EvIcon = Ev?.icon;
   const workableTickets = s.sprintPlan.filter(t => !t.shipped && t.progress < t.effort);
+  // Second+ ticket of the day pays a context-switch tax before any work.
+  const switchesToday = s.actionsToday?.work || 0;
+  const switchCost = switchesToday > 0 ? contextSwitchCost(switchesToday) : null;
+  const canSwitch = !switchCost || s.dayFocusRemaining > switchCost.hours;
+  const canWrapUp = s.dayFocusRemaining === 0 || workableTickets.length === 0 || switchesToday > 0;
 
   return (
     <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 gap-0 lg:overflow-hidden">
@@ -107,11 +113,18 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
             {s.dayFocusRemaining > 0 && workableTickets.length > 0 && (
               <>
                 <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: C.textDimmer }}>
-                  Sit down at your computer
+                  {switchesToday > 0 ? 'Sit back down at your computer' : 'Sit down at your computer'}
                 </div>
+                {switchCost && (
+                  <div className="text-xs mb-2 p-2" style={{ color: canSwitch ? C.amber : C.rust, backgroundColor: C.surface, border: `1px solid ${canSwitch ? C.amberDim : C.rustDim}` }}>
+                    {canSwitch
+                      ? `Context switch #${switchesToday}: −${switchCost.hours.toFixed(1)}h before the first keystroke, −${switchCost.focus} focus, +${switchCost.burnout} burnout. Not on the burn-down.`
+                      : `Not enough of the day left to switch tickets (a switch costs ${switchCost.hours.toFixed(1)}h). Take a break, or call it.`}
+                  </div>
+                )}
                 <div className="space-y-2 mb-5">
                   {workableTickets.map(t => (
-                    <TicketCard key={t.id} t={t} onClick={() => onWork(t.id)} />
+                    <TicketCard key={t.id} t={t} onClick={() => onWork(t.id)} disabled={!canSwitch} />
                   ))}
                 </div>
 
@@ -191,6 +204,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
 
             {(() => {
               if (s.stayedLate) return null;
+              // Only once the day is actually running out. Nobody "stays late" at 9 AM.
+              if (s.dayFocusRemaining > 2) return null;
               const hard = s.sprintPlan.find(t =>
                 !t.shipped && t.progress > 0 && t.progress < t.effort &&
                 (t.type === 'bug' || t.effort >= 5));
@@ -222,10 +237,12 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               </div>
             )}
 
-            {(s.dayFocusRemaining === 0 || workableTickets.length === 0) && (
+            {canWrapUp && (
               <Btn onClick={onSkipWork} full>
                 <span className="flex items-center justify-center gap-2">
-                  WRAP UP DAY <ArrowRight size={14}/>
+                  {s.dayFocusRemaining > 0 && workableTickets.length > 0
+                    ? `CALL IT A DAY (${s.dayFocusRemaining.toFixed(1)}H LEFT, NOBODY WILL ASK)`
+                    : 'WRAP UP DAY'} <ArrowRight size={14}/>
                 </span>
               </Btn>
             )}

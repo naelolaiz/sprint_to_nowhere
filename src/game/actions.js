@@ -31,20 +31,32 @@ export const applyAction = (prev, kind) => {
     s.morale = Math.min(100, s.morale + 6);
     const partner = pick(PAIR_POOL);
     s.pairPartner = partner;
-    const pairFlavors = [
+    const pairFlavorsOffice = [
       `Paired with ${partner} for 90 minutes. They rubber-ducked your weird race condition. You lost 1.5h but you're unstuck — and a little less alone.`,
       `Paired with ${partner}. They spotted the off-by-one in 14 seconds. You both pretended not to know which of you wrote it.`,
       `${partner} pulled up a chair. By minute 40 you'd both refactored a method neither of you was supposed to touch. Felt good.`,
       `Pair session with ${partner}. Half the time was you explaining the thing; the other half was them gently asking why. The why was good.`,
     ];
-    s.dayLog = [...s.dayLog, pick(pairFlavors)];
+    const pairFlavorsHome = [
+      `Paired with ${partner} over a Slack huddle. Their mic picked up a dishwasher. Your screen share froze on the one file that mattered. Still: unstuck.`,
+      `Remote pairing with ${partner}. Twenty minutes of "can you see my screen?" Then 70 minutes of actual work. The ratio is considered good.`,
+      `Paired with ${partner} on a Zoom. The "pair programming" plugin the company bought needs a license nobody has. You shared your screen like animals. It worked.`,
+      `Pair session with ${partner}, cameras off. They found the bug by asking you to read the line aloud. You read it aloud. You heard it. 1.5h, one line.`,
+    ];
+    s.dayLog = [...s.dayLog, pick(s.atHome ? pairFlavorsHome : pairFlavorsOffice)];
   } else if (kind === 'booth') {
     s.capital = Math.max(0, s.capital - 1);
     s.boothBonus = true;
     s.burnout = Math.max(0, s.burnout - 4);
     s.focus = Math.min(100, s.focus + 25);
     s.morale = Math.min(100, s.morale + 4);
-    s.dayLog = [...s.dayLog, 'You walked over to a phone booth and locked the door. Slack is on snooze. Headphones in. The next ticket will hit harder, and the office will be tolerable for a while.'];
+    const boothFlavorsHome = [
+      'You closed the door of the one room with a door. Slack snoozed, camera off, status set to "heads down" — which three people read as "available for a quick one." You did not answer. The next ticket will hit harder.',
+      'You set your status to 🔴 Focus time. Marcus replied to the status. You muted the thread. Headphones in. The next ticket will hit harder.',
+    ];
+    s.dayLog = [...s.dayLog, s.atHome
+      ? pick(boothFlavorsHome)
+      : 'You walked over to a phone booth and locked the door. Slack is on snooze. Headphones in. The next ticket will hit harder, and the office will be tolerable for a while.'];
   } else if (kind === 'lunch') {
     // A real lunch — leaving the building, sitting somewhere quiet, no laptop.
     // Costs an hour of focus-time but recovers significantly more than a coffee.
@@ -72,7 +84,18 @@ export const applyAction = (prev, kind) => {
       'A third lunch. You are no longer eating; you are just outside, away. Nobody stops you. There is freedom in this.',
       'Lunch number three. The diner staff has stopped asking what you want — they just bring food. You have been adopted.',
     ];
-    const pool = lunchN >= 3 ? lunchFlavorsThird : lunchN === 2 ? lunchFlavorsSecond : lunchFlavorsFirst;
+    const lunchFlavorsHome = [
+      'You ate at the kitchen table. Not the desk. The table. No laptop. The fridge hummed. It was the best meeting of the day.',
+      'You made the lunch you keep saying you will make. It took 25 minutes. You ate it on the back step. Slack sent eleven notifications to a phone in another room.',
+      'Lunch at home, standing at the counter at first, then sitting down on purpose. Nobody asked if you had "five minutes." They could not see you.',
+    ];
+    const lunchFlavorsHomeAgain = [
+      'A second lunch at home. The fridge is now in a working relationship with you. Marcus\'s "quick one" sits unread on the other side of the house.',
+      'Lunch again. You are not hungry. You just do not want to open the laptop. The laptop is three meters away and it knows.',
+    ];
+    const pool = s.atHome
+      ? (lunchN >= 2 ? lunchFlavorsHomeAgain : lunchFlavorsHome)
+      : (lunchN >= 3 ? lunchFlavorsThird : lunchN === 2 ? lunchFlavorsSecond : lunchFlavorsFirst);
     s.dayLog = [...s.dayLog, pick(pool)];
   } else if (kind === 'walk') {
     // A short walk around the block — small but free recovery, no political cost
@@ -93,7 +116,18 @@ export const applyAction = (prev, kind) => {
       'You walked again. The route is now familiar. You added a small detour just to make it feel different.',
       'Second lap of the day. The third tree on the right has a small carving you missed earlier. You stared at it.',
     ];
-    const pool = walkN >= 2 ? walkFlavorsRepeat : walkFlavorsFirst;
+    const walkFlavorsHome = [
+      'You walked around your own block. Nobody from work saw you. Nobody from work was going to see you. You still walked fast.',
+      'A walk. Headphones in, no podcast. A neighbor waved. You waved. For eleven minutes you were not "available."',
+      'You walked to the end of the street and back. Your status went yellow. Two people noticed the yellow. Nobody noticed the walk.',
+    ];
+    const walkFlavorsHomeRepeat = [
+      'Another lap of the block. The same neighbor. The same wave. The same yellow status. It helped slightly less, which is still helping.',
+      'You walked again. You added one street. The street had a cat. The cat did not have a standup.',
+    ];
+    const pool = s.atHome
+      ? (walkN >= 2 ? walkFlavorsHomeRepeat : walkFlavorsHome)
+      : (walkN >= 2 ? walkFlavorsRepeat : walkFlavorsFirst);
     s.dayLog = [...s.dayLog, pick(pool)];
   } else if (kind === 'coffee') {
     // Coffee is a 20-minute round trip — the kitchen is upstairs, you take
