@@ -12,7 +12,7 @@ import {
   initialState, totalRemaining, pickDayEvents, dailyFocusBudget,
   eventApplicable, pushRecentEvent, pushRecentDesc,
 } from './state.js';
-import { applyChoice, workOnTicket, applyContextSwitch, contextSwitchCost, tickDailyTaxes } from './mechanics.js';
+import { applyChoice, workOnTicket, applyContextSwitch, contextSwitchCost, tickDailyTaxes, spendTokens, refillTokens } from './mechanics.js';
 import { applyTeammateContributions } from './team.js';
 import { applyAction } from './actions.js';
 import { usedMinutes, clockText, scheduleMinute } from './clock.js';
@@ -164,10 +164,12 @@ export const startSprint = (prev) => {
   }
   const startHours = totalRemaining(plan);
   const dayBudget = dailyFocusBudget(prev.burnout, prev.badDayStreak);
+  const tok = refillTokens(prev);
   const next = {
     ...prev, phase: 'execution', subPhase: 'event',
     currentDay: 1, dayFocus: dayBudget, dayFocusRemaining: dayBudget,
-    dayLog: initialLog, sprintShipped: [], sprintBumped: [], sprintCancelled: [],
+    dayLog: [...initialLog, ...tok.log], sprintShipped: [], sprintBumped: [], sprintCancelled: [],
+    tokenBudget: tok.tokenBudget, tokens: tok.tokens, tokenUsage: 0,
     debtAtSprintStart: prev.debt,
     sprintPlan: plan,
     stayedLate: false,
@@ -244,7 +246,18 @@ export const work = (prev, id) => {
     // The switch ate the time before the next item. It lands as you sit.
     return fireDue({ ...s, resumeTicketId: id, dayLog: [...s.dayLog, 'You sat down. Before the first keystroke:'] });
   }
+  const before = s.dayFocusRemaining;
   s = workOnTicket(s, id, cap);
+  // Under the mandate every sitting ends with the "how AI helped" field. The
+  // assistant fills it while there are tokens; after that you do, and the
+  // form takes its quarter hour.
+  if (s.aiMandate && s.dayFocusRemaining < before) {
+    s = { ...s };
+    if (spendTokens(s, 10) === 0) {
+      s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.25);
+      s.dayLog = [...s.dayLog, '🪙 No tokens left, so you wrote the "how AI helped" field by hand. The form rejected "n/a." A quarter hour.'];
+    }
+  }
   const t = s.sprintPlan.find(x => x.id === id);
   const interrupted = cap < Infinity && usedMinutes(s) >= nextAt
     && t && !t.shipped && t.progress < t.effort && s.dayFocusRemaining > 0;
@@ -322,6 +335,9 @@ export const nextDay = (prev) => {
   // Standing commitments (the sync you now own, day two of the offsite) come
   // off the top of the morning before anything else happens.
   const tax = tickDailyTaxes(prev.dailyTaxes);
+  // A night that moved the budget reset makes this morning the expensive one.
+  const tokenReset = team.tokenReset || prev.tokenReset || 'midnight';
+  const tok = refillTokens({ ...prev, tokenReset });
   const next = {
     ...prev,
     hourHistory: history,
@@ -354,7 +370,11 @@ export const nextDay = (prev) => {
     scheduledEvents: [],
     resumeTicketId: null,
     leaving: false,
-    dayLog: [...team.log, ...archiveLog, ...tax.log],
+    tokenReset,
+    tokenBudget: tok.tokenBudget,
+    tokens: tok.tokens,
+    tokenUsage: 0,
+    dayLog: [...team.log, ...archiveLog, ...tax.log, ...tok.log],
     subPhase: 'event',
     dialogNode: 'start',
     // morning focus ceiling drops as burnout climbs — exhausted devs start the day

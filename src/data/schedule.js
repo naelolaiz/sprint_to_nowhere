@@ -17,6 +17,8 @@ export const EVENT_WHEN = {
   timesheet_friday: 'morning',
   ai_initiative_kickoff: 'morning',
   sso_reauth: 'morning',
+  ai_mandate: 'morning',
+  ai_dashboard: 'morning',
   // Things that find you after lunch.
   initiative_cancelled: 'afternoon',
   fire_drill: 'afternoon',
@@ -33,6 +35,8 @@ export const EVENT_WHEN = {
   tickets_down: 'afternoon',
   dev_summit: 'afternoon',
   self_assessment: 'afternoon',
+  ai_efficiency: 'afternoon',
+  ai_demo: 'afternoon',
 };
 
 export const whenOf = (ev) => (ev && (ev.when || EVENT_WHEN[ev.id])) || 'any';

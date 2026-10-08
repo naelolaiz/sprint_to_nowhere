@@ -48,7 +48,7 @@ const NARRATIVE_IDS = new Set([
   'pandora_dependency_surprise', 'pandora_legacy_tax',
 ]);
 
-const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
+const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = false, tokenReset = 'midnight' }) => {
   if (Math.random() > 0.6) return;
 
   const inProg = plan.filter(t => !t.shipped && t.progress < t.effort);
@@ -95,6 +95,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
   if (inProgWithWork.length > 0) {
     events.push({ id: 'branch_protection', weight: 3 });
     events.push({ id: 'flag_cleanup', weight: 3 });
+  }
+  // Once the assistant has a budget, it also has nights.
+  if (aiMandate) {
+    events.push({ id: 'agent_night_shift', weight: 3 });
+    if (tokenReset !== 'fiscal') events.push({ id: 'token_reset_moved', weight: 2 });
   }
 
   // Bias the pool: 60% of the time, restrict to narrative events when any are
@@ -733,6 +738,34 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
       ]);
       break;
     }
+    case 'agent_night_shift': {
+      deltas.debt += 5;
+      pendingCleanups.push({
+        title: 'Undo the agent\'s night shift',
+        effort: 6,
+        debt: -1,
+        type: 'refactor',
+        urgent: true,
+      });
+      log.push('Overnight: someone enabled "autonomous mode" on the repo "to accelerate velocity." The agent closed 40 issues as duplicates, including the production fire, and opened one PR that renames every variable. +5 debt. A six-hour cleanup ticket will land next sprint.');
+      deltas.flavor = pick([
+        'Marcus: "the agent closed 40 issues overnight! Huge velocity win." Someone asks which 40. Marcus: "let\'s not get into the which."',
+        'The agent\'s PR is titled "Improve naming consistency across the codebase." It is 11,000 lines. The adoption dashboard has it as the most productive contributor this quarter.',
+        'Someone asks who enabled autonomous mode. The audit log says "system." System has been on the team longer than anyone.',
+      ]);
+      break;
+    }
+    case 'token_reset_moved': {
+      deltas.tokenReset = 'fiscal';
+      deltas.askTax = (deltas.askTax || 0) + 0.5;
+      log.push('Overnight: finance moved the assistant budget reset to "end of fiscal day," which is 4 PM. The morning is now the expensive part. The first colleague you ask today has no tokens either and answers from memory; asking for help costs an extra half hour.');
+      deltas.flavor = pick([
+        'Marcus explains the new reset time with a diagram. The diagram is a clock with "4" circled. Someone asks why. Marcus: "fiscal."',
+        'IT posts an FAQ about the reset. Question one: "Why 4 PM?" Answer one: "The reset is at 4 PM."',
+        'Brad has discovered that the budget is full at 4:01 PM and is "going to start coding then." Brad does not code.',
+      ]);
+      break;
+    }
     case 'retro_owner': {
       deltas.morale -= 2;
       pendingCleanups.push({
@@ -841,7 +874,7 @@ export const applyTeammateContributions = (state) => {
   }
 
   // Chaos roll — sometimes the office just has a night.
-  applyChaos({ plan, shipped, log, deltas, pendingCleanups });
+  applyChaos({ plan, shipped, log, deltas, pendingCleanups, aiMandate: !!state.aiMandate, tokenReset: state.tokenReset || 'midnight' });
 
   return {
     sprintPlan: plan,
@@ -855,5 +888,6 @@ export const applyTeammateContributions = (state) => {
     focusDelta: deltas.focus,
     chaosFlavor: deltas.flavor,
     askTax: deltas.askTax || 0,
+    tokenReset: deltas.tokenReset || null,
   };
 };

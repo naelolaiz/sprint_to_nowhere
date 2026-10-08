@@ -90,6 +90,12 @@ export const initialState = () => {
     scheduledEvents: [],           // today's disruptions, each with the minute (after 9:00) it lands
     resumeTicketId: null,          // the ticket an interruption pulled you off; sitting back down is free
     leaving: false,                // you called it a day; the last calendar items land on your way out
+    aiMandate: false,              // the AI mandate has fired: the token meter is live
+    tokenBudget: 0,                // the team's daily assistant budget, as leadership last set it
+    tokens: 0,                     // what is left of today's budget
+    tokenUsage: 0,                 // spent today; leadership reads both ends of this as a problem
+    tokenReset: 'midnight',        // 'fiscal' once finance moves the reset to 4 PM
+    aiEfficiency: false,           // the efficiency announcement happened: the limit hits more often
   };
 };
 
@@ -201,6 +207,18 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     if (e.id === 'phishing_sim') w = 2;
     if (e.id === 'self_assessment') w = 2;
     if (e.id === 'hackathon') w = 2;
+    // ----- AI THEATER — use it for everything, except anything real.
+    if (e.id === 'ai_mandate') w = 4;
+    if (e.id === 'token_limit') w = state.aiMandate ? (state.aiEfficiency ? 5 : 3) : 0;
+    if (e.id === 'ai_first_draft') w = 3;
+    if (e.id === 'ai_efficiency') w = 3;
+    if (e.id === 'ai_dashboard') w = 2;
+    if (e.id === 'ai_guardrails') w = 3;
+    if (e.id === 'ai_both_rules') w = 3;
+    if (e.id === 'ai_demo') w = 2;
+    if (e.id === 'ai_news_rehire') w = 2;
+    if (e.id === 'ai_news_bubble') w = 3;
+    if (e.id === 'ai_response_sync') w = 0;   // only ever queued by the news
     for (let i = 0; i < w; i++) weighted.push(e);
   }
   if (weighted.length === 0) return EVENTS.find(e => e.id === 'quick_sync');
