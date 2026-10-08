@@ -2,8 +2,8 @@
 
 import { ArrowRight } from 'lucide-react';
 import { C, FONT } from '../../data/theme.js';
-import { getEventNode } from '../../game/state.js';
-import { renderCast, isDescEligible, descText } from '../../game/cast.js';
+import { renderCast } from '../../game/cast.js';
+import { resolveEventText } from '../../game/dialog.js';
 import { TicketCard } from '../common/TicketCard.jsx';
 import { BurnDown } from '../common/BurnDown.jsx';
 import { Btn } from '../common/Btn.jsx';
@@ -51,39 +51,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
         </div>
 
         {s.subPhase === 'event' && Ev && (() => {
-          const node = getEventNode(Ev, s.dialogNode);
-          let rawDesc = node.description;
-          // Variant resolution: prefer node-level descriptions array, then event-level.
-          // The variant index is locked into eventCast at fire time so the same one
-          // shows for the duration of the dialog.
-          if (!rawDesc) {
-            const idx = (s.eventCast && s.eventCast._descIdx) || 0;
-            // Pull from node-level descriptions first, then event-level. When a
-            // pool has context-tagged entries ({text, requires}), filter to the
-            // ones eligible for the current state so a remote-only opener never
-            // fires while in-office (and vice versa).
-            const sourcePool = Array.isArray(node.descriptions) && node.descriptions.length > 0
-              ? node.descriptions
-              : (Array.isArray(Ev.descriptions) ? Ev.descriptions : []);
-            if (sourcePool.length > 0) {
-              const eligible = sourcePool.filter(d => isDescEligible(d, s));
-              const pool = eligible.length > 0 ? eligible : sourcePool;
-              rawDesc = descText(pool[idx % pool.length]);
-            }
-          }
-          const isMultiTurn = !!Ev.nodes;
-          const isStartNode = !isMultiTurn || s.dialogNode === (Ev.start || 'start');
-          // When chaos happened overnight, the morning standup IS that
-          // discussion — replace the random standup blurb with the chaos
-          // flavor so the conversation makes sense in context. Applies to both
-          // the regular standup and the standup_debug variant.
-          const useChaosAsDesc = (Ev.id === 'daily_standup' || Ev.id === 'standup_debug') && isStartNode && s.lastChaosFlavor;
-          // Function-form descriptions get the resolved string fed through
-          // renderCast too, so cast placeholders ({bro}, {updater}, …) inside
-          // the function's returned template still get substituted.
-          const desc = useChaosAsDesc
-            ? s.lastChaosFlavor
-            : renderCast(typeof rawDesc === 'function' ? rawDesc(s, s.eventCast) : rawDesc, s.eventCast);
+          const { isStartNode, description: desc, choices } = resolveEventText(Ev, s);
           return (
           <div className="p-4 sm:p-6" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
             {isStartNode && (
@@ -101,7 +69,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               {emphasizeNames(desc)}
             </div>
             <div className="space-y-2">
-              {node.choices.filter(c => !c.requires || c.requires(s)).map((c, i) => (
+              {choices.map((c, i) => (
                 <button key={i} onClick={() => onChoose(c)}
                   className="w-full text-left px-4 py-3 text-sm transition-colors"
                   style={{
