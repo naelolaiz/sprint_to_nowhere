@@ -63,9 +63,8 @@ jobs:
       - name: Audit shipped dependencies
         run: npm audit --omit=dev --audit-level=high
 
-      # Build-time tooling is reported but does not block: every remaining
-      # finding today is a DoS in Tailwind 3's glob/selector parsers, only
-      # fixable by the Tailwind 4 major. Dependabot keeps the rest current.
+      # Build-time tooling is reported but does not block: it never ships to
+      # the browser, and Dependabot keeps it current.
       - name: Audit build tooling (informational)
         continue-on-error: true
         run: npm audit --audit-level=high
