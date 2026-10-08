@@ -45,4 +45,8 @@ export const EVENT_CAST_RULES = {
   ci_queue:             { dev: 'engineers' },  // owner of the "CI (again)" thread
   security_scanner:     { dev: 'engineers' },  // tried to suppress the finding
   channel_migration:    { jin: 'jins' },       // still searching the old channel
+  // ----- corporate contradictions -----
+  blameless_postmortem: { dev: 'engineers' },  // has worked out which "role" they are
+  return_to_office:     { doug: 'dougs' },     // the one in-person interaction
+  timesheet_friday:     { jin: 'jins' },       // third attempt at the next desk
 };

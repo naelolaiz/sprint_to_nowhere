@@ -44,6 +44,10 @@ export const applyAction = (prev, kind) => {
       `Pair session with ${partner}, cameras off. They found the bug by asking you to read the line aloud. You read it aloud. You heard it. 1.5h, one line.`,
     ];
     s.dayLog = [...s.dayLog, pick(s.atHome ? pairFlavorsHome : pairFlavorsOffice)];
+  } else if (kind === 'booth' && s.boothClosedToday && !s.atHome) {
+    // Every booth is booked today. You can still walk over and check.
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.25);
+    s.dayLog = [...s.dayLog, 'You walked the floor. Every booth is booked, each by one person on a video call with their camera off. You stood outside one for a while. It did not help.'];
   } else if (kind === 'booth') {
     s.capital = Math.max(0, s.capital - 1);
     s.boothBonus = true;

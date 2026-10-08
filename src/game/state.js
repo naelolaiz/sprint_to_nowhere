@@ -84,6 +84,7 @@ export const initialState = () => {
     velocityCommit: false,         // "20% more next sprint" — raises capacity and forces an extra ticket
     pendingEvents: [],             // event ids that open tomorrow morning, ahead of the day's roll
     askTaxToday: 0,                // extra hours an ask-a-colleague costs today; resets each morning
+    boothClosedToday: false,       // every phone booth is booked today; resets each morning
   };
 };
 
@@ -186,6 +187,13 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     if (e.id === 'os_update') w = 2;
     if (e.id === 'security_scanner') w = 2;
     if (e.id === 'channel_migration') w = 2;
+    // ----- CORPORATE CONTRADICTIONS — what is said and what is done, same email.
+    if (e.id === 'blameless_postmortem') w = 2;
+    if (e.id === 'return_to_office') w = 2;
+    if (e.id === 'timesheet_friday') w = 3;
+    if (e.id === 'phishing_sim') w = 2;
+    if (e.id === 'self_assessment') w = 2;
+    if (e.id === 'hackathon') w = 2;
     for (let i = 0; i < w; i++) weighted.push(e);
   }
   if (weighted.length === 0) return EVENTS.find(e => e.id === 'quick_sync');

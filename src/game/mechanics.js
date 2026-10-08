@@ -4,7 +4,7 @@ import { URGENT_FEATURES, LEGACY_TICKETS, BUGS } from '../data/tickets.js';
 import { EVENTS } from '../data/events.js';
 import { mkTicket, firstUnstarted } from './backlog.js';
 import { renderCast } from './cast.js';
-import { totalRemaining } from './state.js';
+import { totalRemaining, eventApplicable } from './state.js';
 
 export const debtSpeedPenalty = (debt) => {
   if (debt > 80) return 0.5;
@@ -243,6 +243,15 @@ export const applyChoice = (state, choice) => {
 
   // Tomorrow morning opens with this event, whatever else the day rolls.
   if (e.queueEvent) s.pendingEvents = [...(s.pendingEvents || []), e.queueEvent];
+
+  // This event follows the current one today, if it still fits the day.
+  if (e.queueToday) {
+    const ev = EVENTS.find(x => x.id === e.queueToday);
+    if (ev && eventApplicable(ev, s)) s.eventQueue = [...(s.eventQueue || []), ev];
+  }
+
+  // Every booth is booked for the rest of the day.
+  if (e.boothClosed) s.boothClosedToday = true;
 
   // Asking a colleague costs more for the rest of today: their tools are
   // logged out too, or the answer is in a channel nobody can find.

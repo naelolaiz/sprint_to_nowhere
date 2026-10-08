@@ -3753,6 +3753,134 @@ export const EVENTS = [
       { label: 'Keep posting in the old one', effect: { focus: -0.25, focusPct: -8, morale: -2, capital: -0.5, askTax: 0.25 }, log: 'You posted in the old channel. Nobody answered, because everyone who could answer was looking for the new one. Every ask today cost the extra time to find the right room first.' },
     ],
   },
+  // =====================================================================
+  // CORPORATE CONTRADICTIONS — the thing that is said, and the thing that
+  // is done, in the same email.
+  // =====================================================================
+  {
+    id: 'blameless_postmortem', icon: Users,
+    title: 'Blameless postmortem',
+    requires: (s) => s.sprint >= 2,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'A postmortem for last week\'s outage. The template says "blameless" in the title, in bold. Slide 3 is "Timeline (who did what)." Slide 4 is "Root cause: human error." Slide 5 has a photo of the human. The human is in the room. The runbook the timeline says "should have been followed" is a link to a page called "Runbook (TODO)."',
+          (s, c) => `Postmortem at ${T(c)}. The facilitator opens with "this is a blameless space." The first question, from a director, is "so who approved the deploy?" The facilitator writes the name on the whiteboard, under the word BLAMELESS, which is still there from the previous postmortem. Action item one: "follow the runbook." There is no runbook.`,
+          'The incident review doc, from the template "Blameless Postmortem v3," has a section called "Contributing factors (no names)." The contributing factors are three names. The "action items" section says "be more careful" and "follow the runbook." The runbook link is a 404. It is assigned to one of the names.',
+          '"Blameless postmortem" is on the calendar. Blameless, it turns out, means nobody will be fired in the meeting. The meeting has a slide titled "Accountability." It is a list of people, sorted by seniority, ascending, which is the order in which they will be asked why the runbook was not followed. The runbook does not exist.',
+          'The postmortem template was updated by the Quality Guild to be "truly blameless." Names have been replaced with roles: "the engineer who merged it," "the engineer who reviewed it," "the engineer who was on call." There are three engineers on the team. {dev} has already worked out which one they are. All three roles "should have consulted the runbook." Nobody has seen the runbook.',
+        ],
+        choices: [
+          { label: 'Speak up about the runbook that does not exist', next: 'speak' },
+          { label: 'Stay quiet. It is not your incident.', effect: { morale: -4, burnout: 3, focus: -1.5 }, log: 'You said nothing for ninety minutes. The action items were assigned to people who were not in the room. The runbook that "we should have followed" still does not exist. You knew that. You said nothing.' },
+          { label: 'Volunteer to write it up', effect: { focus: -2.5, capital: 0.5, burnout: 2 }, log: 'You wrote a careful, genuinely blameless document. It was filed under "Incidents." Nobody has opened it. The next postmortem will use the old template.' },
+        ],
+      },
+      speak: {
+        description: 'You say it. "The runbook the timeline says we should have followed does not exist. It has never existed. The link goes to a page called \'Runbook (TODO).\'" The room is quiet. The facilitator writes "runbook gap" under "contributing factors," then, after a beat, erases "gap."',
+        choices: [
+          { label: '"Then let\'s write it. Next sprint."', effect: { focus: -1.5, capital: -1, morale: 3, addCleanup: { title: 'Write the runbook the postmortem says we followed', effort: 5, debt: -2, type: 'refactor' } }, log: 'The runbook is now a ticket, for next sprint, assigned to you, for raising it. The postmortem action item still reads "follow the runbook," which will be possible once you have written it.' },
+          { label: '"I\'m just noting it for the record."', effect: { focus: -1, capital: -1, morale: 1 }, log: 'Noted for the record. The record is a doc nobody reads. The action item still says "follow the runbook." The runbook still does not exist. You are now the person who "raised concerns," which is a role.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'return_to_office', icon: Briefcase, inOffice: true,
+    title: 'Return-to-office day: "for collaboration"',
+    requires: (s) => s.sprint >= 2,
+    descriptions: [
+      'Three days a week in the office, "for collaboration." Your team is in another time zone. You commuted fifty minutes to take video calls alone, in a phone booth, with the person you would have called from home. The booths are all booked. By people on video calls.',
+      (s, c) => `RTO day. Badge-in recorded at ${T(c)}, the dashboard says, with a green tick. The floor is a sea of empty desks and one person on a call with their camera off. Every booth is booked until 5 PM. The booking app offers you "Thursday, 7:30 AM." You have four calls today.`,
+      'Facilities has sent a cheerful email about "the energy of being together." The energy is nine people on nine separate video calls at adjacent desks, each hearing the other eight. The booths are full. The "quiet zone" has a sales standup in it. You have four calls today.',
+      'In-office day. Your 1:1 is on Zoom, because your manager is remote today. Your standup is on Zoom, because the team is remote. The one in-person interaction is {doug}, who wants to talk about the kitchen. Every phone booth is booked, by people taking calls with people at home. You have four calls.',
+      'The collaboration day. The office has been "reconfigured for collaboration," which means the desks are closer together and the booths have been converted into a "collaboration pod" that seats six and is booked by sales until Friday. You have four calls and nowhere to take them.',
+    ],
+    choices: [
+      { label: 'Take the calls from your desk', effect: { focus: -1, boothClosed: true, burnout: 2, chance: { p: 0.3, effect: { queueToday: 'loud_sales_call' }, log: 'The desk next to yours is where the sales team takes its calls. It is about to be a call.', elseLog: 'The open plan was merely open. Nine calls, nine echoes. Nobody collaborated.' } }, log: 'Four calls, one open-plan desk, no booth all day. You learned a lot about the deals the sales team is closing, through your headphones.' },
+      { label: 'Find a stairwell', effect: { focus: -1.5, boothClosed: true, burnout: 1, morale: -1 }, log: 'The stairwell has excellent acoustics and no chair. Facilities found you on the third call and asked you to "use a booth." The booths are booked all day. Facilities booked one, for a facilities meeting about booth availability.' },
+    ],
+  },
+  {
+    id: 'timesheet_friday', icon: Briefcase,
+    title: 'Timesheet Friday',
+    requires: (s) => s.currentDay === 5,
+    descriptions: [
+      'Timesheets are due by noon. Every hour needs a project code. Meetings have no project code. "Other" is rejected by the form. "Admin" is capped at one hour. You had six hours of meetings this week and one hour of admin, and the form wants to know what you were really doing.',
+      (s, c) => `A reminder at ${T(c)}: "Timesheets due 12:00 — thanks for your accuracy!" The timesheet tool has 41 project codes. None of them is "the meeting about the timesheet tool." The tool times out after ten minutes of inactivity. Reading the code list takes eleven.`,
+      'Finance has rolled out "activity-based time tracking" so leadership can "see where the time goes." The time goes to meetings. Meetings are not a category. The guidance doc says to "allocate meeting time to the project it most benefits." No project benefits from the meetings.',
+      'The timesheet rejects your week: "Hours (38) do not match contracted hours (40)." You add two hours of "Other." Rejected: "Other requires a justification." You write "meetings." Rejected: "Please select a project." The dashboard will say whichever project you pick is over budget.',
+      'Friday, timesheet day. {jin} at the next desk is on their third attempt. The form has a new mandatory field: "Value delivered (1-5)." For the sprint goal change meeting, {jin} enters 1. The form says "Please enter a value between 3 and 5." {jin} enters 3. The form thanks them for their honesty.',
+    ],
+    choices: [
+      { label: 'Code the meetings as feature work', effect: { focus: -0.5, debt: 2, capital: 0.25 }, log: 'Submitted. Six hours of meetings are now six hours of feature work. The dashboard says the feature is well-resourced and behind, which will be a question for you, in a meeting, which you will code as feature work.' },
+      { label: 'File it honestly', effect: { focus: -1, capital: -0.5, morale: 1 }, log: 'Submitted, with a justification per row. Finance replied within the hour: "Your utilisation looks low this week, is everything OK?" Everything is the same as every week. This is the first week it was written down.' },
+      { label: 'Skip it. It is Friday.', effect: { focus: -0.25, burnout: 2, chance: { p: 0.6, effect: { queueEvent: 'quick_sync' }, log: 'Monday opens with a "quick sync" about the timesheet, which will take longer than the timesheet.', elseLog: 'Three reminders, a dashboard with your name in red, and no follow-up. The system assumed 40 hours on "Unallocated." Unallocated is now the best-resourced project in the company.' } }, log: 'You did not fill in the timesheet. The timesheet filled itself in, with zeros, and emailed your manager.' },
+    ],
+  },
+  {
+    id: 'phishing_sim', icon: Wrench,
+    title: 'Phishing simulation',
+    descriptions: [
+      'You report the "urgent invoice" email, as trained. It was the real CFO. The real invoice is now 48 hours late. Security thanks you for your vigilance and assigns you a training module for reporting a real email, which the module calls "a false positive event."',
+      (s, c) => `An email at ${T(c)}: "URGENT: action required on your account." You hover over the link, as trained. It goes to the real HR system. You report it anyway, as trained. It was the real HR system, with a real deadline, which you have now missed. Security awards you a "Vigilant" badge and a 25-minute module.`,
+      'The quarterly phishing test. You passed, by ignoring an email that turned out to be the test. You also ignored the real onboarding email for the new expense tool, which looked identical. Your expenses are rejected. Security has assigned everyone a module anyway, "to keep sharp."',
+      'Security sends a company-wide email: "Congratulations, 94% of you spotted this quarter\'s simulation!" The email asks you to click a link to see your score. Half the company reports the email. Security assigns the half that reported it a module on "recognising legitimate communications." You are in that half.',
+      'You click "Report phishing" on an email about mandatory phishing training. The email was legitimate. The training is now mandatory and overdue. Its first lesson is "when in doubt, report it." You are in doubt. You report the training. The system is "looking into it." The module is still assigned.',
+    ],
+    choices: [
+      { label: 'Do the module', effect: { focus: -0.75, morale: -1 }, log: 'Twenty-five minutes of a video you cannot skip, a quiz you cannot fail, and a certificate you cannot find afterwards. The module\'s last slide says "when in doubt, report it."' },
+      { label: 'Ignore it', effect: { focus: -0.25, capital: -0.5, focusPct: -5 }, log: 'Three reminders by lunch, each with a bigger red banner. The third one came from an address you have never seen. You reported it. It was Security. They have assigned you a second module.' },
+    ],
+  },
+  {
+    id: 'self_assessment', icon: Briefcase,
+    title: 'Self-assessment season',
+    once: true,
+    requires: (s) => s.sprint >= 2 && s.currentDay <= 3,
+    start: 'open',
+    nodes: {
+      open: {
+        descriptions: [
+          'Performance season. The self-assessment form is "designed to be lightweight": nine sections, 2,000 characters each, due Friday. The form times out after twenty minutes and does not save. There is a "save draft" button. It is decorative.',
+          (s, c) => `HR, at ${T(c)}: "Your self-assessment is open! Keep it brief 🙂 Due Friday." Brief is nine sections. Each has a prompt like "Describe your impact against the leadership principles, with examples." The principles were updated last week. The old ones are still in the form. The form logs you out every twenty minutes.`,
+          'The self-assessment tool wants "three examples of exceeding expectations" per value. There are eight values. The tool has a word count minimum and a twenty-minute session. Due Friday. Your manager has told you, kindly, that "it mostly doesn\'t matter," and also that calibration is based on it.',
+          'Self-assessment season. The guidance says "be concise." The form rejects sections under 500 characters. It also rejects sections over 2,000. It also logs you out every twenty minutes, taking the section with it. Due Friday. It is a review of your resilience.',
+          'Performance review time. Your manager will "mostly copy from your self-assessment," so it had better be good. The form is in a tool that only works in one browser, which is not the browser IT installed last week. Nine sections, Friday, no saving, twenty minutes a session.',
+        ],
+        choices: [
+          { label: 'Do it properly. A bit every day.', effect: { morale: -2, dailyTax: { hours: 0.75, days: 5, label: 'Self-assessment, a section at a time, before the form logs you out' } }, log: 'Nine sections over the week, written in a text editor and pasted in before the timeout. Your manager will read the first paragraph. Calibration will read the score.' },
+          { label: 'Paste last year\'s and change the dates', effect: { focus: -0.5, morale: -1, chance: { p: 0.3, effect: { capital: -1 }, log: 'Your manager noticed. Last year\'s assessment mentioned a project that was cancelled in March. It was noted, warmly, in a way that will come back in calibration.', elseLog: 'Nobody noticed. Last year\'s assessment was a copy of the year before. The tool has a plagiarism check. It is for the other direction.' } }, log: 'Last year\'s nine sections, this year\'s dates, thirty minutes. The form timed out once anyway.' },
+          { label: 'Ask for an extension', next: 'extension' },
+        ],
+      },
+      extension: {
+        description: 'You ask for an extension. HR replies within four minutes: "Of course! We want this to be a reflective exercise, not a rush. Extended until Saturday 9 AM." Saturday is not a working day. The form does not know that.',
+        choices: [
+          { label: 'Take the Saturday', effect: { capital: -0.5, burnout: 4, morale: -2, focus: -0.25 }, log: 'You did it on Saturday morning, at the kitchen table, in one sitting, before the form could time out. The extension is noted in your file as "requested additional time."' },
+          { label: 'Do it Friday anyway, badly', effect: { capital: -0.5, focus: -1.5, morale: -2 }, log: 'Friday afternoon, nine sections, the minimum word count, the maximum caffeine. The extension is still noted in your file. The assessment is still the one calibration reads.' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'hackathon', icon: Sparkles,
+    title: 'Mandatory fun: the hackathon',
+    requires: (s) => s.sprint >= 2 && s.currentDay <= 3,
+    descriptions: [
+      'Two days of "innovation time," announced the same week as the release. The sprint commitment is unchanged. Attendance is "strongly encouraged," which is a phrase with a dashboard. Prizes are stickers. The judges are the people who set the release date.',
+      (s, c) => `A calendar block from ${T(c)}: "HACKATHON 🚀 (2 days)." Underneath, in the description: "Note: sprint deliverables are not affected." They are not affected in the sense that they are still due. The hackathon has a theme. The theme is "velocity."`,
+      'The hackathon kickoff. "No managers, no tickets, just building!" The CTO then presents a list of "suggested problem areas," which is the roadmap. Teams that pick a roadmap item get "priority support." Teams that do not get a sticker. The sprint is still the sprint. The demos are tomorrow at five.',
+      'Hackathon week. The company has rented a space with beanbags. The beanbags are for "ideation." Ideation is scheduled: 9:00 to 9:30. Building is 9:30 to 17:00, today and tomorrow. Demos are tomorrow at 17:00. The demo that wins will be "parked" by Monday. The release is Thursday. Nobody has moved the release.',
+      '"Two days to build anything you want!" says the invite. "Please align your project with Q3 OKRs," says the follow-up. "Attendance is optional," says HR. "Visible non-participation will be reflected in the engagement survey," says nobody, out loud, in a way you can quote. Demos are tomorrow at five.',
+    ],
+    choices: [
+      { label: 'Participate. Build the thing.', effect: { focus: -2, morale: -2, burnout: 3, dailyTax: { hours: 2, days: 1, label: 'Hackathon, day two' } }, log: 'Two days, one demo, forty seconds of applause, a sticker. The project was "parked for a future quarter" by Monday standup. The release date has not moved. Your tickets have not moved either.' },
+      { label: 'Skip it. You have a release.', effect: { focus: -0.5, capital: -1.5, morale: -2 }, log: 'You skipped the hackathon. Your name is on a slide titled "Participation," in a different colour. The people who participated also have a release on Thursday. They are now two days behind you, and you are behind.' },
+      { label: 'Show up for the demos only', effect: { focus: -1, capital: -0.5, morale: -1 }, log: 'You attended the demos. Eleven projects, nine of them a chatbot. The winner was a chatbot that books phone booths. The booths are still booked. The release is still Thursday.' },
+    ],
+  },
 ];
 
 export const MELTDOWN_EVENT = {

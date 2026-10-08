@@ -145,14 +145,14 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                   </button>
                   <button
                     onClick={() => onAction('booth')}
-                    disabled={s.boothBonus || s.capital < 1}
+                    disabled={s.boothBonus || s.capital < 1 || (s.boothClosedToday && !s.atHome)}
                     className="text-left px-3 py-2.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ backgroundColor: C.surface2, color: C.text, border: `1px solid ${C.border}`, fontFamily: FONT }}
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
                     <span style={{ color: C.amber }}>🚪 Hide in a phone booth </span>
-                    <span style={{ color: C.textDim }}>· 0h, costs 1 capital · +30% on your next ticket work</span>
+                    <span style={{ color: C.textDim }}>{s.boothClosedToday && !s.atHome ? '· every booth is booked today' : '· 0h, costs 1 capital · +30% on your next ticket work'}</span>
                   </button>
                   <button
                     onClick={() => onAction('coffee')}
