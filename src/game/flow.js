@@ -207,10 +207,9 @@ export const nextDay = (prev) => {
       Math.max(40, 100 - Math.floor(newBurnout * 0.4)) + (team.focusDelta || 0)
     )),
   };
-  // The night can finish you too. "Either bar at 100% ends your career" —
-  // not "ends your career after one more full day of pretending".
-  if (next.debt >= 100) return { ...next, phase: 'gameover', gameOverReason: 'debt' };
-  if (next.burnout >= 100) return stageMeltdown(next);
+  // A night that pushes a bar to 100 does NOT end things here: you still get
+  // up, go to work, and have the day. The checks at the top of nextDay catch
+  // it that evening — by design, you explode at the office, not in bed.
   return beginDay(next);
 };
 

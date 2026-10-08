@@ -170,41 +170,37 @@ describe('nextDay', () => {
     expect(out.stayedLate).toBe(false);
   });
 
-  it('a night that pushes debt to 100 is game over in the morning, not a day later', () => {
-    const s = midSprint({ subPhase: 'day-summary', currentDay: 2, debt: 95 });
-    s.sprintPlan[0].progress = 3;
-    let died = false;
-    for (let seed = 0; seed < 3000 && !died; seed++) {
+  it('a night that pushes a bar to 100 still sends you to work; the reckoning comes that evening', () => {
+    const lcg = (seed) => { let x = seed; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; };
+    let sawDebt = false, sawBurnout = false;
+    for (let seed = 0; seed < 3000 && !(sawDebt && sawBurnout); seed++) {
       vi.restoreAllMocks();
-      let x = seed;
-      vi.spyOn(Math, 'random').mockImplementation(() => { x = (x * 9301 + 49297) % 233280; return x / 233280; });
-      const out = flow.nextDay(s);
-      if (out.debt >= 100) {
-        died = true;
-        expect(out.phase).toBe('gameover');
-        expect(out.gameOverReason).toBe('debt');
-      } else {
-        expect(out.phase).toBe('execution');
+      vi.spyOn(Math, 'random').mockImplementation(lcg(seed));
+      const debtNight = midSprint({ subPhase: 'day-summary', currentDay: 2, debt: 95 });
+      debtNight.sprintPlan[0].progress = 3;
+      const d = flow.nextDay(debtNight);
+      expect(d.phase).toBe('execution');
+      expect(d.subPhase).toBe('event');
+      if (d.debt >= 100) {
+        sawDebt = true;
+        expect(d.currentEvent).not.toBe(MELTDOWN_EVENT);
+        const evening = flow.nextDay({ ...d, subPhase: 'day-summary' });
+        expect(evening.phase).toBe('gameover');
+        expect(evening.gameOverReason).toBe('debt');
+      }
+      const burnNight = midSprint({ subPhase: 'day-summary', currentDay: 2, burnout: 99, stayedLate: true });
+      const b = flow.nextDay(burnNight);
+      expect(b.phase).toBe('execution');
+      if (b.burnout >= 100) {
+        sawBurnout = true;
+        expect(b.currentEvent).not.toBe(MELTDOWN_EVENT);
+        const evening = flow.nextDay({ ...b, subPhase: 'day-summary' });
+        expect(evening.currentEvent).toBe(MELTDOWN_EVENT);
+        expect(evening.subPhase).toBe('event');
       }
     }
-    expect(died).toBe(true);
-  });
-
-  it('a night that pushes burnout to 100 opens on the meltdown', () => {
-    const s = midSprint({ subPhase: 'day-summary', currentDay: 2, burnout: 99, stayedLate: true });
-    let melted = false;
-    for (let seed = 0; seed < 3000 && !melted; seed++) {
-      vi.restoreAllMocks();
-      let x = seed;
-      vi.spyOn(Math, 'random').mockImplementation(() => { x = (x * 9301 + 49297) % 233280; return x / 233280; });
-      const out = flow.nextDay(s);
-      if (out.burnout >= 100) {
-        melted = true;
-        expect(out.currentEvent).toBe(MELTDOWN_EVENT);
-        expect(out.subPhase).toBe('event');
-      }
-    }
-    expect(melted).toBe(true);
+    expect(sawDebt).toBe(true);
+    expect(sawBurnout).toBe(true);
   });
 
   it('a teammate finishing a ticket overnight counts it as shipped and remembers the title', () => {
