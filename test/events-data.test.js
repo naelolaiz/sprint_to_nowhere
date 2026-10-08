@@ -16,6 +16,7 @@ const KNOWN_EFFECTS = new Set([
   'goHome', 'returnOffice',
   'chance', 'dailyTax', 'inflateAll', 'splitTicket', 'foldEstimate', 'velocityCommit',
   'addUrgentBug', 'loseProgress', 'queueEvent', 'askTax', 'addCleanup',
+  'queueToday', 'boothClosed',
 ]);
 const KNOWN_CHOICE_KEYS = new Set(['label', 'effect', 'log', 'next', 'requires', 'logByDesc', 'meltdownEnding']);
 
@@ -111,6 +112,7 @@ describe('event data', () => {
         }
         const nested = { ...(c.effect || {}), ...(c.effect?.chance?.effect || {}) };
         if (nested.queueEvent) expect(ALL.some(e => e.id === nested.queueEvent), `${id}/${key}: queueEvent -> ${nested.queueEvent}`).toBe(true);
+        if (nested.queueToday) expect(ALL.some(e => e.id === nested.queueToday), `${id}/${key}: queueToday -> ${nested.queueToday}`).toBe(true);
         if (nested.addCleanup) expect(typeof nested.addCleanup.title === 'string' && nested.addCleanup.effort > 0, `${id}/${key}: malformed addCleanup`).toBe(true);
         if (c.next) expect(ev.nodes?.[c.next], `${id}/${key}: next -> ${c.next}`).toBeTruthy();
         expect(!!(c.next || c.effect || c.meltdownEnding), `${id}/${key}: "${c.label}" does nothing`).toBe(true);
@@ -203,6 +205,21 @@ describe('event data', () => {
       const text = typeof t === 'function' ? t(CONTEXTS.office, { _baseMin: 0 }) : t;
       expect(/demo/i.test(text), `staging opener without the demo: ${text.slice(0, 70)}`).toBe(true);
       expect(/test data|fixtures|re-seed|wiped/i.test(text), `staging opener without the lost data: ${text.slice(0, 70)}`).toBe(true);
+    }
+  });
+
+  // Both postmortem branches are about the runbook that does not exist, and
+  // both office-day replies are about having no booth, so every opener has
+  // to set those up.
+  it('postmortem and office-day openers set up what their replies answer', () => {
+    const render = (d) => { const t = textOf(d); return typeof t === 'function' ? t(CONTEXTS.office, { _baseMin: 0 }) : t; };
+    for (const d of EVENTS.find(e => e.id === 'blameless_postmortem').nodes.open.descriptions) {
+      const text = render(d);
+      expect(/blameless/i.test(text) && /runbook/i.test(text), `postmortem opener: ${text.slice(0, 70)}`).toBe(true);
+    }
+    for (const d of EVENTS.find(e => e.id === 'return_to_office').descriptions) {
+      const text = render(d);
+      expect(/booth/i.test(text) && /call/i.test(text), `office-day opener: ${text.slice(0, 70)}`).toBe(true);
     }
   });
 
