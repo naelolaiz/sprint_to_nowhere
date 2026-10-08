@@ -7,8 +7,10 @@ export const CAST_POOLS = {
   karens:    ['Karen', 'Linda', 'Pat', 'Rhonda', 'Carol', 'Sue'],
   // Sales-bro with the Tesla / pickleball / "synergy at scale"
   bros:      ['Brad', 'Chad', 'Brock', 'Tanner', 'Trevor', 'Hunter', 'Skyler'],
-  // Competent engineer you actually like working with
-  engineers: ['Sarah', 'Priya', 'Jamal', 'Wei', 'Maya', 'Yusuf', 'Ana', 'Devon'],
+  // Competent engineer you actually like working with. Priya is deliberately
+  // absent: she is the sales lead in the scripted dialogue, so she cannot also
+  // turn up as a platform engineer or a pairing partner.
+  engineers: ['Sarah', 'Noor', 'Jamal', 'Wei', 'Maya', 'Yusuf', 'Ana', 'Devon'],
   // The helpful Jin-type at the next desk, often gender-neutral
   jins:      ['Jin', 'Alex', 'Sam', 'Kit', 'Riley', 'Avery', 'Morgan'],
 };

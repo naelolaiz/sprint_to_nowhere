@@ -145,7 +145,8 @@ describe('work / skipWork', () => {
     expect(two.focus).toBeLessThan(one.focus - 9);
     expect(two.burnout).toBeGreaterThan(one.burnout);
     expect(two.actionsToday.work).toBe(2);
-    expect(two.dayLog.some(l => /Context switch|switch|Switching|next ticket/i.test(l))).toBe(true);
+    // Every context-switch flavor line ends in the hours it cost; the wording varies.
+    expect(two.dayLog.some(l => l.includes('1.0h'))).toBe(true);
     const three = flow.work(two, s.sprintPlan[2].id);
     // 1.5h switch, then the rest of the day on the big one
     expect(three.subPhase).toBe('day-summary');

@@ -14,7 +14,7 @@ const CHARACTER_NAMES = [
   'Doug', 'Greg', 'Larry', 'Steve', 'Frank', 'Hank', 'Gary',
   'Karen', 'Linda', 'Pat', 'Rhonda', 'Carol', 'Sue',
   'Brad', 'Chad', 'Brock', 'Tanner', 'Trevor', 'Hunter', 'Skyler',
-  'Sarah', 'Priya', 'Jamal', 'Wei', 'Maya', 'Yusuf', 'Ana', 'Devon',
+  'Sarah', 'Noor', 'Priya', 'Jamal', 'Wei', 'Maya', 'Yusuf', 'Ana', 'Devon',
   'Jin', 'Alex', 'Sam', 'Kit', 'Riley', 'Avery', 'Morgan',
   'Marcus',
 ];
