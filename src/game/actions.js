@@ -211,7 +211,10 @@ export const applyAction = (prev, kind) => {
       ? `You stayed late chasing "${hard.title}". The fluorescent lights got worse. +2h, +8 burnout.`
       : 'You stayed late. The office cleared out. The cleaners came. +2h, +8 burnout.'];
   } else if (kind === 'ask') {
-    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
+    // Some days asking costs more: the colleague's tools are logged out too,
+    // or the answer lives in a channel that no longer exists.
+    const askTax = s.askTaxToday || 0;
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1 - askTax);
     s.capital = Math.max(0, s.capital - 0.5);
     s.focus = Math.min(100, s.focus + 5);
     // Find the least-progressed unfinished ticket and bump it
@@ -231,6 +234,7 @@ export const applyAction = (prev, kind) => {
       if (bump > 0) {
         s.sprintPlan[i] = { ...stuck, progress: stuck.progress + bump };
         s.dayLog = [...s.dayLog, `You walked over to ${helper}'s desk. Asked about "${stuck.title}". They pointed at one line and said "that's your bug." +${bump.toFixed(1)}h progress.`];
+        if (askTax > 0) s.dayLog = [...s.dayLog, `Getting to that line took an extra ${askTax.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}h: ${helper} had to log back in to three things, and the thread with the answer was in the old channel.`];
       } else {
         s.dayLog = [...s.dayLog, `You walked over to ${helper}'s desk. Asked about "${stuck.title}". They looked at it, nodded, and said "yeah, that's basically done." It is not done. The last hour is always yours.`];
       }

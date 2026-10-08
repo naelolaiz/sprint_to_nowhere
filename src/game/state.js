@@ -82,6 +82,8 @@ export const initialState = () => {
     dailyTaxes: [],                // [{ hours, days, label }] — hours taken off each morning; cleared each sprint
     foldedEstimates: 0,            // times an 8 was logged as a 3; makes the velocity audit likelier
     velocityCommit: false,         // "20% more next sprint" — raises capacity and forces an extra ticket
+    pendingEvents: [],             // event ids that open tomorrow morning, ahead of the day's roll
+    askTaxToday: 0,                // extra hours an ask-a-colleague costs today; resets each morning
   };
 };
 
@@ -176,6 +178,14 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     if (e.id === 'velocity_audit') w = (state.foldedEstimates || 0) > 0 ? 5 : 2;
     if (e.id === 'sprint_goal_changed') w = 3;
     if (e.id === 'no_meeting_wednesday') w = 2;
+    // ----- INFRASTRUCTURE THEATER — the tools the process assumes, as shipped.
+    if (e.id === 'staging_booked') w = 3;
+    if (e.id === 'ci_queue') w = 3;
+    if (e.id === 'sso_reauth') w = 3;
+    if (e.id === 'flags_down') w = 2;
+    if (e.id === 'os_update') w = 2;
+    if (e.id === 'security_scanner') w = 2;
+    if (e.id === 'channel_migration') w = 2;
     for (let i = 0; i < w; i++) weighted.push(e);
   }
   if (weighted.length === 0) return EVENTS.find(e => e.id === 'quick_sync');
