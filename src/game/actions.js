@@ -186,11 +186,14 @@ export const applyAction = (prev, kind) => {
       return s;
     }
     s.dayLog = [...s.dayLog, 'You head to the kitchen for coffee.'];
+    // Headphones on and status red halve the odds of being intercepted.
+    // Halve, not remove: the people who intercept you do not read statuses.
+    const odds = s.dndToday ? 0.5 : 1;
     const r = Math.random();
-    if (r < 0.35) {
+    if (r < 0.35 * odds) {
       // Doug ambush at the espresso machine — fire the actual dialog tree
       s = fire(s, 'kitchen_karen');
-    } else if (r < 0.6) {
+    } else if (r < 0.6 * odds) {
       // On the way back, Brad rolls his chair to intercept — fire his dialog tree
       s.dayLog = [...s.dayLog, 'On your way back, Brad rolled his chair into the aisle to intercept you.'];
       s = fire(s, 'shoulder_tap');
@@ -214,6 +217,79 @@ export const applyAction = (prev, kind) => {
     s.dayLog = [...s.dayLog, hard
       ? `You stayed late chasing "${hard.title}". The fluorescent lights got worse. +2h, +8 burnout.`
       : 'You stayed late. The office cleared out. The cleaners came. +2h, +8 burnout.'];
+  } else if (kind === 'block') {
+    // Block the afternoon as "Focus time". Everyone can see the block.
+    // Most people treat it as availability.
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.25);
+    s.actionsToday = { ...(s.actionsToday || {}), block: (s.actionsToday?.block || 0) + 1 };
+    if (Math.random() < 0.65) {
+      s.capital = Math.max(0, s.capital - 0.5);
+      s.dayLog = [...s.dayLog, pick([
+        'You blocked the afternoon as "Focus time." Eleven minutes later a meeting was booked over it, with a note: "saw you had a hold, assuming it\'s not a real meeting?" It is now a real meeting.',
+        'You blocked three hours. The block is visible to the whole org. Marcus booked the middle hour and wrote "grabbing this since you\'re free!" You were not free. You are now.',
+        'Focus time: booked. Marcus: "is this block movable? just need 15." It was movable. It moved. So did the 15, to 50.',
+      ])];
+      s = fire(s, 'quick_sync');
+    } else {
+      s.focus = Math.min(100, s.focus + 15);
+      s.burnout = Math.max(0, s.burnout - 2);
+      s.dayLog = [...s.dayLog, pick([
+        'You blocked the afternoon as "Focus time." Nobody booked over it. You keep checking the calendar to see if anyone has. That is most of the focus.',
+        'The block held. Three people messaged "are you free?" anyway. You were not. For once the calendar and the truth agreed.',
+      ])];
+    }
+  } else if (kind === 'writeup') {
+    // Write the decision down. The page shields the ticket once from a
+    // pivot or a rewrite. Overnight, the page may be "tidied" into an
+    // archive, taking the shield with it.
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1);
+    const open = s.sprintPlan
+      .map((t, i) => ({ t, i }))
+      .filter(({ t }) => !t.shipped && t.progress > 0 && t.progress < t.effort && !t.shielded)
+      .sort((a, b) => b.t.progress - a.t.progress);
+    if (open.length > 0) {
+      const { t, i } = open[0];
+      s.sprintPlan[i] = { ...t, shielded: true };
+      s.dayLog = [...s.dayLog, `You wrote down what was decided on "${t.title}", who decided it, and when. A page, with a date. The next time someone "re-aligns" it, the page gets read aloud. Once.`];
+    } else {
+      s.dayLog = [...s.dayLog, 'You opened a blank page to write the decision down. There is no decision to write down. You wrote "TBD" and a date. An hour.'];
+    }
+  } else if (kind === 'dnd') {
+    // Headphones on, status red. Free. Mostly respected, by the people who
+    // were not going to interrupt you anyway.
+    s.dndToday = true;
+    s.dayLog = [...s.dayLog, 'Headphones on. Status: 🔴 Do not disturb. The office gets quieter, which is to say the interruptions now start with "sorry, I know you\'re heads-down."'];
+    if (Math.random() < 0.3) {
+      s.dayLog = [...s.dayLog, 'A tap on the shoulder anyway. Then: "oh, nice headphones! are those the noise-cancelling ones?"'];
+      s = fire(s, 'shoulder_tap');
+    }
+    if (Math.random() < 0.2) {
+      s.capital = Math.max(0, s.capital - 0.5);
+      s.dayLog = [...s.dayLog, 'Your manager, in DM, to the red status: "are you there? just checking you\'re online." You were. You are now also "hard to reach," in a 1:1 note.'];
+    }
+  } else if (kind === 'vent') {
+    // The private group chat. Fifteen minutes. Usually fine.
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.25);
+    s.actionsToday = { ...(s.actionsToday || {}), vent: (s.actionsToday?.vent || 0) + 1 };
+    if (Math.random() < 0.1) {
+      s.capital = Math.max(0, s.capital - 1.5);
+      s.morale = Math.max(0, s.morale - 8);
+      s.dayLog = [...s.dayLog, 'You vented in the private chat. Someone screenshotted it "for context" into a channel Marcus is in. The context was your face. It is now a 1:1 agenda item.'];
+    } else {
+      s.burnout = Math.max(0, s.burnout - 4);
+      s.morale = Math.min(100, s.morale + 5);
+      s.dayLog = [...s.dayLog, pick([
+        'Fifteen minutes in the private chat. Four people typed the same thing at once. It did not fix anything. It helped.',
+        'You vented. Someone replied with the exact GIF. Someone else replied "same." The sprint is unchanged. Your shoulders are not.',
+      ])];
+    }
+  } else if (kind === 'board') {
+    // Move every card to the column it is actually in. The board is now
+    // accurate. Nothing else changed, and now everyone can see that.
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.5);
+    s.morale = Math.max(0, s.morale - 2);
+    s.boardAccurateUntilDay = (s.currentDay || 1) + 1;
+    s.dayLog = [...s.dayLog, 'You moved every card to its true column. The board is accurate for the first time this sprint. The velocity chart will not be asked about tomorrow. Nothing else changed.'];
   } else if (kind === 'ask') {
     // Some days asking costs more: the colleague's tools are logged out too,
     // or the answer lives in a channel that no longer exists.

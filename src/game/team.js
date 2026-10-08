@@ -89,6 +89,13 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
   events.push({ id: 'junior_questions', weight: 3 });
   events.push({ id: 'vendor_outage', weight: 3 });
   events.push({ id: 'jin_homelab_fire', weight: 1 });
+  events.push({ id: 'dependabot_automerge', weight: 3 });
+  events.push({ id: 'wiki_migration', weight: 3 });
+  events.push({ id: 'retro_owner', weight: 3 });
+  if (inProgWithWork.length > 0) {
+    events.push({ id: 'branch_protection', weight: 3 });
+    events.push({ id: 'flag_cleanup', weight: 3 });
+  }
 
   // Bias the pool: 60% of the time, restrict to narrative events when any are
   // available. Combined with the 60% chaos roll, that's ~36% per night for a
@@ -129,6 +136,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
     case 'marcus_rewrite': {
       const t = pick(inProg);
       const idx = plan.findIndex(p => p.id === t.id);
+      if (plan[idx].shielded) {
+        // The decision record exists, with a date. The rewrite becomes a comment.
+        plan[idx] = { ...plan[idx], shielded: false };
+        deltas.capital -= 0.5;
+        log.push(`Overnight: Marcus started "rewriting" the spec for "${t.title}", found your write-up, and left a comment instead. The ticket stands. The write-up is spent. −0.5 capital.`);
+        deltas.flavor = pick([
+          `Marcus mentions "a great decision doc" on "${t.title}" and then, in the same breath, "some thoughts I left on it." The thoughts are a rewrite, in comment form.`,
+          `Marcus: "loved the write-up on '${t.title}', really aligned." He then describes something that is not in the write-up.`,
+        ]);
+        break;
+      }
       const lost = Math.round(plan[idx].progress);
       plan[idx] = {
         ...plan[idx],
@@ -654,6 +672,83 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups }) => {
       ]);
       break;
     }
+    case 'dependabot_automerge': {
+      deltas.debt += 4;
+      deltas.focus -= 4;
+      pendingCleanups.push({
+        title: 'Pin everything back after the auto-merged major bump',
+        effort: 5,
+        debt: -1,
+        type: 'refactor',
+        urgent: false,
+      });
+      log.push('Overnight: someone enabled auto-merge on the grouped dependency update "to reduce toil." The major bump merged itself at 3:12am. The build is green because the tests were also bumped. Nothing renders. +4 debt, −4 focus. A pin-it-all-back ticket will land next sprint.');
+      deltas.flavor = pick([
+        'Marcus celebrates "zero-touch dependency hygiene." Sarah asks why the app is a white page. Marcus: "let\'s take that offline."',
+        'Jin explains that the bot merged its own PR. Marcus asks whether the bot can also review it. Nobody is sure he is joking.',
+        'Someone asks who approved the major bump. The approver is a bot. The bot has more approvals this quarter than anyone on the call.',
+      ]);
+      break;
+    }
+    case 'branch_protection': {
+      // Two approvals now required. Two engineers. One on leave.
+      const stuck = inProgWithWork;
+      for (const tt of stuck) {
+        const idx = plan.findIndex(p => p.id === tt.id);
+        plan[idx] = { ...plan[idx], effort: plan[idx].effort + 1, scopeCreep: (plan[idx].scopeCreep || 0) + 1 };
+      }
+      deltas.morale -= 4;
+      deltas.focus -= 5;
+      log.push(`Overnight: a new branch-protection policy requires two approvals on every PR. The team has two engineers. One is on leave. Every open PR is stuck; ${stuck.length} ticket${stuck.length === 1 ? '' : 's'} grew by an hour of chasing reviews. −4 morale, −5 focus.`);
+      deltas.flavor = pick([
+        'The standup is about approvals. Marcus suggests "approving each other\'s PRs as a team." There are two people on the team. One of them is on a beach.',
+        'Marcus: "the two-approval rule is about quality." Sarah: "who\'s the second approver?" Marcus: "great question, let\'s park it."',
+        'Someone proposes a bot that approves PRs. Someone else points out the bot would need a second bot. The idea is "parked for the retro."',
+      ]);
+      break;
+    }
+    case 'wiki_migration': {
+      deltas.focus -= 3;
+      deltas.askTax = (deltas.askTax || 0) + 0.5;
+      log.push('Overnight: the wiki was migrated to the new wiki. Every internal link is dead. The on-call runbook is a 404 with a cheerful illustration. Asking anyone anything today starts with "do you have the new link?" −3 focus; asking for help costs an extra half hour today.');
+      deltas.flavor = pick([
+        'Marcus shares the "wiki migration FAQ." The link is to the old wiki. The old wiki is a 404 with a cheerful illustration.',
+        'Jin asks where the runbook went. Marcus: "it\'s in the new space." Jin: "which space?" Marcus: "the new one." The call goes quiet.',
+        'Someone has found the runbook. It is a PDF in a Slack DM from 2023. It is now the runbook.',
+      ]);
+      break;
+    }
+    case 'flag_cleanup': {
+      const sorted = [...inProgWithWork].sort((a, b) => b.progress - a.progress);
+      const tt = sorted[0];
+      const idx = plan.findIndex(p => p.id === tt.id);
+      const drop = Math.min(3, plan[idx].progress);
+      plan[idx] = { ...plan[idx], progress: Math.max(0, plan[idx].progress - drop) };
+      deltas.morale -= 6;
+      log.push(`Overnight: a "stale flag cleanup" script removed every flag older than 30 days, including the one "${tt.title}" is built behind. The code path is gone from prod and half of it from the branch. −${drop.toFixed(1)}h, −6 morale.`);
+      deltas.flavor = pick([
+        `Marcus celebrates the cleanup script: "flag debt down 60%!" Sarah points out one of the flags was "${tt.title}." Marcus: "we can always re-add it."`,
+        'The person who wrote the cleanup script is "excited about the hygiene win." The person whose feature it removed is on mute, deliberately.',
+        'Someone asks whether the cleanup script had a dry-run mode. It did. It was behind a flag. The flag was stale.',
+      ]);
+      break;
+    }
+    case 'retro_owner': {
+      deltas.morale -= 2;
+      pendingCleanups.push({
+        title: 'Write a proposal to reduce meetings (present it at the meeting)',
+        effort: 4,
+        debt: 0,
+        type: 'refactor',
+        urgent: false,
+      });
+      log.push('Overnight: the retro action item "reduce meetings" found an owner. It is you. The deliverable is a proposal, to be presented at a meeting, which has been scheduled. A four-hour ticket will land next sprint. −2 morale.');
+      deltas.flavor = pick([
+        'Marcus: "great news, the meeting-reduction item has an owner!" He looks at you. Everyone looks at you. A meeting is booked to kick it off.',
+        'The retro board is on screen. Your name is next to "reduce meetings." The next line is "weekly check-in on progress." It has nine attendees.',
+      ]);
+      break;
+    }
   }
 };
 
@@ -662,7 +757,7 @@ export const applyTeammateContributions = (state) => {
   const log = [];
   const shipped = [];
   const pendingCleanups = [];
-  const deltas = { debt: 0, morale: 0, burnout: 0, capital: 0, focus: 0, flavor: null };
+  const deltas = { debt: 0, morale: 0, burnout: 0, capital: 0, focus: 0, flavor: null, askTax: 0 };
 
   const inProgress = () => plan.filter(t => !t.shipped && t.progress < t.effort);
 
@@ -759,5 +854,6 @@ export const applyTeammateContributions = (state) => {
     capitalDelta: deltas.capital,
     focusDelta: deltas.focus,
     chaosFlavor: deltas.flavor,
+    askTax: deltas.askTax || 0,
   };
 };

@@ -175,6 +175,7 @@ export const startSprint = (prev) => {
     velocityCommit: false,
     askTaxToday: 0,
     boothClosedToday: false,
+    dndToday: false,
     hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
     dialogNode: 'start',
     atHome: false,
@@ -302,6 +303,17 @@ export const nextDay = (prev) => {
   // QA reopening old tickets — which can bump burnout and queue cleanup
   // tickets for future sprints.
   const team = applyTeammateContributions(prev);
+  // Decision records do not always survive the night: someone "tidies" the
+  // wiki, and the page is now under Archive (2019).
+  const archiveLog = [];
+  const planAfterNight = team.sprintPlan.map(t => {
+    if (!t.shielded || t.shipped) return t;
+    if (Math.random() < 0.4) {
+      archiveLog.push(`Overnight: the page you wrote for "${t.title}" was moved to "Archive (2019)" during a wiki tidy-up. The decision is still made. Nobody can find it.`);
+      return { ...t, shielded: false };
+    }
+    return t;
+  });
   const newBurnout = Math.max(0, Math.min(100,
     prev.burnout - sleepRecovery + (team.burnoutDelta || 0)
   ));
@@ -314,7 +326,7 @@ export const nextDay = (prev) => {
     ...prev,
     hourHistory: history,
     currentDay: prev.currentDay + 1,
-    sprintPlan: team.sprintPlan,
+    sprintPlan: planAfterNight,
     sprintShipped: [...prev.sprintShipped, ...team.shipped],
     totalShipped: prev.totalShipped + team.shipped.length,
     // Append titles teammates shipped overnight so future backlogs skip
@@ -336,12 +348,13 @@ export const nextDay = (prev) => {
     stayedLate: false,
     atHome: false,
     actionsToday: {},
-    askTaxToday: 0,
+    askTaxToday: team.askTax || 0,
     boothClosedToday: false,
+    dndToday: false,
     scheduledEvents: [],
     resumeTicketId: null,
     leaving: false,
-    dayLog: [...team.log, ...tax.log],
+    dayLog: [...team.log, ...archiveLog, ...tax.log],
     subPhase: 'event',
     dialogNode: 'start',
     // morning focus ceiling drops as burnout climbs — exhausted devs start the day

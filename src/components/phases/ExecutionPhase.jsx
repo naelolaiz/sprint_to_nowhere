@@ -205,6 +205,26 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     <span style={{ color: C.amber }}>🚶 Take a short walk </span>
                     <span style={{ color: C.textDim }}>· 0.5h · −3 burnout, +10 focus, +3 morale</span>
                   </button>
+                  {[
+                    { kind: 'block', icon: '📅', label: 'Block focus time on the calendar', hint: '· 15 min · everyone can see the block', disabled: !!s.actionsToday?.block || s.dayFocusRemaining < 0.25 },
+                    { kind: 'writeup', icon: '📝', label: 'Write the decision down', hint: '· 1h · a page with a date, for the next "re-alignment"', disabled: s.dayFocusRemaining < 1 || !s.sprintPlan.some(t => !t.shipped && t.progress > 0 && t.progress < t.effort && !t.shielded) },
+                    { kind: 'dnd', icon: '🎧', label: 'Headphones on, status red', hint: s.dndToday ? '· already on · people can see it' : '· free · fewer desk-side ambushes, probably', disabled: s.dndToday, hide: s.atHome },
+                    { kind: 'vent', icon: '💬', label: 'Vent in the private group chat', hint: '· 15 min · once a day · −4 burnout, +5 morale, usually', disabled: !!s.actionsToday?.vent || s.dayFocusRemaining < 0.25 },
+                    { kind: 'board', icon: '🗂', label: 'Update the board', hint: '· 0.5h · −2 morale · the cards become accurate; nothing else changes', disabled: s.dayFocusRemaining < 0.5 || (s.boardAccurateUntilDay || 0) > s.currentDay },
+                  ].filter(a => !a.hide).map(a => (
+                    <button
+                      key={a.kind}
+                      onClick={() => onAction(a.kind)}
+                      disabled={a.disabled}
+                      className="text-left px-3 py-2.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: C.surface2, color: C.text, border: `1px solid ${C.border}`, fontFamily: FONT }}
+                      onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
+                      onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
+                    >
+                      <span style={{ color: C.amber }}>{a.icon} {a.label} </span>
+                      <span style={{ color: C.textDim }}>{a.hint}</span>
+                    </button>
+                  ))}
                 </div>
               </>
             )}
