@@ -35,4 +35,9 @@ export const EVENT_CAST_RULES = {
   // dev_summit is in flight on a separate PR; cast rule registered here so its
   // {dev} placeholder substitutes correctly the moment that event lands.
   dev_summit:           { dev: 'engineers' },  // teammate visibly losing it next to you
+  // ----- scrum theater -----
+  planning_poker:       { dev: 'engineers', bro: 'bros' },  // the engineer who read the ticket; the listener who votes
+  agile_coach:          { coach: 'bros' },     // the transformation consultant
+  sprint_goal_changed:  { bro: 'bros' },       // the 🚀 reaction
+  no_meeting_wednesday: { doug: 'dougs' },     // reply-all about whether a sync is a meeting
 };

@@ -12,7 +12,7 @@ import {
   initialState, totalRemaining, pickDayEvents, dailyFocusBudget,
   eventApplicable, pushRecentEvent, pushRecentDesc,
 } from './state.js';
-import { applyChoice, workOnTicket, applyContextSwitch, contextSwitchCost } from './mechanics.js';
+import { applyChoice, workOnTicket, applyContextSwitch, contextSwitchCost, tickDailyTaxes } from './mechanics.js';
 import { applyTeammateContributions } from './team.js';
 
 const quickSync = () => EVENTS.find(e => e.id === 'quick_sync');
@@ -30,6 +30,9 @@ export const stageEvent = (s, ev, prefix = '— ') => {
     dayLog: [...(s.dayLog || []), `${prefix}${renderCast(ev.title, cast)}`],
     recentEventIds: pushRecentEvent(s.recentEventIds || [], ev.id),
     recentDescIdx: pushRecentDesc(s.recentDescIdx || {}, ev.id, cast?._descIdx),
+    onceFired: ev.once && !(s.onceFired || []).includes(ev.id)
+      ? [...(s.onceFired || []), ev.id]
+      : (s.onceFired || []),
   };
 };
 
@@ -83,6 +86,17 @@ export const startSprint = (prev) => {
       initialLog.push(`📋 Carry-over from a previous sprint: "${t.title}" (${t.effort}h). Forced into the sprint.`);
     }
   }
+  // You committed to 20% more last sprint. Here is the 20%: one more ticket
+  // from the backlog, chosen by someone who did not read it.
+  if (prev.velocityCommit) {
+    const planned = new Set(plan.map(t => t.id));
+    const spare = (prev.backlog || []).filter(t => !planned.has(t.id));
+    if (spare.length > 0) {
+      const extra = { ...spare[Math.floor(Math.random() * spare.length)] };
+      plan = [...plan, extra];
+      initialLog.push(`📋 You committed to 20% more. Here is the 20%: "${extra.title}" (${extra.effort}h). "We believe in you."`);
+    }
+  }
   // 35% chance management forces a strategic initiative into the sprint
   if (Math.random() < 0.35) {
     const tpl = STRATEGIC_INITIATIVES[Math.floor(Math.random() * STRATEGIC_INITIATIVES.length)];
@@ -100,6 +114,7 @@ export const startSprint = (prev) => {
     sprintPlan: plan,
     stayedLate: false,
     pendingCleanups: [],
+    velocityCommit: false,
     hourHistory: [{ day: 0, hours: startHours, kind: 'start' }],
     dialogNode: 'start',
     atHome: false,
@@ -195,6 +210,9 @@ export const nextDay = (prev) => {
   ));
   const newStreak = wasBadDay ? (prev.badDayStreak || 0) + 1 : 0;
   const newBudget = dailyFocusBudget(newBurnout, newStreak);
+  // Standing commitments (the sync you now own, day two of the offsite) come
+  // off the top of the morning before anything else happens.
+  const tax = tickDailyTaxes(prev.dailyTaxes);
   const next = {
     ...prev,
     hourHistory: history,
@@ -214,13 +232,14 @@ export const nextDay = (prev) => {
     pendingCleanups: [...(prev.pendingCleanups || []), ...(team.pendingCleanups || [])],
     lastChaosFlavor: team.chaosFlavor || null,
     dayFocus: newBudget,
-    dayFocusRemaining: newBudget,
+    dayFocusRemaining: Math.max(0, newBudget - tax.hours),
+    dailyTaxes: tax.taxes,
     burnout: newBurnout,
     badDayStreak: newStreak,
     stayedLate: false,
     atHome: false,
     actionsToday: {},
-    dayLog: team.log,
+    dayLog: [...team.log, ...tax.log],
     subPhase: 'event',
     dialogNode: 'start',
     // morning focus ceiling drops as burnout climbs — exhausted devs start the day
@@ -260,6 +279,12 @@ export const nextSprint = (prev) => {
     // but keep `shippedTitles` (it persists across sprints).
     recentEventIds: [],
     recentDescIdx: {},
+    // Standing commitments end with the sprint; the "20% more" you agreed to
+    // shows up here as a bigger capacity number and, at kickoff, a ticket.
+    dailyTaxes: [],
+    sprintCapacity: prev.velocityCommit
+      ? Math.round((prev.sprintCapacity ?? 60) * 1.2)
+      : prev.sprintCapacity,
   };
 };
 

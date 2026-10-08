@@ -4,7 +4,8 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { sampleEventCast, renderCast, formatClock, isDescEligible, descText } from '../src/game/cast.js';
 import { pickVariant, resolveEventText } from '../src/game/dialog.js';
 import { EVENTS, MELTDOWN_EVENT } from '../src/data/events.js';
-import { midSprint } from './helpers.js';
+import { midSprint, ticket } from './helpers.js';
+import * as flow from '../src/game/flow.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -123,5 +124,47 @@ describe('resolveEventText', () => {
     const r = resolveEventText(MELTDOWN_EVENT, midSprint({ dialogNode: 'open', eventCast: {} }));
     expect(r.description).toMatch(/Something is about to happen/);
     expect(r.choices).toHaveLength(5);
+  });
+});
+
+// Every node of every event, rendered and answered in both locations. This
+// catches a function-form opener that throws on a real state, a cast key with
+// no rule, a reply whose effect blows up, and a bad interpolation. (The word
+// "undefined" is not checked: one opener quotes a real JavaScript error.)
+describe('every path through every event', () => {
+  const base = () => {
+    const s = midSprint({ sprint: 5, currentDay: 3, burnout: 20, debt: 30 });
+    s.sprintPlan = [
+      ticket({ title: 'Started feature', effort: 10, progress: 4 }),
+      ticket({ title: 'Fresh feature', effort: 8 }),
+      { ...ticket({ title: 'Refactor', effort: 12 }), type: 'refactor' },
+      { ...ticket({ title: 'Strategic', effort: 14, progress: 2 }), strategic: true },
+    ];
+    s.backlog = [ticket({ title: 'Spare' })];
+    return s;
+  };
+  const nodesOf = (ev) => (ev.nodes ? Object.keys(ev.nodes) : ['start']);
+
+  it.each([...EVENTS, MELTDOWN_EVENT].map(e => [e.id, e]))('%s renders and resolves everywhere', (id, ev) => {
+    for (const atHome of [false, true]) {
+      if (ev.inOffice && atHome) continue;
+      if (ev.atHome && !atHome) continue;
+      const staged = flow.stageEvent({ ...base(), atHome }, ev);
+      for (const key of nodesOf(ev)) {
+        const at = { ...staged, dialogNode: key };
+        const { description, choices } = resolveEventText(ev, at);
+        expect(typeof description, `${id}/${key}: description`).toBe('string');
+        expect(description, `${id}/${key}: leaked a bad interpolation`).not.toMatch(/\[object Object\]|\bNaN\b/);
+        expect(description, `${id}/${key}: unrendered placeholder`).not.toMatch(/\{\w+\}/);
+        expect(choices.length, `${id}/${key}: no choice available`).toBeGreaterThan(0);
+        for (const c of choices) {
+          const out = flow.chooseEvent(at, c);
+          expect(out, `${id}/${key}: "${c.label}"`).toBeTruthy();
+          for (const line of out.dayLog.slice(at.dayLog.length)) {
+            expect(line, `${id}/${key}: "${c.label}" log`).not.toMatch(/\[object Object\]|\bNaN\b|\{\w+\}/);
+          }
+        }
+      }
+    }
   });
 });

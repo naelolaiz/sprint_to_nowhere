@@ -2,7 +2,7 @@
 
 import { URGENT_FEATURES, LEGACY_TICKETS } from '../data/tickets.js';
 import { EVENTS } from '../data/events.js';
-import { mkTicket } from './backlog.js';
+import { mkTicket, firstUnstarted } from './backlog.js';
 import { renderCast } from './cast.js';
 import { totalRemaining } from './state.js';
 
@@ -28,10 +28,37 @@ export const burnoutSpeedPenalty = (burnout) => {
   return 1;
 };
 
+// Fold one effect block into another: numbers add up, everything else is
+// overwritten. Used when a `chance` roll lands and its effect joins the
+// choice's own effect for a single application.
+const mergeEffects = (base, extra = {}) => {
+  const out = { ...base };
+  for (const [k, v] of Object.entries(extra)) {
+    out[k] = typeof v === 'number' && typeof out[k] === 'number' ? out[k] + v : v;
+  }
+  return out;
+};
+
 export const applyChoice = (state, choice) => {
-  const e = choice.effect || {};
+  let e = { ...(choice.effect || {}) };
   let s = { ...state, sprintPlan: state.sprintPlan.map(t => ({ ...t })) };
   const log = [];
+
+  // Some replies only *probably* go wrong. `chance: { p, effect, log, elseLog }`
+  // rolls once; on a hit the nested effect is merged into this choice's effect
+  // and applied below with it, so a hit never double-charges the per-interaction
+  // drains. The matching log line lands after the choice's own.
+  const rolled = [];
+  if (e.chance) {
+    const { p = 0.5, effect = {}, log: hitLog, elseLog } = e.chance;
+    delete e.chance;
+    if (Math.random() < p) {
+      e = mergeEffects(e, effect);
+      if (hitLog) rolled.push(hitLog);
+    } else if (elseLog) {
+      rolled.push(elseLog);
+    }
+  }
 
   // Every interaction in this office costs you something, even if just background noise
   s.burnout = Math.min(100, (s.burnout || 0) + 0.4);
@@ -161,6 +188,48 @@ export const applyChoice = (state, choice) => {
     log.push(`📦 Legacy project assigned: "${t.title}".`);
   }
 
+  // Definition-of-Done style process changes: every open ticket needs more of
+  // something before it counts, so every open ticket just got longer.
+  if (e.inflateAll) {
+    let grown = 0;
+    for (const t of s.sprintPlan) {
+      if (t.shipped || t.progress >= t.effort) continue;
+      t.effort += e.inflateAll;
+      grown += 1;
+    }
+    if (grown > 0) log.push(`📏 Every open ticket grew by ${e.inflateAll}h (${grown} ticket${grown === 1 ? '' : 's'}). The work did not change. The definition of finished did.`);
+  }
+
+  // An estimate argument "resolved" by splitting the card. Two halves, each
+  // rounded up and padded, so the sum is larger than the whole was.
+  if (e.splitTicket) {
+    const target = firstUnstarted(s.sprintPlan);
+    if (target) {
+      const idx = s.sprintPlan.findIndex(t => t.id === target.id);
+      const half = Math.ceil(target.effort / 2) + 1;
+      const debtHalf = Math.ceil((target.debtImpact || 0) / 2);
+      const flags = { urgent: !!target.urgent, strategic: !!target.strategic, legacy: !!target.legacy };
+      const a = mkTicket({ title: `${target.title} (part 1)`, effort: half, debt: debtHalf }, target.type, flags);
+      const b = mkTicket({ title: `${target.title} (part 2)`, effort: half, debt: debtHalf }, target.type, flags);
+      s.sprintPlan = [...s.sprintPlan.slice(0, idx), a, b, ...s.sprintPlan.slice(idx + 1)];
+      log.push(`✂ "${target.title}" (${target.effort}h) was split into two tickets. Together they are ${half * 2}h.`);
+    }
+  }
+
+  // A recurring cost that starts tomorrow: hours taken off the top of each
+  // morning for `days` days (the sprint boundary clears it regardless).
+  if (e.dailyTax) {
+    const { hours = 0.5, days = 5, label = 'a recurring sync' } = e.dailyTax;
+    s.dailyTaxes = [...(s.dailyTaxes || []), { hours, days, label }];
+  }
+
+  // Logging a real 8 as a 3. Nothing changes today; the velocity audit now
+  // has a reason to come looking.
+  if (e.foldEstimate) s.foldedEstimates = (s.foldedEstimates || 0) + 1;
+
+  // "We believe in you": next sprint arrives with 20% more in it.
+  if (e.velocityCommit) s.velocityCommit = true;
+
   if (e.promise) s.promise = e.promise;
   if (e.clearPromise) s.promise = null;
 
@@ -195,6 +264,8 @@ export const applyChoice = (state, choice) => {
   if (e.addUrgentFeature) auto += 4;    // a new urgent thing just appeared on you
   if (e.bumpRefactor) auto += 3;        // refactor swapped for sales-driven feature
   if (e.scopeCreep) auto += 2;          // the feature grew, you didn't agree to it
+  if (e.inflateAll) auto += 3;          // every ticket got longer by decree
+  if (e.splitTicket) auto += 2;         // your estimate was "resolved" by cutting the card
   if (auto > 0) s.morale = Math.max(0, s.morale - auto);
 
   // Track scope changes in the burn-up chart with a fractional-day timestamp.
@@ -221,8 +292,26 @@ export const applyChoice = (state, choice) => {
     : null;
   const rawLog = overrideLog || choice.log;
   const renderedChoiceLog = rawLog ? renderCast(rawLog, cast) : null;
-  s.dayLog = [...s.dayLog, ...[renderedChoiceLog, ...log].filter(Boolean)];
+  const renderedRolled = rolled.map(l => renderCast(l, cast));
+  s.dayLog = [...s.dayLog, ...[renderedChoiceLog, ...renderedRolled, ...log].filter(Boolean)];
   return s;
+};
+
+// ----- DAILY TAXES -----
+// Each morning, every standing commitment takes its hours off the top of the
+// day before the first ticket is opened, then counts down a day. Returns the
+// surviving taxes, the hours lost and a log line per tax.
+export const tickDailyTaxes = (taxes = []) => {
+  const kept = [];
+  const log = [];
+  let hours = 0;
+  for (const t of taxes) {
+    if (!t || !(t.days > 0) || !(t.hours > 0)) continue;
+    hours += t.hours;
+    log.push(`⏰ ${t.label}: ${t.hours}h gone before you opened a ticket.`);
+    if (t.days - 1 > 0) kept.push({ ...t, days: t.days - 1 });
+  }
+  return { taxes: kept, hours, log };
 };
 
 // ----- CONTEXT SWITCHING -----

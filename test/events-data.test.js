@@ -14,6 +14,7 @@ const KNOWN_EFFECTS = new Set([
   'bumpRefactor', 'scopeCreep', 'addUrgentFeature', 'cancelInitiative',
   'pivotTicket', 'wasteProgress', 'addLegacy', 'promise', 'clearPromise',
   'goHome', 'returnOffice',
+  'chance', 'dailyTax', 'inflateAll', 'splitTicket', 'foldEstimate', 'velocityCommit',
 ]);
 const KNOWN_CHOICE_KEYS = new Set(['label', 'effect', 'log', 'next', 'requires', 'logByDesc', 'meltdownEnding']);
 
@@ -95,6 +96,18 @@ describe('event data', () => {
         expect(typeof c.label, `${id}/${key}: choice label`).toBe('string');
         for (const k of Object.keys(c)) expect(KNOWN_CHOICE_KEYS.has(k), `${id}/${key}: unknown choice key "${k}"`).toBe(true);
         for (const k of Object.keys(c.effect || {})) expect(KNOWN_EFFECTS.has(k), `${id}/${key}: unknown effect "${k}"`).toBe(true);
+        if (c.effect?.chance) {
+          const ch = c.effect.chance;
+          expect(ch.p > 0 && ch.p < 1, `${id}/${key}: chance.p must be strictly between 0 and 1`).toBe(true);
+          expect(Object.keys(ch.effect || {}).length, `${id}/${key}: chance without an effect`).toBeGreaterThan(0);
+          for (const k of Object.keys(ch.effect)) expect(KNOWN_EFFECTS.has(k) && k !== 'chance', `${id}/${key}: unknown nested effect "${k}"`).toBe(true);
+          for (const p of placeholders(ch.log)) used.add(p);
+          for (const p of placeholders(ch.elseLog)) used.add(p);
+        }
+        if (c.effect?.dailyTax) {
+          const t = c.effect.dailyTax;
+          expect(t.hours > 0 && t.days > 0 && typeof t.label === 'string', `${id}/${key}: malformed dailyTax`).toBe(true);
+        }
         if (c.next) expect(ev.nodes?.[c.next], `${id}/${key}: next -> ${c.next}`).toBeTruthy();
         expect(!!(c.next || c.effect || c.meltdownEnding), `${id}/${key}: "${c.label}" does nothing`).toBe(true);
         if (c.logByDesc) {
@@ -148,6 +161,32 @@ describe('event data', () => {
     for (const d of ev.nodes.your_update.descriptions) {
       const text = textOf(d);
       expect(/\?/.test(text), `your_update opener without an ask: ${text.slice(0, 70)}`).toBe(true);
+    }
+  });
+
+  // The sprint review's replies are all ways of demoing, so every opener has
+  // to end with you being asked to demo.
+  it('every sprint review opener asks you to demo', () => {
+    const ev = EVENTS.find(e => e.id === 'sprint_review');
+    for (const d of ev.nodes.open.descriptions) {
+      const t = textOf(d);
+      const text = typeof t === 'function' ? t({ ...CONTEXTS.office, sprint: 3 }, { _baseMin: 0 }) : t;
+      expect(/demo|show/i.test(text), `sprint_review opener without a demo ask: ${text.slice(0, 70)}`).toBe(true);
+    }
+  });
+
+  // The planning poker replies argue about one card's estimate, so every
+  // opener must name that card and the number it is being talked down to.
+  it('every planning poker opener names the card on the table and the low-ball', () => {
+    const ev = EVENTS.find(e => e.id === 'planning_poker');
+    const plan = [{ id: 't1', title: 'Reactions on comments', type: 'feature', effort: 8, progress: 0, shipped: false }];
+    const st = { ...CONTEXTS.office, sprintPlan: plan };
+    expect(ev.requires(st)).toBe(true);
+    expect(ev.requires(CONTEXTS.office)).toBe(false);
+    for (const d of ev.nodes.open.descriptions) {
+      const text = textOf(d)(st, { _baseMin: 0 });
+      expect(text.includes('"Reactions on comments"'), `poker opener without the card: ${text.slice(0, 70)}`).toBe(true);
+      expect(/\b3\b/.test(text), `poker opener without the 3: ${text.slice(0, 70)}`).toBe(true);
     }
   });
 
