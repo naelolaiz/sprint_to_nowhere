@@ -77,7 +77,7 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
             {quip}
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs flex-wrap sm:flex-shrink-0" style={{ color: C.textDim }}>
+        <div className="flex items-center gap-2 text-xs flex-wrap sm:shrink-0" style={{ color: C.textDim }}>
           <span className="tracking-wider uppercase">Capacity</span>
           {[40, 50, 60, 70, 80].map(c => (
             <button
