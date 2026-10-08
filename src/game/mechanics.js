@@ -225,6 +225,47 @@ export const applyChoice = (state, choice) => {
   return s;
 };
 
+// ----- CONTEXT SWITCHING -----
+// Working a second (third, fourth...) ticket in one day is allowed, and it
+// is taxed. Every switch costs real hours before the first keystroke — find
+// the branch, re-read the "see thread" ticket, wait for the CI that was
+// supposed to be fast — plus a focus hit that slows the rest of the day.
+// The tax grows with each switch: the first one costs an hour, the next
+// an hour and a half, and so on. Nobody is measuring this. It is not on
+// the burn-down.
+export const contextSwitchCost = (switchesSoFar = 0) => {
+  const n = Math.max(1, switchesSoFar);
+  return {
+    hours: 0.5 + 0.5 * n,           // 1.0, 1.5, 2.0, ...
+    focus: 10 + 2 * (n - 1),        // 10, 12, 14, ...
+    burnout: 1.5 + 0.5 * (n - 1),   // 1.5, 2.0, 2.5, ...
+  };
+};
+
+const CONTEXT_SWITCH_FLAVORS = [
+  (h) => `Context switch. You re-read the ticket, found the branch, re-ran the failing test you forgot was failing. ${h}h gone before the first keystroke.`,
+  (h) => `You switched tickets. The old one is still open in a tab. So are 41 others. The new one needs a different Node version. ${h}h.`,
+  (h) => `Switching. The second ticket's branch is 300 commits behind main. The rebase "should be quick." ${h}h.`,
+  (h) => `New ticket, same brain. It took ${h}h to stop thinking about the last one. Marcus pinged twice in that time to ask about a third.`,
+  (h) => `Context switch. The ticket description says "see thread." The thread is 212 messages. You start at the bottom. ${h}h.`,
+  (h) => `You open the next ticket. CI for the previous one goes red while you watch. You do not look. ${h}h later you are pretending you did not see it.`,
+  (h) => `Context switch. The dev environment for this one "just needs" a VPN, a token, and a Confluence page that 404s. ${h}h. The page is still 404.`,
+  (h) => `Switching. You pulled main. Main does not build. Main has not built since Tuesday. "Known issue." ${h}h.`,
+];
+
+export const applyContextSwitch = (state, switchesSoFar) => {
+  const cost = contextSwitchCost(switchesSoFar);
+  const hours = Math.min(cost.hours, state.dayFocusRemaining);
+  const flavor = CONTEXT_SWITCH_FLAVORS[Math.floor(Math.random() * CONTEXT_SWITCH_FLAVORS.length)];
+  return {
+    ...state,
+    dayFocusRemaining: Math.max(0, state.dayFocusRemaining - hours),
+    focus: Math.max(0, (state.focus ?? 100) - cost.focus),
+    burnout: Math.min(100, (state.burnout || 0) + cost.burnout),
+    dayLog: [...(state.dayLog || []), flavor(hours.toFixed(1))],
+  };
+};
+
 export const workOnTicket = (state, ticketId) => {
   let s = { ...state, sprintPlan: state.sprintPlan.map(t => ({ ...t })) };
   const idx = s.sprintPlan.findIndex(t => t.id === ticketId);

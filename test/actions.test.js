@@ -130,3 +130,19 @@ describe('applyAction', () => {
     expect(out.dayLog).toEqual(s.dayLog);
   });
 });
+
+describe('working from home', () => {
+  it('breaks and pairing read as home, not the office', () => {
+    for (const kind of ['pair', 'booth', 'lunch', 'walk']) {
+      for (let i = 0; i < 30; i++) {
+        const out = applyAction(midSprint({ dayFocusRemaining: 9, capital: 5, atHome: true }), kind);
+        expect(out.dayLog.at(-1)).not.toMatch(/phone booth|security guard|parking lot|lobby|pulled up a chair|diner|park bench/);
+      }
+    }
+  });
+  it('office breaks still read as the office', () => {
+    const seen = new Set();
+    for (let i = 0; i < 60; i++) seen.add(applyAction(midSprint({ dayFocusRemaining: 9 }), 'walk').dayLog.at(-1));
+    expect([...seen].some(l => /security guard|parking lot|around the block/.test(l))).toBe(true);
+  });
+});

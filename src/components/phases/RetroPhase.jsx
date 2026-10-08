@@ -99,6 +99,17 @@ export const RetroPhase = ({ s, onNext }) => {
           <div className="text-sm italic mt-3" style={{ color: C.textDim }}>"{flavor}"</div>
         </div>
 
+        {s.sprintsSurvived >= 10 && (
+          <div className="mb-6 p-4" style={{ backgroundColor: C.surface, border: `1px solid ${C.amberDim}` }}>
+            <div className="text-xs tracking-wider uppercase mb-2" style={{ color: C.amber }}>MILESTONE: TEN SPRINTS</div>
+            <div className="text-sm" style={{ color: C.textDim, lineHeight: 1.7 }}>
+              The roadmap said this is where the codebase is healthy. The codebase is at {Math.round(s.debt)} debt;
+              "healthy" is under 15. The roadmap has been updated to say "ongoing." Leadership has extended the
+              quarter. Again. The sprint after this one is also called Sprint {s.sprint + 1}, and it will also be a sprint.
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-end">
           <Btn onClick={onNext}>
             <span className="flex items-center gap-2">PLAN NEXT SPRINT <ArrowRight size={14}/></span>

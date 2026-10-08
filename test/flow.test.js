@@ -109,12 +109,73 @@ describe('chooseEvent', () => {
 });
 
 describe('work / skipWork', () => {
-  it('working a ticket ends the day', () => {
-    const s = midSprint({ dayFocusRemaining: 9 });
+  it('a ticket that eats the whole day ends it', () => {
+    const s = midSprint({ dayFocusRemaining: 9, focus: 100, morale: 70 });
+    const out = flow.work(s, s.sprintPlan[2].id); // Refactor C, 12h
+    expect(out.subPhase).toBe('day-summary');
+    expect(out.dayFocusRemaining).toBe(0);
+    expect(out.actionsToday.work).toBe(1);
+    expect(flow.skipWork(s).subPhase).toBe('day-summary');
+  });
+
+  it('a short ticket leaves you at your desk with the rest of the day', () => {
+    const s = midSprint({ dayFocusRemaining: 9, focus: 100, morale: 70, debt: 0, burnout: 0 });
+    const bug = s.sprintPlan.find(t => t.type === 'bug'); // 4h
+    const out = flow.work(s, bug.id);
+    expect(out.subPhase).toBe('work');
+    expect(out.dayFocusRemaining).toBeGreaterThan(0);
+    expect(out.sprintPlan.find(t => t.id === bug.id).shipped).toBe(true);
+    expect(out.actionsToday.work).toBe(1);
+  });
+
+  it('the second ticket of the day pays a context-switch tax first, the third pays more', () => {
+    const s = midSprint({ dayFocusRemaining: 9, focus: 100, morale: 70, debt: 0, burnout: 0 });
+    s.sprintPlan = [
+      ticket({ title: 'Small 1', effort: 2 }),
+      ticket({ title: 'Small 2', effort: 2 }),
+      ticket({ title: 'Big', effort: 20 }),
+    ];
+    const one = flow.work(s, s.sprintPlan[0].id);
+    expect(one.dayFocusRemaining).toBe(7);
+    const two = flow.work(one, s.sprintPlan[1].id);
+    // 1.0h switch, then the 2h ticket (a little slower now that focus took a hit)
+    expect(two.sprintPlan[1].shipped).toBe(true);
+    expect(two.dayFocusRemaining).toBeLessThanOrEqual(4);
+    expect(two.dayFocusRemaining).toBeGreaterThanOrEqual(3);
+    expect(two.focus).toBeLessThan(one.focus - 9);
+    expect(two.burnout).toBeGreaterThan(one.burnout);
+    expect(two.actionsToday.work).toBe(2);
+    expect(two.dayLog.some(l => /Context switch|switch|Switching|next ticket/i.test(l))).toBe(true);
+    const three = flow.work(two, s.sprintPlan[2].id);
+    // 1.5h switch, then the rest of the day on the big one
+    expect(three.subPhase).toBe('day-summary');
+    expect(three.dayFocusRemaining).toBe(0);
+    const big = three.sprintPlan.find(t => t.title === 'Big');
+    expect(big.progress).toBeGreaterThan(0);
+    expect(big.progress).toBeLessThanOrEqual(2.5 * 1.3); // at most 2.5h of work, morale bonus aside
+  });
+
+  it('with too little day left to switch, opening another ticket just ends the day', () => {
+    const s = midSprint({ dayFocusRemaining: 1, actionsToday: { work: 1 } });
     const out = flow.work(s, s.sprintPlan[0].id);
     expect(out.subPhase).toBe('day-summary');
-    expect(out.sprintPlan[0].progress).toBeGreaterThan(0);
-    expect(flow.skipWork(s).subPhase).toBe('day-summary');
+    expect(out.sprintPlan[0].progress).toBe(0);
+    expect(out.dayFocusRemaining).toBe(1);
+    expect(out.dayLog.at(-1)).toMatch(/the day was over/);
+  });
+
+  it('the day ends when every ticket is done, even with hours left', () => {
+    const s = midSprint({ dayFocusRemaining: 9, focus: 100, morale: 70, debt: 0, burnout: 0 });
+    s.sprintPlan = [ticket({ title: 'Only', effort: 2 })];
+    const out = flow.work(s, s.sprintPlan[0].id);
+    expect(out.subPhase).toBe('day-summary');
+    expect(out.dayFocusRemaining).toBe(7);
+  });
+
+  it('nextDay resets the per-day work counter', () => {
+    withRandom([0.99]);
+    const out = flow.nextDay(midSprint({ subPhase: 'day-summary', currentDay: 2, actionsToday: { work: 3 } }));
+    expect(out.actionsToday).toEqual({});
   });
 });
 

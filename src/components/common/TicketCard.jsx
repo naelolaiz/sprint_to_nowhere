@@ -30,6 +30,8 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
   const stealHint = isTeammateOwned && onClick && !disabled
     ? `Working this would mean taking it from @${assignee}. Costs morale.`
     : undefined;
+  // top/right/bottom share one color; the left edge is the ticket-type stripe.
+  const edgeColor = (c) => `${c} ${c} ${c} ${typeColor}`;
   return (
     <div
       onClick={!disabled ? onClick : undefined}
@@ -37,13 +39,17 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
       className={`${onClick && !disabled ? 'cursor-pointer' : ''} transition-all`}
       style={{
         backgroundColor: selected ? C.surface2 : C.surface,
-        border: `1px solid ${selected ? C.amber : C.border}`,
-        borderLeft: `3px solid ${typeColor}`,
+        // Longhands only: mixing `border` with `borderLeft` in one style
+        // object makes React warn on every re-render.
+        borderStyle: 'solid',
+        borderWidth: '1px 1px 1px 3px',
+        borderColor: edgeColor(selected ? C.amber : C.border),
         padding: compact ? '8px 10px' : '10px 12px',
-        opacity: t.shipped ? 0.5 : 1,
+        opacity: t.shipped ? 0.5 : (disabled ? 0.45 : 1),
+        cursor: disabled ? 'not-allowed' : undefined,
       }}
-      onMouseEnter={(e) => onClick && !disabled && (e.currentTarget.style.borderColor = selected ? C.amber : C.borderHi)}
-      onMouseLeave={(e) => onClick && !disabled && (e.currentTarget.style.borderColor = selected ? C.amber : C.border)}
+      onMouseEnter={(e) => onClick && !disabled && (e.currentTarget.style.borderColor = edgeColor(selected ? C.amber : C.borderHi))}
+      onMouseLeave={(e) => onClick && !disabled && (e.currentTarget.style.borderColor = edgeColor(selected ? C.amber : C.border))}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
