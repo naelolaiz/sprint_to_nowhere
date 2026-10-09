@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   base: '/sprint_to_nowhere/',
   build: {
+    // The Spanish dictionary is one lazy chunk (~780 kB, ~300 kB gzipped),
+    // loaded only when Spanish is picked.
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
         // Split the static dialog-data files into their own chunk so they

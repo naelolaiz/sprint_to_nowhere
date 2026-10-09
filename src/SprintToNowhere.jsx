@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { C, FONT } from './data/theme.js';
 import { initialState } from './game/state.js';
 import * as flow from './game/flow.js';
@@ -11,6 +11,8 @@ import { ExecutionPhase } from './components/phases/ExecutionPhase.jsx';
 import { RetroPhase } from './components/phases/RetroPhase.jsx';
 import { GameOverPhase } from './components/phases/GameOverPhase.jsx';
 import { VictoryPhase } from './components/phases/VictoryPhase.jsx';
+import { LanguageSwitcher } from './components/common/LanguageSwitcher.jsx';
+import { tr, getLocale, subscribe } from './i18n/index.js';
 
 export default function SprintToNowhere() {
   // Lazy initializer: `initialState` resets the ticket-id counter, and the
@@ -19,6 +21,9 @@ export default function SprintToNowhere() {
   // initiatives) reused ids already in the plan, and clicking one of them
   // could work on, grow, or cancel a different ticket with the same id.
   const [s, setS] = useState(initialState);
+  // Every string is translated while rendering, so a language change only
+  // has to re-render from the top.
+  useSyncExternalStore(subscribe, getLocale);
 
   const startGame = () => setS(flow.startGame);
   const toggleTicket = (id) => setS(prev => flow.toggleTicket(prev, id));
@@ -49,10 +54,11 @@ export default function SprintToNowhere() {
       {s.phase === 'retro' && <RetroPhase s={s} onNext={nextSprint}/>}
       {s.phase === 'gameover' && <GameOverPhase s={s} onRestart={restart}/>}
       {s.phase === 'victory' && <VictoryPhase s={s} onRestart={restart}/>}
-      <div className="px-3 sm:px-6 py-2 text-[10px] tracking-widest uppercase" style={{
+      <div className="px-3 sm:px-6 py-2 text-[10px] tracking-widest uppercase flex items-center justify-between gap-3" style={{
         color: C.textDimmer, borderTop: `1px solid ${C.border}`,
       }}>
-        sprint_to_nowhere · v0 · ship anyway
+        <span>{tr`sprint_to_nowhere · v0 · ship anyway`}</span>
+        <LanguageSwitcher/>
       </div>
     </div>
   );

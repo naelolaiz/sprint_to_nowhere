@@ -4,6 +4,10 @@ import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
 import { SkyPane } from './Sky.jsx';
+import { tr } from '../../i18n/index.js';
+
+// A slide's lines are translated together, one string with | between lines.
+const lines = (text) => text.split('|');
 
 const Chair = ({ x, y, w = 14, h = 14, front = false }) => (
   <g>
@@ -20,35 +24,35 @@ export const BoardroomScene = ({ event, clock = 10 * 60 }) => {
 
   const config =
     eid === 'ai_initiative_kickoff' ? {
-      banner: 'BOARDROOM · "AGENTIC EVERYTHING" KICKOFF · DAY 1',
-      slide: ['AGENTIC', 'EVERYTHING', '*subject to change'],
+      banner: tr`BOARDROOM · "AGENTIC EVERYTHING" KICKOFF · DAY 1`,
+      slide: lines(tr`AGENTIC|EVERYTHING|*subject to change`),
       slideColor: C.amber,
       vendor: { type: 'vp', label: 'SYNAPSAI' },
       logan: true,
       catering: true,
-      footer: 'CATERING ON A TUESDAY · CEO IN A BLAZER OVER A HOODIE',
+      footer: tr`CATERING ON A TUESDAY · CEO IN A BLAZER OVER A HOODIE`,
     } :
     eid === 'sales_pincer' ? {
-      banner: 'ROOM C · "ALIGNMENT" · 15 MIN ON CAL · 47 MIN IN',
-      slide: ['ENGINEERING', '+ SALES', 'ALIGNMENT'],
+      banner: tr`ROOM C · "ALIGNMENT" · 15 MIN ON CAL · 47 MIN IN`,
+      slide: lines(tr`ENGINEERING|+ SALES|ALIGNMENT`),
       slideColor: C.sage,
       vendor: null,
       logan: false,
       catering: false,
-      footer: 'BOTH SMILING · BOTH STILL SMILING',
+      footer: tr`BOTH SMILING · BOTH STILL SMILING`,
     } :
     eid === 'cto_skiplevel' ? {
-      banner: 'EXECUTIVE SUITE · COFFEE CHAT · 30 MIN',
-      slide: ['LISTENING', '"NO AGENDA"'],
+      banner: tr`EXECUTIVE SUITE · COFFEE CHAT · 30 MIN`,
+      slide: lines(tr`LISTENING|"NO AGENDA"`),
       slideColor: C.blue,
       vendor: null,
       logan: false,
       catering: false,
-      footer: 'CTO HAS A PRINTED SHEET',
+      footer: tr`CTO HAS A PRINTED SHEET`,
     } :
     {
-      banner: 'BOARDROOM',
-      slide: ['EXECUTIVE', 'REVIEW'],
+      banner: tr`BOARDROOM`,
+      slide: lines(tr`EXECUTIVE|REVIEW`),
       slideColor: C.amber,
       vendor: null,
       logan: false,
@@ -58,10 +62,10 @@ export const BoardroomScene = ({ event, clock = 10 * 60 }) => {
 
   // Far-side seats, left to right.
   const seats = [
-    { x: 72, type: 'ceo', name: 'CEO', scale: 1.15 },
+    { x: 72, type: 'ceo', name: tr`CEO`, scale: 1.15 },
     { x: 150, type: 'marcus', name: 'MARCUS' },
     config.vendor ? { x: 210, type: config.vendor.type, name: config.vendor.label, mood: 'phone' } : null,
-    config.logan ? { x: 268, type: 'vp', name: 'LOGAN (MUTE)', target: true } : null,
+    config.logan ? { x: 268, type: 'vp', name: tr`LOGAN (MUTE)`, target: true } : null,
   ].filter(Boolean);
   const emptySeats = [210, 268, 326].filter(x => !seats.some(s => s.x === x));
 
@@ -108,7 +112,7 @@ export const BoardroomScene = ({ event, clock = 10 * 60 }) => {
         <ellipse cx="22" cy="24" rx="12" ry="8" fill={C.amberDim} opacity="0.55"/>
         <ellipse cx="42" cy="32" rx="14" ry="6" fill={C.rust} opacity="0.45"/>
         <ellipse cx="55" cy="18" rx="9" ry="4" fill={C.sage} opacity="0.45"/>
-        <text x="38" y="45" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>"momentum (acrylic)"</text>
+        <text x="38" y="45" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>{tr`"momentum (acrylic)"`}</text>
       </g>
 
       {/* Spotlight wash on the head of the table */}
@@ -135,9 +139,9 @@ export const BoardroomScene = ({ event, clock = 10 * 60 }) => {
         <circle cx="92" cy="6" r="1.4" fill={C.rust}>
           <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" repeatCount="indefinite"/>
         </circle>
-        <text x="86" y="7.5" fontSize="2.6" fontFamily={FONT} fill={C.rust} textAnchor="end">LIVE</text>
+        <text x="86" y="7.5" fontSize="2.6" fontFamily={FONT} fill={C.rust} textAnchor="end">{tr`LIVE`}</text>
         <rect x="0" y="60" width="100" height="6" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.3"/>
-        <text x="50" y="64" textAnchor="middle" fontSize="2.6" fontFamily={FONT} fill={C.textDimmer}>SLIDE 3 / 47 · "TRUST THE PROCESS"</text>
+        <text x="50" y="64" textAnchor="middle" fontSize="2.6" fontFamily={FONT} fill={C.textDimmer}>{tr`SLIDE 3 / 47 · "TRUST THE PROCESS"`}</text>
       </g>
 
       {/* Plant on a stand */}
@@ -218,7 +222,7 @@ export const BoardroomScene = ({ event, clock = 10 * 60 }) => {
           <ellipse cx="-7" cy="0" rx="2" ry="1" fill={C.amber} opacity="0.6"/>
           <ellipse cx="0" cy="0" rx="2" ry="1" fill={C.amberDim} opacity="0.7"/>
           <ellipse cx="7" cy="0" rx="2" ry="1" fill={C.amber} opacity="0.6"/>
-          <text x="0" y="9" textAnchor="middle" fontSize="2.5" fontFamily={FONT} fill={C.amberDim}>(catering — on a Tuesday)</text>
+          <text x="0" y="9" textAnchor="middle" fontSize="2.5" fontFamily={FONT} fill={C.amberDim}>{tr`(catering — on a Tuesday)`}</text>
         </g>
       )}
 

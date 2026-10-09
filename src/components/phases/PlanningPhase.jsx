@@ -5,32 +5,33 @@ import { C, FONT } from '../../data/theme.js';
 import { TicketCard } from '../common/TicketCard.jsx';
 import { Btn } from '../common/Btn.jsx';
 import { PlanningScene } from '../scene/PlanningScene.jsx';
+import { tr, msg } from '../../i18n/index.js';
 
 const PLANNING_QUIPS = [
-  "The points are made up; the deadlines aren't.",
-  "Past you was an optimist.",
-  "Velocity is a vibe.",
-  "Sizing is a feeling, not a fact.",
-  "Whatever you commit to, double it. The PM already has.",
-  "Round down. You always round down.",
-  "Pretend the carryover doesn't exist.",
-  "If it's a 3, it's a 5.",
-  "Estimates are confessions of hope.",
-  "Capacity is theoretical. Burnout is empirical.",
-  "Refactor tickets ship in dreams.",
-  "The retro will not save you.",
-  "Add a buffer. Then add another.",
-  "Story points are a controlled hallucination.",
-  "There are no small tickets, only optimistic ones.",
-  "The backlog is older than you are.",
-  "Definition of done is aspirational.",
-  "Every sprint is a draft.",
-  "The work expands to fill the sprint, then exceeds it.",
-  "If it scares you, it's a 13.",
-  "The assistant sized this sprint. It said \"it depends.\"",
-  "AI-adjusted capacity is capacity, multiplied by a cell.",
-  "Every ticket is AI-accelerated. The budget ran out at nine.",
-  "Legal says keep the tickets out of the assistant. Leadership says put them in. Size for both.",
+  msg`The points are made up; the deadlines aren't.`,
+  msg`Past you was an optimist.`,
+  msg`Velocity is a vibe.`,
+  msg`Sizing is a feeling, not a fact.`,
+  msg`Whatever you commit to, double it. The PM already has.`,
+  msg`Round down. You always round down.`,
+  msg`Pretend the carryover doesn't exist.`,
+  msg`If it's a 3, it's a 5.`,
+  msg`Estimates are confessions of hope.`,
+  msg`Capacity is theoretical. Burnout is empirical.`,
+  msg`Refactor tickets ship in dreams.`,
+  msg`The retro will not save you.`,
+  msg`Add a buffer. Then add another.`,
+  msg`Story points are a controlled hallucination.`,
+  msg`There are no small tickets, only optimistic ones.`,
+  msg`The backlog is older than you are.`,
+  msg`Definition of done is aspirational.`,
+  msg`Every sprint is a draft.`,
+  msg`The work expands to fill the sprint, then exceeds it.`,
+  msg`If it scares you, it's a 13.`,
+  msg`The assistant sized this sprint. It said "it depends."`,
+  msg`AI-adjusted capacity is capacity, multiplied by a cell.`,
+  msg`Every ticket is AI-accelerated. The budget ran out at nine.`,
+  msg`Legal says keep the tickets out of the assistant. Leadership says put them in. Size for both.`,
 ];
 
 let _quipDeck = [];
@@ -56,7 +57,7 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
   const cap = s.sprintCapacity ?? 60;
   const overCapacity = capacity > cap;
   const hasRefactor = planned.some(t => t.type === 'refactor');
-  const quip = pickQuip(s.sprint);
+  const quip = tr(pickQuip(s.sprint));
 
   return (
     <div className="flex-1 flex flex-col lg:overflow-hidden">
@@ -73,16 +74,16 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
       <div className="flex-1 flex flex-col p-3 sm:p-6 gap-4 sm:gap-6 lg:overflow-auto">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div>
-          <div className="text-xs tracking-[0.3em] mb-1" style={{ color: C.amberDim }}>SPRINT {s.sprint} — PLANNING</div>
+          <div className="text-xs tracking-[0.3em] mb-1" style={{ color: C.amberDim }}>{tr`SPRINT ${s.sprint} — PLANNING`}</div>
           <div className="text-base sm:text-lg" style={{ color: C.text }}>
-            Pick tickets for the sprint. {cap}-point team capacity.
+            {tr`Pick tickets for the sprint. ${cap}-point team capacity.`}
           </div>
           <div className="text-sm italic mt-1" style={{ color: C.textDim }}>
             {quip}
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs flex-wrap sm:shrink-0" style={{ color: C.textDim }}>
-          <span className="tracking-wider uppercase">Capacity</span>
+          <span className="tracking-wider uppercase">{tr`Capacity`}</span>
           {[40, 50, 60, 70, 80].map(c => (
             <button
               key={c}
@@ -111,7 +112,7 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
         }}
       >
         <span className="tracking-wider uppercase whitespace-nowrap">
-          Plan · {planned.length}
+          {tr`Plan · ${planned.length}`}
         </span>
         <div className="flex-1 h-1" style={{ backgroundColor: C.surface2, border: `1px solid ${C.border}` }}>
           <div className="h-full transition-all" style={{
@@ -126,7 +127,7 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1">
         <div>
           <div className="text-xs tracking-wider uppercase mb-3" style={{ color: C.textDim }}>
-            Backlog ({s.backlog.length})
+            {tr`Backlog (${s.backlog.length})`}
           </div>
           <div className="space-y-2">
             {s.backlog.map(t => {
@@ -139,7 +140,7 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
         </div>
         <div>
           <div className="text-xs tracking-wider uppercase mb-3 flex justify-between" style={{ color: C.textDim }}>
-            <span>Sprint Plan ({planned.length})</span>
+            <span>{tr`Sprint Plan (${planned.length})`}</span>
             <span style={{ color: overCapacity ? C.rust : C.textDim, fontVariantNumeric: 'tabular-nums' }}>
               {capacity}pt / {cap}pt
             </span>
@@ -154,7 +155,7 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
             <div className="text-sm italic p-4 text-center" style={{
               color: C.textDimmer, border: `1px dashed ${C.border}`,
             }}>
-              No tickets selected. Click backlog items to add them.
+              {tr`No tickets selected. Click backlog items to add them.`}
             </div>
           ) : (
             <div className="space-y-2">
@@ -167,14 +168,14 @@ export const PlanningPhase = ({ s, onToggle, onStart, onSetCapacity }) => {
             <div className="text-xs mt-4 p-3" style={{
               color: C.amber, backgroundColor: C.surface, border: `1px solid ${C.amberDim}`,
             }}>
-              ⚠ No refactors planned. Debt only goes up from here.
+              {tr`⚠ No refactors planned. Debt only goes up from here.`}
             </div>
           )}
         </div>
       </div>
       <div className="flex justify-end gap-3">
         <Btn onClick={onStart} disabled={planned.length === 0 || overCapacity}>
-          <span className="flex items-center gap-2">START SPRINT <ArrowRight size={14}/></span>
+          <span className="flex items-center gap-2">{tr`START SPRINT`} <ArrowRight size={14}/></span>
         </Btn>
       </div>
       </div>

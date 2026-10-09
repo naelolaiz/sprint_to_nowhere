@@ -6,20 +6,21 @@ import { InitechLogo } from './InitechLogo.jsx';
 import { SkyPane } from './Sky.jsx';
 import { skyFor } from './sky.js';
 import { minutesToClock } from '../../game/clock.js';
+import { tr } from '../../i18n/index.js';
 
 export const OutdoorScene = ({ event, clock = 9 * 60 + 14 }) => {
   const eid = event?.id;
   const isFireDrill = eid === 'fire_drill';
   const isMorning = eid === 'morning_arrival';
   const banner =
-    isFireDrill ? '🔥 FIRE DRILL · ALL HANDS PARKING LOT · ETA 25 MIN' :
-    isMorning ? `MORNING ARRIVAL · LOT B · ${minutesToClock(clock)}` :
-    '"GIVING BACK" — Q3 IMPACT DAY';
+    isFireDrill ? tr`🔥 FIRE DRILL · ALL HANDS PARKING LOT · ETA 25 MIN` :
+    isMorning ? tr`MORNING ARRIVAL · LOT B · ${minutesToClock(clock)}` :
+    tr`"GIVING BACK" — Q3 IMPACT DAY`;
   const bannerColor = isFireDrill ? C.rust : isMorning ? C.blue : C.amber;
   const footer =
-    isFireDrill ? 'WARDEN HAS A CLIPBOARD' :
-    isMorning ? 'YOU ARE NOT YET AT YOUR DESK' :
-    'PHOTOS WILL APPEAR IN A DECK';
+    isFireDrill ? tr`WARDEN HAS A CLIPBOARD` :
+    isMorning ? tr`YOU ARE NOT YET AT YOUR DESK` :
+    tr`PHOTOS WILL APPEAR IN A DECK`;
 
   return (
     <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
@@ -49,16 +50,16 @@ export const OutdoorScene = ({ event, clock = 9 * 60 + 14 }) => {
           <g transform="translate(184 66)">
             <InitechLogo width={32} dim/>
           </g>
-          <text x="200" y="110" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.textDimmer}>(EVACUATED BUILDING)</text>
+          <text x="200" y="110" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.textDimmer}>{tr`(EVACUATED BUILDING)`}</text>
           {/* Clusters */}
           <Person x={75} y={148} type="generic" scale={0.9} label=""/>
           <Person x={88} y={150} type="generic" scale={0.9} label="Doug"/>
           <Person x={102} y={148} type="generic" scale={0.9} label=""/>
           <Person x={195} y={148} type="you" scale={1.2} label="JARED"/>
-          <Person x={250} y={148} type="brad" scale={1.0} label="sales"/>
+          <Person x={250} y={148} type="brad" scale={1.0} label={tr`sales`}/>
           <Person x={264} y={150} type="generic" scale={0.95} label="Skip"/>
           <Person x={278} y={148} type="generic" scale={0.95} label=""/>
-          <Person x={325} y={146} type="manager" scale={1.0} label="warden"/>
+          <Person x={325} y={146} type="manager" scale={1.0} label={tr`warden`}/>
         </>
       ) : isMorning ? (
         <>
@@ -97,10 +98,10 @@ export const OutdoorScene = ({ event, clock = 9 * 60 + 14 }) => {
             <g key={i} transform={`translate(${110 + i * 65} 145)`}>
               <rect x="-14" y="-12" width="28" height="16" fill={C.bg} stroke={C.borderHi} strokeWidth="0.8"/>
               <line x1="-14" y1="-4" x2="14" y2="-4" stroke={C.borderHi} strokeWidth="0.4"/>
-              <text x="0" y="-3" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDim}>DONATIONS</text>
+              <text x="0" y="-3" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDim}>{tr`DONATIONS`}</text>
             </g>
           ))}
-          <Person x={85} y={140} type="generic" scale={1.05} label="colleague"/>
+          <Person x={85} y={140} type="generic" scale={1.05} label={tr`colleague`}/>
           <Person x={195} y={148} type="you" scale={1.2} label="JARED"/>
           <Person x={310} y={142} type="brad" scale={1.05} label="Brad"/>
         </>

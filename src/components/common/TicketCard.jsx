@@ -4,6 +4,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { C } from '../../data/theme.js';
 import { ticketLabel, ticketColor } from '../../game/ticketDisplay.js';
 import { TicketIcon } from './TicketIcon.jsx';
+import { tr, msg } from '../../i18n/index.js';
 
 const statusOf = (t) => {
   if (t.shipped) return 'done';
@@ -12,9 +13,20 @@ const statusOf = (t) => {
 };
 
 const STATUS_STYLE = {
-  open:          { label: 'OPEN',        fg: C.textDim, border: C.border },
-  'in-progress': { label: 'IN PROGRESS', fg: C.amber,   border: C.amberDim },
-  done:          { label: 'DONE',        fg: C.sage,    border: C.sage },
+  open:          { label: msg`OPEN`,        fg: C.textDim, border: C.border },
+  'in-progress': { label: msg`IN PROGRESS`, fg: C.amber,   border: C.amberDim },
+  done:          { label: msg`DONE`,        fg: C.sage,    border: C.sage },
+};
+
+// Who is on a ticket is kept in English in the game state ("you",
+// "you & Sam", "the assistant") so the logic can read it; this is the label.
+const assigneeLabel = (who) => {
+  if (who === 'you') return tr`you`;
+  const m = /^you & (.+)$/.exec(who);
+  if (m) return tr`you & ${m[1]}`;
+  if (who === 'Sarah & Jin') return tr`Sarah & Jin`;
+  if (who === 'the assistant') return tr`the assistant`;
+  return tr(who);
 };
 
 export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
@@ -28,7 +40,7 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
   const badgeFg = isTeammateOwned ? C.rust : statusStyle.fg;
   const badgeBorder = isTeammateOwned ? C.rustDim : statusStyle.border;
   const stealHint = isTeammateOwned && onClick && !disabled
-    ? `Working this would mean taking it from @${assignee}. Costs morale.`
+    ? tr`Working this would mean taking it from @${assigneeLabel(assignee)}. Costs morale.`
     : undefined;
   // top/right/bottom share one color; the left edge is the ticket-type stripe.
   const edgeColor = (c) => `${c} ${c} ${c} ${typeColor}`;
@@ -58,11 +70,11 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
             {ticketLabel(t)}
           </span>
           <span className="text-[10px] px-1.5 py-0.5 tracking-wider" style={{ color: badgeFg, border: `1px solid ${badgeBorder}` }}>
-            {statusStyle.label}{assignee ? ` · @${assignee}` : ''}
+            {tr(statusStyle.label)}{assignee ? ` · @${assigneeLabel(assignee)}` : ''}
           </span>
           {isTeammateOwned && (
             <span className="text-[10px] px-1.5 py-0.5 tracking-wider" style={{ color: C.rust, border: `1px solid ${C.rustDim}` }}>
-              TAKE?
+              {tr`TAKE?`}
             </span>
           )}
           {t.urgent && !t.strategic && !t.legacy && (
@@ -72,7 +84,7 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
           )}
           {t.scopeCreep > 0 && (
             <span className="text-[10px] px-1.5 py-0.5" style={{ color: C.amber, border: `1px solid ${C.amberDim}` }}>
-              SCOPE+{t.scopeCreep}
+              {tr`SCOPE+${t.scopeCreep}`}
             </span>
           )}
         </div>
@@ -82,7 +94,7 @@ export const TicketCard = ({ t, onClick, selected, disabled, compact }) => {
       </div>
       <div className="text-sm mt-1.5 leading-snug" style={{ color: t.shipped ? C.textDim : C.text }}>
         {t.shipped && <CheckCircle2 size={12} className="inline mr-1.5" style={{ color: C.sage }} />}
-        {t.title}
+        {tr(t.title)}
       </div>
       {t.progress > 0 && !t.shipped && (
         <div className="h-0.5 mt-2" style={{ backgroundColor: C.border }}>

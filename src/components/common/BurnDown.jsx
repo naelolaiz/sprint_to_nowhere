@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { C, FONT } from '../../data/theme.js';
+import { tr } from '../../i18n/index.js';
 
 export const BurnDown = ({ history, currentRemaining, currentDay, dayFocusRemaining, dayBudget = 8 }) => {
   const W = 280, H = 110, P = 18;
@@ -58,7 +59,7 @@ export const BurnDown = ({ history, currentRemaining, currentDay, dayFocusRemain
     <div style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, padding: 14, marginBottom: 16 }}>
       <div className="flex items-baseline justify-between mb-2">
         <div className="text-[10px] tracking-widest uppercase" style={{ color: C.textDim }}>
-          Sprint Burn-{goingUp ? 'Up' : 'Down'}
+          {goingUp ? tr`Sprint Burn-Up` : tr`Sprint Burn-Down`}
         </div>
         <div className="text-xs" style={{ color: trendColor, fontVariantNumeric: 'tabular-nums' }}>
           {goingUp ? '↑' : trend < 0 ? '↓' : '·'} {trend >= 0 ? '+' : ''}{Math.round(trend)}h
@@ -71,7 +72,7 @@ export const BurnDown = ({ history, currentRemaining, currentDay, dayFocusRemain
         {/* day ticks */}
         {[0,1,2,3,4,5].map(d => (
           <text key={d} x={xFor(d)} y={H - 4} fill={C.textDimmer} fontSize="8" textAnchor="middle" fontFamily={FONT}>
-            d{d}
+            {tr`d${d}`}
           </text>
         ))}
         {/* starting hours reference */}
@@ -97,8 +98,8 @@ export const BurnDown = ({ history, currentRemaining, currentDay, dayFocusRemain
         })}
       </svg>
       <div className="text-[10px] mt-1 flex items-center justify-between" style={{ color: C.textDimmer }}>
-        <span>Dotted = the plan. Solid = reality.</span>
-        <span style={{ color: C.rust }}>● scope</span>
+        <span>{tr`Dotted = the plan. Solid = reality.`}</span>
+        <span style={{ color: C.rust }}>{tr`● scope`}</span>
       </div>
     </div>
   );

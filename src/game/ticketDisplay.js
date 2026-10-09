@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { C } from '../data/theme.js';
+import { tr } from '../i18n/index.js';
 
 export const ticketLabel = (t) => {
-  if (t.strategic) return 'STRATEGIC';
-  if (t.legacy) return 'LEGACY';
-  return { feature: 'FEAT', bug: 'BUG', refactor: 'REFACTOR', legacy: 'LEGACY' }[t.type] || t.type.toUpperCase();
+  if (t.strategic) return tr`STRATEGIC`;
+  if (t.legacy) return tr`LEGACY`;
+  if (t.type === 'feature') return tr`FEAT`;
+  if (t.type === 'bug') return tr`BUG`;
+  if (t.type === 'refactor') return tr`REFACTOR`;
+  return t.type.toUpperCase();
 };
 
 export const ticketColor = (t) => {

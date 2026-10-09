@@ -3,6 +3,7 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { SkyPane } from './Sky.jsx';
+import { tr } from '../../i18n/index.js';
 
 // Seats on the far side of the table, left to right. You sit on the near
 // side, back to the viewer, which is also where the empty chair is.
@@ -66,13 +67,13 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
     ] :
     eid === 'meeting_cascade' ? [
       { type: 'marcus', name: 'MARCUS' },
-      { type: 'brad', name: 'SALES (LEAVING)', mood: 'phone' },
-      { type: 'engineer', name: 'PLATFORM' },
+      { type: 'brad', name: tr`SALES (LEAVING)`, mood: 'phone' },
+      { type: 'engineer', name: tr`PLATFORM` },
     ] :
     eid === 'requirements_changed' ? [
       { type: 'marcus', name: 'MARCUS' },
-      { type: 'engineer', name: 'DESIGNER' },
-      { type: 'vp', name: 'DESIGN LEAD' },
+      { type: 'engineer', name: tr`DESIGNER` },
+      { type: 'vp', name: tr`DESIGN LEAD` },
     ] :
     [{ type: 'generic', name: '' }];
 
@@ -83,17 +84,17 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
   const emptyFar = FAR_SEATS.filter(x => !seated.some(o => o.x === x));
 
   const wbContent =
-    eid === 'one_on_one' ? '"YOUR GROWTH"' :
-    eid === 'quick_sync' ? 'AGENDA: ?' :
-    eid === 'initiative_cancelled' ? 'INITIATIVE' :
-    eid === 'interview' ? 'BEHAVIORAL Qs' :
-    eid === 'new_hire' ? 'WELCOME!' :
-    eid === 'standup_debug' ? 'STACK TRACE 🔥' :
-    eid === 'backlog_refinement' ? 'STORY POINTS = ?' :
-    eid === 'daily_standup' ? 'YESTERDAY / TODAY / VIBES' :
-    eid === 'meeting_cascade' ? 'AGENDA: TBD' :
-    eid === 'requirements_changed' ? 'v3 — final final' :
-    'Q3 GOALS';
+    eid === 'one_on_one' ? tr`"YOUR GROWTH"` :
+    eid === 'quick_sync' ? tr`AGENDA: ?` :
+    eid === 'initiative_cancelled' ? tr`INITIATIVE` :
+    eid === 'interview' ? tr`BEHAVIORAL Qs` :
+    eid === 'new_hire' ? tr`WELCOME!` :
+    eid === 'standup_debug' ? tr`STACK TRACE 🔥` :
+    eid === 'backlog_refinement' ? tr`STORY POINTS = ?` :
+    eid === 'daily_standup' ? tr`YESTERDAY / TODAY / VIBES` :
+    eid === 'meeting_cascade' ? tr`AGENDA: TBD` :
+    eid === 'requirements_changed' ? tr`v3 — final final` :
+    tr`Q3 GOALS`;
 
   const wbColor =
     eid === 'initiative_cancelled' ? C.rust :
@@ -102,23 +103,23 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
     C.amber;
 
   const banner =
-    eid === 'one_on_one' ? 'ROOM B · "INNOVATE" · 1:1 RECURRING · 30 MIN' :
-    eid === 'initiative_cancelled' ? 'ROOM A · POST-MORTEM · NO QUORUM' :
-    eid === 'daily_standup' ? 'ROOM A · STANDUP · 15 MIN ON CAL · 22 MIN IN' :
-    eid === 'backlog_refinement' ? 'ROOM A · REFINEMENT · 90 MIN · 47 TICKETS LEFT' :
-    eid === 'meeting_cascade' ? 'ROOM A · 30 MIN · STARTED 23 LATE' :
-    eid === 'requirements_changed' ? 'ROOM B · FIGMA HUDDLE · 7 ATTENDEES · v3 FINAL' :
-    eid === 'interview' ? 'ROOM C · LOOP INTERVIEW · ROUND 5/5' :
-    eid === 'new_hire' ? 'ROOM B · ONBOARDING · WEEK 2' :
-    eid === 'standup_debug' ? 'ROOM A · STANDUP · 41 MIN IN' :
-    'ROOM A · "ASCEND" · 11:00–11:15';
+    eid === 'one_on_one' ? tr`ROOM B · "INNOVATE" · 1:1 RECURRING · 30 MIN` :
+    eid === 'initiative_cancelled' ? tr`ROOM A · POST-MORTEM · NO QUORUM` :
+    eid === 'daily_standup' ? tr`ROOM A · STANDUP · 15 MIN ON CAL · 22 MIN IN` :
+    eid === 'backlog_refinement' ? tr`ROOM A · REFINEMENT · 90 MIN · 47 TICKETS LEFT` :
+    eid === 'meeting_cascade' ? tr`ROOM A · 30 MIN · STARTED 23 LATE` :
+    eid === 'requirements_changed' ? tr`ROOM B · FIGMA HUDDLE · 7 ATTENDEES · v3 FINAL` :
+    eid === 'interview' ? tr`ROOM C · LOOP INTERVIEW · ROUND 5/5` :
+    eid === 'new_hire' ? tr`ROOM B · ONBOARDING · WEEK 2` :
+    eid === 'standup_debug' ? tr`ROOM A · STANDUP · 41 MIN IN` :
+    tr`ROOM A · "ASCEND" · 11:00–11:15`;
 
   const footer =
-    eid === 'daily_standup' ? '4 PEOPLE TYPING IN CHAT' :
-    eid === 'backlog_refinement' ? 'BIMODAL VOTE DISTRIBUTION DETECTED' :
-    eid === 'meeting_cascade' ? '14 MIN OVER · NEXT MEETING IS NOW' :
-    eid === 'requirements_changed' ? 'FIGMA HAS UNSAVED CHANGES' :
-    'AUDIO: ✓ · VIDEO: ✓ · CHAT: 47 UNREAD';
+    eid === 'daily_standup' ? tr`4 PEOPLE TYPING IN CHAT` :
+    eid === 'backlog_refinement' ? tr`BIMODAL VOTE DISTRIBUTION DETECTED` :
+    eid === 'meeting_cascade' ? tr`14 MIN OVER · NEXT MEETING IS NOW` :
+    eid === 'requirements_changed' ? tr`FIGMA HAS UNSAVED CHANGES` :
+    tr`AUDIO: ✓ · VIDEO: ✓ · CHAT: 47 UNREAD`;
 
   return (
     <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
@@ -173,10 +174,10 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
       <g transform="translate(46 22)">
         <rect x="0" y="0" width="46" height="32" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.5"/>
         <rect x="2" y="2" width="42" height="28" fill="#0a0a0a"/>
-        <text x="23" y="11" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">BOLD</text>
-        <text x="23" y="17" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">FRUGAL</text>
-        <text x="23" y="23" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">BIAS / ACTION</text>
-        <text x="23" y="28" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>(Q3 refresh)</text>
+        <text x="23" y="11" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`BOLD`}</text>
+        <text x="23" y="17" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`FRUGAL`}</text>
+        <text x="23" y="23" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`BIAS / ACTION`}</text>
+        <text x="23" y="28" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>{tr`(Q3 refresh)`}</text>
       </g>
 
       {/* Whiteboard */}
@@ -195,15 +196,15 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
         <text x="29" y="29" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill="#000" transform="rotate(2 29 29)" fontWeight="700">BUG-7</text>
         <rect x="38" y="20" width="14" height="11" fill={C.sage} opacity="0.7" transform="rotate(-1 45 25)"/>
         <text x="45" y="27" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill="#000" transform="rotate(-1 45 27)" fontWeight="700">REF-3</text>
-        <text x="60" y="38" fontSize="2.4" fontFamily={FONT} fill={C.text}>velocity goal:</text>
-        <text x="88" y="38" fontSize="2.4" fontFamily={FONT} fill={C.amber}>aspirational</text>
-        <text x="60" y="44" fontSize="2.4" fontFamily={FONT} fill={C.text}>capacity:</text>
-        <text x="82" y="44" fontSize="2.4" fontFamily={FONT} fill={C.rust}>vibes</text>
+        <text x="60" y="38" fontSize="2.4" fontFamily={FONT} fill={C.text}>{tr`velocity goal:`}</text>
+        <text x="88" y="38" fontSize="2.4" fontFamily={FONT} fill={C.amber}>{tr`aspirational`}</text>
+        <text x="60" y="44" fontSize="2.4" fontFamily={FONT} fill={C.text}>{tr`capacity:`}</text>
+        <text x="82" y="44" fontSize="2.4" fontFamily={FONT} fill={C.rust}>{tr`vibes`}</text>
         {eid === 'initiative_cancelled' && (
           <line x1="6" y1="36" x2="144" y2="12" stroke={C.rust} strokeWidth="2"/>
         )}
         {eid === 'requirements_changed' && (
-          <text x="75" y="30" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDim}>(file 14 was also "final final")</text>
+          <text x="75" y="30" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDim}>{tr`(file 14 was also "final final")`}</text>
         )}
       </g>
 
@@ -264,7 +265,7 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
         <g transform="translate(300 124)">
           <rect x="-8" y="-4" width="16" height="9" fill="#0a0a0a" stroke={C.rust} strokeWidth="0.4"/>
           <text x="0" y="-0.2" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.rust}>TypeError</text>
-          <text x="0" y="3" textAnchor="middle" fontSize="1.7" fontFamily={FONT} fill={C.rustDim}>at line 47</text>
+          <text x="0" y="3" textAnchor="middle" fontSize="1.7" fontFamily={FONT} fill={C.rustDim}>{tr`at line 47`}</text>
           <circle cx="-6.5" cy="-2.6" r="0.6" fill={C.rust}>
             <animate attributeName="opacity" values="0.4;1;0.4" dur="0.9s" repeatCount="indefinite"/>
           </circle>
@@ -273,7 +274,7 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
 
       {/* The post-mortem nobody attended */}
       {eid === 'initiative_cancelled' && (
-        <text x="230" y="122" textAnchor="middle" fontSize="6" fontFamily={FONT} fill={C.textDimmer} fontStyle="italic">(no one came)</text>
+        <text x="230" y="122" textAnchor="middle" fontSize="6" fontFamily={FONT} fill={C.textDimmer} fontStyle="italic">{tr`(no one came)`}</text>
       )}
 
       {/* Near side: you, back to the room, and the chair nobody took */}
@@ -284,7 +285,7 @@ export const MeetingScene = ({ event, clock = 10 * 60 }) => {
 
       {/* Headers and footer */}
       <text x="20" y="11" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">{banner}</text>
-      <text x="395" y="11" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>MEETING IN PROGRESS</text>
+      <text x="395" y="11" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>{tr`MEETING IN PROGRESS`}</text>
       <text x="395" y="172" textAnchor="end" fontSize="4" fontFamily={FONT} fill={C.textDimmer}>{footer}</text>
     </svg>
   );

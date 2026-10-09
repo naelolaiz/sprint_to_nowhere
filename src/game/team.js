@@ -16,6 +16,8 @@
 // `chaosFlavor` that BECOMES the next morning's standup conversation —
 // when chaos happened, the standup IS that discussion.
 
+import { tr, msg } from '../i18n/index.js';
+
 const teamMoraleForShip = (t) => {
   if (t.type === 'refactor') return 6;
   if (t.legacy) return 7;
@@ -30,11 +32,11 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const keepsOwnership = (t) => typeof t.assignedTo === 'string' && t.assignedTo.startsWith('you');
 
 const REGRESSION_TITLES = [
-  'REGRESSION: that bug-fix from a few sprints back',
-  'REGRESSION: the onboarding flow you "finished" two sprints ago',
-  'REGRESSION: the export job nobody has touched since Q1',
-  'REGRESSION: the search filter Sarah closed last month',
-  'REGRESSION: the email template "fix" from the sprint everyone forgot about',
+  msg`REGRESSION: that bug-fix from a few sprints back`,
+  msg`REGRESSION: the onboarding flow you "finished" two sprints ago`,
+  msg`REGRESSION: the export job nobody has touched since Q1`,
+  msg`REGRESSION: the search filter Sarah closed last month`,
+  msg`REGRESSION: the email template "fix" from the sprint everyone forgot about`,
 ];
 
 // IDs of "narrative" review/QA-flavor events. When chaos fires, we bias the
@@ -128,17 +130,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.debt += extra;
       deltas.capital -= 1;
       pendingCleanups.push({
-        title: `Untangle "${t.title}" (${t.shippedBy || 'someone'} shipped a 4,000-line diff)`,
+        title: tr`Untangle "${t.title}" (${t.shippedBy || tr`someone`} shipped a 4,000-line diff)`,
         effort: Math.max(8, Math.round(t.effort * 1.5)),
         debt: -2,
         type: 'refactor',
         urgent: true,
       });
-      log.push(`Overnight: ${t.shippedBy || 'someone'} merged "${t.title}" at 11pm. The diff is 4,000 lines, half of them deletes. Debt +${extra}, −1 capital. A cleanup ticket will land next sprint, larger than the original.`);
+      log.push(tr`Overnight: ${t.shippedBy || tr`someone`} merged "${t.title}" at 11pm. The diff is 4,000 lines, half of them deletes. Debt +${extra}, −1 capital. A cleanup ticket will land next sprint, larger than the original.`);
       deltas.flavor = pick([
-        `Marcus celebrates yesterday's ship of "${t.title}." Nobody mentions the diff size. The debt total quietly ticks up on the dashboard he is not looking at.`,
-        `Marcus opens with "huge win on '${t.title}'!" Three people who have already opened the PR exchange the same look.`,
-        `${t.shippedBy || 'Someone'} gives an update on "${t.title}." It is "shipped, no notes." There are 4,000 lines of notes.`,
+        tr`Marcus celebrates yesterday's ship of "${t.title}." Nobody mentions the diff size. The debt total quietly ticks up on the dashboard he is not looking at.`,
+        tr`Marcus opens with "huge win on '${t.title}'!" Three people who have already opened the PR exchange the same look.`,
+        tr`${t.shippedBy || 'Someone'} gives an update on "${t.title}." It is "shipped, no notes." There are 4,000 lines of notes.`,
       ]);
       break;
     }
@@ -149,10 +151,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
         // The decision record exists, with a date. The rewrite becomes a comment.
         plan[idx] = { ...plan[idx], shielded: false };
         deltas.capital -= 0.5;
-        log.push(`Overnight: Marcus started "rewriting" the spec for "${t.title}", found your write-up, and left a comment instead. The ticket stands. The write-up is spent. −0.5 capital.`);
+        log.push(tr`Overnight: Marcus started "rewriting" the spec for "${t.title}", found your write-up, and left a comment instead. The ticket stands. The write-up is spent. −0.5 capital.`);
         deltas.flavor = pick([
-          `Marcus mentions "a great decision doc" on "${t.title}" and then, in the same breath, "some thoughts I left on it." The thoughts are a rewrite, in comment form.`,
-          `Marcus: "loved the write-up on '${t.title}', really aligned." He then describes something that is not in the write-up.`,
+          tr`Marcus mentions "a great decision doc" on "${t.title}" and then, in the same breath, "some thoughts I left on it." The thoughts are a rewrite, in comment form.`,
+          tr`Marcus: "loved the write-up on '${t.title}', really aligned." He then describes something that is not in the write-up.`,
         ]);
         break;
       }
@@ -166,11 +168,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       };
       deltas.morale -= 3;
       deltas.capital -= 0.5;
-      log.push(`Overnight: Marcus "rewrote" the spec for "${t.title}" to align with "the new direction." Progress reset to 0; ${lost}h of work discarded. Effort grew by 50%. −3 morale, −0.5 capital.`);
+      log.push(tr`Overnight: Marcus "rewrote" the spec for "${t.title}" to align with "the new direction." Progress reset to 0; ${lost}h of work discarded. Effort grew by 50%. −3 morale, −0.5 capital.`);
       deltas.flavor = pick([
-        `Marcus walks through "the new direction" for "${t.title}" for nine minutes. Nobody pushes back. He calls it "alignment."`,
-        `Marcus presents the updated spec for "${t.title}" as if it has always been the spec. Sarah locks her camera off.`,
-        `Marcus, brightly: "small refresh on '${t.title}' — same scope, just sharpened." It is, by hour count, +50%.`,
+        tr`Marcus walks through "the new direction" for "${t.title}" for nine minutes. Nobody pushes back. He calls it "alignment."`,
+        tr`Marcus presents the updated spec for "${t.title}" as if it has always been the spec. Sarah locks her camera off.`,
+        tr`Marcus, brightly: "small refresh on '${t.title}' — same scope, just sharpened." It is, by hour count, +50%.`,
       ]);
       break;
     }
@@ -184,11 +186,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       };
       deltas.morale -= 6;
       deltas.focus -= 5;
-      log.push(`Overnight: someone let an AI pair-pilot push code on "${t.title}". The diff has three different code styles, all confidently wrong. +3h scope, −6 morale, −5 focus.`);
+      log.push(tr`Overnight: someone let an AI pair-pilot push code on "${t.title}". The diff has three different code styles, all confidently wrong. +3h scope, −6 morale, −5 focus.`);
       deltas.flavor = pick([
-        `Someone asks whether the AI-generated parts of "${t.title}" were reviewed. The answer is unclear. Marcus says "we'll get to it."`,
-        `Marcus celebrates the team's "AI-augmented velocity" on "${t.title}." Nobody can find the human reviewer.`,
-        `Three people independently try to run "${t.title}" locally. Three different things break. Marcus calls it "iterating."`,
+        tr`Someone asks whether the AI-generated parts of "${t.title}" were reviewed. The answer is unclear. Marcus says "we'll get to it."`,
+        tr`Marcus celebrates the team's "AI-augmented velocity" on "${t.title}." Nobody can find the human reviewer.`,
+        tr`Three people independently try to run "${t.title}" locally. Three different things break. Marcus calls it "iterating."`,
       ]);
       break;
     }
@@ -200,17 +202,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 3;
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Untangle a drive-by refactor that touched three other files',
+        title: tr`Untangle a drive-by refactor that touched three other files`,
         effort: 5,
         debt: -1,
         type: 'refactor',
         urgent: false,
       });
-      log.push(`Overnight: Sarah "fixed" "${t.title}" by also refactoring three unrelated files. The original isn't done; -${lost.toFixed(1)}h progress. −3 morale, −0.5 capital. A new refactor ticket will land next sprint.`);
+      log.push(tr`Overnight: Sarah "fixed" "${t.title}" by also refactoring three unrelated files. The original isn't done; -${lost.toFixed(1)}h progress. −3 morale, −0.5 capital. A new refactor ticket will land next sprint.`);
       deltas.flavor = pick([
-        `Sarah explains that her "${t.title}" fix "also touched a few other things — for clarity." Nobody asks which other things.`,
-        `Sarah's update: "I cleaned some adjacent code while I was in there." The PR diff is now eight files long.`,
-        `Sarah, casually: "scope-wise, '${t.title}' grew a little." Marcus says "love the proactivity."`,
+        tr`Sarah explains that her "${t.title}" fix "also touched a few other things — for clarity." Nobody asks which other things.`,
+        tr`Sarah's update: "I cleaned some adjacent code while I was in there." The PR diff is now eight files long.`,
+        tr`Sarah, casually: "scope-wise, '${t.title}' grew a little." Marcus says "love the proactivity."`,
       ]);
       break;
     }
@@ -219,28 +221,28 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.burnout += 5;
       deltas.focus -= 10;
       deltas.capital -= 1;
-      log.push('Overnight: Jin committed at 2:47am. Tomorrow morning the build is red across all branches. Half the team will spend the morning bisecting. −10 morale, +5 burnout, −10 focus, −1 capital.');
+      log.push(tr`Overnight: Jin committed at 2:47am. Tomorrow morning the build is red across all branches. Half the team will spend the morning bisecting. −10 morale, +5 burnout, −10 focus, −1 capital.`);
       deltas.flavor = pick([
-        'Jin owns this morning\'s build break. Marcus reframes it as "a great learning opportunity." Three people are clearly bisecting in another tab.',
-        'The build is red. Marcus opens with "before we start, small heads-up — main is on fire." He says "small" three more times.',
-        'Jin\'s update is "I\'m fixing the thing I broke." Marcus replies "love the ownership."',
-        'CI is red across all branches. Marcus suggests "we keep things async this morning so people can focus on the fix." Async means everyone is still on the call.',
+        tr`Jin owns this morning's build break. Marcus reframes it as "a great learning opportunity." Three people are clearly bisecting in another tab.`,
+        tr`The build is red. Marcus opens with "before we start, small heads-up — main is on fire." He says "small" three more times.`,
+        tr`Jin's update is "I'm fixing the thing I broke." Marcus replies "love the ownership."`,
+        tr`CI is red across all branches. Marcus suggests "we keep things async this morning so people can focus on the fix." Async means everyone is still on the call.`,
       ]);
       break;
     }
     case 'doug_milk_macros': {
       deltas.focus -= 3;
       pendingCleanups.push({
-        title: 'Remove milk_v47.xlsx export macros from prod',
+        title: tr`Remove milk_v47.xlsx export macros from prod`,
         effort: 6,
         debt: -1,
         type: 'legacy',
         urgent: false,
       });
-      log.push('Overnight: Doug from Infra "helped" by pushing his milk-tracking spreadsheet macros into the codebase. Nobody saw the PR until merge. −3 focus. A legacy cleanup ticket will land next sprint.');
+      log.push(tr`Overnight: Doug from Infra "helped" by pushing his milk-tracking spreadsheet macros into the codebase. Nobody saw the PR until merge. −3 focus. A legacy cleanup ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Someone notices an Excel-macro file in production. Marcus says he\'ll "follow up offline." He will not.',
-        'Doug joins the call uninvited and shares his screen. The screen is milk_v48.xlsx. Marcus says "Doug, we\'re going to have to circle back."',
+        tr`Someone notices an Excel-macro file in production. Marcus says he'll "follow up offline." He will not.`,
+        tr`Doug joins the call uninvited and shares his screen. The screen is milk_v48.xlsx. Marcus says "Doug, we're going to have to circle back."`,
       ]);
       break;
     }
@@ -255,13 +257,13 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
         type: 'bug',
         urgent: true,
       });
-      log.push(`Overnight: QA finished testing something you shipped sprints ago. They found a problem. The ticket is back, with a regression fix queued for next sprint. ("${title}") −3 morale, −0.5 capital.`);
+      log.push(tr`Overnight: QA finished testing something you shipped sprints ago. They found a problem. The ticket is back, with a regression fix queued for next sprint. ("${title}") −3 morale, −0.5 capital.`);
       deltas.flavor = pick([
-        `QA wants to "just flag" a regression they found. The Slack thread is already at 47 messages. ("${title}")`,
-        `QA emailed. Subject: "URGENT - quick question." It is neither. ("${title}")`,
-        `QA leadership joins, off-camera. They have "context." They will not share it. ("${title}")`,
-        `QA found a thing. They titled the ticket "minor." Marcus moved it to P0 by lunch. ("${title}")`,
-        `QA writes a 12-paragraph reproduction. Step 1: "navigate to the application." ("${title}")`,
+        tr`QA wants to "just flag" a regression they found. The Slack thread is already at 47 messages. ("${title}")`,
+        tr`QA emailed. Subject: "URGENT - quick question." It is neither. ("${title}")`,
+        tr`QA leadership joins, off-camera. They have "context." They will not share it. ("${title}")`,
+        tr`QA found a thing. They titled the ticket "minor." Marcus moved it to P0 by lunch. ("${title}")`,
+        tr`QA writes a 12-paragraph reproduction. Step 1: "navigate to the application." ("${title}")`,
       ]);
       break;
     }
@@ -281,18 +283,18 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.debt += debtChange;
       deltas.morale += teamMoraleForShip(t) + 4;
       deltas.capital += 1;
-      log.push(`Overnight: Sarah and Jin paired on "${t.title}" until 6pm and shipped it. The diff was clean. Both got credit. Suspicious. +1 capital.`);
+      log.push(tr`Overnight: Sarah and Jin paired on "${t.title}" until 6pm and shipped it. The diff was clean. Both got credit. Suspicious. +1 capital.`);
       deltas.flavor = pick([
-        `Marcus calls out Sarah and Jin's overnight pair-up on "${t.title}" as "exactly the kind of energy we need." Sarah looks tired. Jin is not on the call.`,
-        `Sarah's update: "we paired on '${t.title}', it's done." Jin gives a thumbs-up. The room exhales.`,
-        `Marcus opens with "I want to recognize Sarah and Jin." It is a 12-minute recognition.`,
+        tr`Marcus calls out Sarah and Jin's overnight pair-up on "${t.title}" as "exactly the kind of energy we need." Sarah looks tired. Jin is not on the call.`,
+        tr`Sarah's update: "we paired on '${t.title}', it's done." Jin gives a thumbs-up. The room exhales.`,
+        tr`Marcus opens with "I want to recognize Sarah and Jin." It is a 12-minute recognition.`,
       ]);
       break;
     }
     case 'pr_review_war': {
       // Two teammates feud in PR review. A regression-feedback ticket lands next sprint.
       pendingCleanups.push({
-        title: 'Address PR review feedback from a heated thread',
+        title: tr`Address PR review feedback from a heated thread`,
         effort: 3 + Math.floor(Math.random() * 3),  // 3-5h
         debt: 0,
         type: 'bug',
@@ -300,12 +302,12 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       });
       deltas.morale -= 6;
       deltas.capital -= 1;
-      log.push('Overnight: Sarah and Jin spent 47 comments arguing about a function name on Marcus\'s PR. The thread is locked. −6 morale, −1 capital. A follow-up ticket will land next sprint.');
+      log.push(tr`Overnight: Sarah and Jin spent 47 comments arguing about a function name on Marcus's PR. The thread is locked. −6 morale, −1 capital. A follow-up ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Sarah and Jin avoid eye contact. Marcus says he "loves the engagement on the review thread." The thread, it transpires, has been locked by an admin.',
-        'Marcus opens with "I want to recognize the discourse on the open PR." Two people unmute to interrupt him. He keeps talking.',
-        'Sarah brings up the PR. Jin counters. Marcus says "let\'s take that offline." They are about to be online for an hour.',
-        'Brad joins the call to "add some context." He has none. He stays for the whole meeting.',
+        tr`Sarah and Jin avoid eye contact. Marcus says he "loves the engagement on the review thread." The thread, it transpires, has been locked by an admin.`,
+        tr`Marcus opens with "I want to recognize the discourse on the open PR." Two people unmute to interrupt him. He keeps talking.`,
+        tr`Sarah brings up the PR. Jin counters. Marcus says "let's take that offline." They are about to be online for an hour.`,
+        tr`Brad joins the call to "add some context." He has none. He stays for the whole meeting.`,
       ]);
       break;
     }
@@ -313,11 +315,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 8;
       deltas.burnout += 3;
       deltas.focus -= 3;
-      log.push('Overnight: Jin and Sarah fought in #engineering about tabs vs spaces. Three other people weighed in. The conversation drifted to monorepos. Two emoji reactions were retracted. −8 morale, +3 burnout, −3 focus.');
+      log.push(tr`Overnight: Jin and Sarah fought in #engineering about tabs vs spaces. Three other people weighed in. The conversation drifted to monorepos. Two emoji reactions were retracted. −8 morale, +3 burnout, −3 focus.`);
       deltas.flavor = pick([
-        'Nobody mentions the tabs/spaces thread. Everyone has read it. The silence is louder than the thread was.',
-        'Two people in the call have their notifications visible. The thread is still active. Marcus pretends he doesn\'t see them.',
-        'Marcus, brightly: "I noticed some great technical discussion in #engineering — let\'s take that energy and channel it into the sprint."',
+        tr`Nobody mentions the tabs/spaces thread. Everyone has read it. The silence is louder than the thread was.`,
+        tr`Two people in the call have their notifications visible. The thread is still active. Marcus pretends he doesn't see them.`,
+        tr`Marcus, brightly: "I noticed some great technical discussion in #engineering — let's take that energy and channel it into the sprint."`,
       ]);
       break;
     }
@@ -333,11 +335,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       }
       deltas.morale -= 10;
       deltas.capital -= 0.5;
-      log.push(`Overnight: Sarah force-pushed to main. ${titles.length === 1 ? titles[0] : titles.join(' and ')} lost half their progress. She is "really sorry, the rebase got weird." −10 morale, −0.5 capital.`);
+      log.push(tr`Overnight: Sarah force-pushed to main. ${titles.length === 1 ? titles[0] : titles.join(tr` and `)} lost half their progress. She is "really sorry, the rebase got weird." −10 morale, −0.5 capital.`);
       deltas.flavor = pick([
-        'Sarah opens with "so, about main last night..." The room collectively braces. She has prepared a five-slide retrospective.',
-        'Sarah\'s update: "I have to walk back yesterday\'s ship." She does. It takes seven minutes.',
-        'Marcus says "blameless, blameless" four times before Sarah has finished saying what happened.',
+        tr`Sarah opens with "so, about main last night..." The room collectively braces. She has prepared a five-slide retrospective.`,
+        tr`Sarah's update: "I have to walk back yesterday's ship." She does. It takes seven minutes.`,
+        tr`Marcus says "blameless, blameless" four times before Sarah has finished saying what happened.`,
       ]);
       break;
     }
@@ -355,20 +357,22 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       }
       deltas.morale -= 3;
       deltas.capital -= 0.5;
-      log.push(`Overnight: Marcus and Brad had a "quick sync" that ran 90 minutes over. ${targets.length} ticket${targets.length > 1 ? 's' : ''} grew by 1h each. Marcus called it "alignment." −3 morale, −0.5 capital.`);
+      log.push(targets.length === 1
+        ? tr`Overnight: Marcus and Brad had a "quick sync" that ran 90 minutes over. 1 ticket grew by 1h. Marcus called it "alignment." −3 morale, −0.5 capital.`
+        : tr`Overnight: Marcus and Brad had a "quick sync" that ran 90 minutes over. ${targets.length} tickets grew by 1h each. Marcus called it "alignment." −3 morale, −0.5 capital.`);
       deltas.flavor = pick([
-        'Marcus references his "alignment sync" with Brad. He lists three new acceptance criteria that nobody had asked about. He calls them "table stakes."',
-        'Marcus, brightly: "Brad and I had a great chat — there are some details we want to make sure we land." The details, in aggregate, are three more hours.',
+        tr`Marcus references his "alignment sync" with Brad. He lists three new acceptance criteria that nobody had asked about. He calls them "table stakes."`,
+        tr`Marcus, brightly: "Brad and I had a great chat — there are some details we want to make sure we land." The details, in aggregate, are three more hours.`,
       ]);
       break;
     }
     case 'donuts': {
       // The rare positive event.
       deltas.morale += 6;
-      log.push('Overnight: Sarah brought donuts. The good ones from the place across the highway. The box was empty by 9:30am. +6 morale.');
+      log.push(tr`Overnight: Sarah brought donuts. The good ones from the place across the highway. The box was empty by 9:30am. +6 morale.`);
       deltas.flavor = pick([
-        'Morale is unaccountably high. Marcus asks "what changed?" Nobody tells him about the donuts.',
-        'Three updates in a row are 30 seconds long and end with someone smiling. Marcus is suspicious.',
+        tr`Morale is unaccountably high. Marcus asks "what changed?" Nobody tells him about the donuts.`,
+        tr`Three updates in a row are 30 seconds long and end with someone smiling. Marcus is suspicious.`,
       ]);
       break;
     }
@@ -376,10 +380,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 3;
       deltas.burnout += 3;
       deltas.focus -= 5;
-      log.push('Overnight: Marcus organized "Innovation Hour" for tomorrow. Voluntary, mandatory. Themes will be "blue-sky." −3 morale, +3 burnout, −5 focus.');
+      log.push(tr`Overnight: Marcus organized "Innovation Hour" for tomorrow. Voluntary, mandatory. Themes will be "blue-sky." −3 morale, +3 burnout, −5 focus.`);
       deltas.flavor = pick([
-        'Marcus reminds everyone Innovation Hour is in the calendar. He uses the word "voluntary" three times. His tone is the tone of mandatory.',
-        'Marcus, eagerly: "I want to remind folks Innovation Hour is at 2pm — bring your wildest ideas!" Two people decline the invite live.',
+        tr`Marcus reminds everyone Innovation Hour is in the calendar. He uses the word "voluntary" three times. His tone is the tone of mandatory.`,
+        tr`Marcus, eagerly: "I want to remind folks Innovation Hour is at 2pm — bring your wildest ideas!" Two people decline the invite live.`,
       ]);
       break;
     }
@@ -387,8 +391,8 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 3;
       deltas.burnout += 2;
       deltas.focus -= 3;
-      log.push('Overnight: Doug from Infra cornered Sarah at the espresso machine for 40 minutes about milk_v48.xlsx. She is "fine." She is not fine. −3 morale, +2 burnout, −3 focus.');
-      deltas.flavor = 'Sarah is unusually quiet. The smell of espresso clings to her hoodie. Doug joins the call uninvited and immediately mutes himself.';
+      log.push(tr`Overnight: Doug from Infra cornered Sarah at the espresso machine for 40 minutes about milk_v48.xlsx. She is "fine." She is not fine. −3 morale, +2 burnout, −3 focus.`);
+      deltas.flavor = tr`Sarah is unusually quiet. The smell of espresso clings to her hoodie. Doug joins the call uninvited and immediately mutes himself.`;
       break;
     }
     case 'junior_questions': {
@@ -396,10 +400,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale += 1;
       deltas.burnout += 3;
       deltas.focus -= 3;
-      log.push('Overnight: Tyler the junior asked thoughtful questions for three hours. You\'re glad someone is, even if it cost the day. +1 morale, +3 burnout, −3 focus.');
+      log.push(tr`Overnight: Tyler the junior asked thoughtful questions for three hours. You're glad someone is, even if it cost the day. +1 morale, +3 burnout, −3 focus.`);
       deltas.flavor = pick([
-        'Tyler\'s update is eight questions long. Marcus calls it "great learning energy." Three people made eye contact in solidarity.',
-        'Tyler asks if "this is how we always do it." Five people answer at once with five different answers.',
+        tr`Tyler's update is eight questions long. Marcus calls it "great learning energy." Three people made eye contact in solidarity.`,
+        tr`Tyler asks if "this is how we always do it." Five people answer at once with five different answers.`,
       ]);
       break;
     }
@@ -407,10 +411,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 2;
       deltas.burnout += 2;
       deltas.focus -= 5;
-      const vendors = ['Linear', 'Notion', 'CircleCI', 'GitHub', 'Slack', 'the artifact registry'];
+      const vendors = ['Linear', 'Notion', 'CircleCI', 'GitHub', 'Slack', tr`the artifact registry`];
       const v = pick(vendors);
-      log.push(`Overnight: ${v} was down for 90 minutes. Marcus had to walk over and ask people what they were working on. He looked uncomfortable. −2 morale, +2 burnout, −5 focus.`);
-      deltas.flavor = `Someone asks if ${v} is back up. Nobody is sure. Marcus says he'll "follow up offline" — possibly with ${v} support, possibly not.`;
+      log.push(tr`Overnight: ${v} was down for 90 minutes. Marcus had to walk over and ask people what they were working on. He looked uncomfortable. −2 morale, +2 burnout, −5 focus.`);
+      deltas.flavor = tr`Someone asks if ${v} is back up. Nobody is sure. Marcus says he'll "follow up offline" — possibly with ${v} support, possibly not.`;
       break;
     }
     case 'jin_homelab_fire': {
@@ -419,14 +423,14 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.focus -= 3;
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Pick up Jin\'s in-flight refactor while he reinstalls Proxmox',
+        title: tr`Pick up Jin's in-flight refactor while he reinstalls Proxmox`,
         effort: 10,
         debt: -2,
         type: 'refactor',
         urgent: true,
       });
-      log.push('Overnight: Jin\'s homelab caught fire. He\'s "fine" but his rack is "less fine." He will be on PTO Tuesday-Thursday. −4 morale, −3 focus, −0.5 capital. A cleanup ticket will land next sprint.');
-      deltas.flavor = 'Jin is OOO. Marcus says he\'s "on a personal infrastructure project." Sarah, who has seen the photos, is openly concerned.';
+      log.push(tr`Overnight: Jin's homelab caught fire. He's "fine" but his rack is "less fine." He will be on PTO Tuesday-Thursday. −4 morale, −3 focus, −0.5 capital. A cleanup ticket will land next sprint.`);
+      deltas.flavor = tr`Jin is OOO. Marcus says he's "on a personal infrastructure project." Sarah, who has seen the photos, is openly concerned.`;
       break;
     }
     case 'stale_pr_block': {
@@ -434,17 +438,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 3;
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Push Sarah\'s 5-day-old PR over the line (it\'s "ready for review")',
+        title: tr`Push Sarah's 5-day-old PR over the line (it's "ready for review")`,
         effort: 4,
         debt: 0,
         type: 'bug',
         urgent: true,
       });
-      log.push('Overnight: Sarah\'s PR has been "ready for review" for 5 days. Nobody has looked at it. The auto-reminder bot is now muted in #engineering. −3 morale, −0.5 capital. A follow-up ticket will land next sprint.');
+      log.push(tr`Overnight: Sarah's PR has been "ready for review" for 5 days. Nobody has looked at it. The auto-reminder bot is now muted in #engineering. −3 morale, −0.5 capital. A follow-up ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Sarah brings up her PR. Nobody acknowledges it. Marcus pivots to "any blockers?" Sarah\'s PR is the blocker.',
-        'Marcus says he\'ll "find someone to take a look at Sarah\'s PR today." Sarah has heard this exactly three times before.',
-        'The reminder bot pings the channel mid-standup. Marcus mutes it. Live.',
+        tr`Sarah brings up her PR. Nobody acknowledges it. Marcus pivots to "any blockers?" Sarah's PR is the blocker.`,
+        tr`Marcus says he'll "find someone to take a look at Sarah's PR today." Sarah has heard this exactly three times before.`,
+        tr`The reminder bot pings the channel mid-standup. Marcus mutes it. Live.`,
       ]);
       break;
     }
@@ -459,11 +463,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       };
       deltas.morale -= 5;
       deltas.capital -= 0.5;
-      log.push(`Overnight: Jin left 23 review comments on the PR for "${t.title}" — half about variable naming, three about a function the PR doesn't even touch. Effort +2h. −5 morale, −0.5 capital.`);
+      log.push(tr`Overnight: Jin left 23 review comments on the PR for "${t.title}" — half about variable naming, three about a function the PR doesn't even touch. Effort +2h. −5 morale, −0.5 capital.`);
       deltas.flavor = pick([
-        `Jin reads three review comments aloud, "just for context." Two are about variable naming. One is about a file the PR doesn't touch. ("${t.title}")`,
-        `Sarah patiently goes through Jin's comments on "${t.title}." The team learns three new opinions Jin has about React conventions.`,
-        `Marcus says "love the rigor on the review thread." He has not read the PR.`,
+        tr`Jin reads three review comments aloud, "just for context." Two are about variable naming. One is about a file the PR doesn't touch. ("${t.title}")`,
+        tr`Sarah patiently goes through Jin's comments on "${t.title}." The team learns three new opinions Jin has about React conventions.`,
+        tr`Marcus says "love the rigor on the review thread." He has not read the PR.`,
       ]);
       break;
     }
@@ -471,17 +475,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       // QA backlog grows; you have to triage.
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Triage the 14 tickets stuck in QA "Awaiting Validation"',
+        title: tr`Triage the 14 tickets stuck in QA "Awaiting Validation"`,
         effort: 6,
         debt: 0,
         type: 'bug',
         urgent: false,
       });
-      log.push('Overnight: 14 tickets are stuck in QA "Awaiting Validation". Three are from last quarter. Nobody knows who owns the column. −0.5 capital. A triage ticket will land next sprint.');
+      log.push(tr`Overnight: 14 tickets are stuck in QA "Awaiting Validation". Three are from last quarter. Nobody knows who owns the column. −0.5 capital. A triage ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Someone mentions QA. The room goes briefly silent. Marcus says he\'ll "loop in QA leadership" and moves on.',
-        'Marcus opens a doc titled "QA Process Improvements — Q3." The doc from Q1 has the same name.',
-        'Three people simultaneously ask "who owns the QA column?" Nobody answers.',
+        tr`Someone mentions QA. The room goes briefly silent. Marcus says he'll "loop in QA leadership" and moves on.`,
+        tr`Marcus opens a doc titled "QA Process Improvements — Q3." The doc from Q1 has the same name.`,
+        tr`Three people simultaneously ask "who owns the QA column?" Nobody answers.`,
       ]);
       break;
     }
@@ -489,11 +493,11 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       // Tests get skipped instead of fixed. Debt grows now.
       deltas.debt += 5;
       deltas.focus -= 3;
-      log.push('Overnight: three integration tests started failing intermittently. The team agreed to "skip them for now." The skip list is now 31 tests long. Debt +5, −3 focus.');
+      log.push(tr`Overnight: three integration tests started failing intermittently. The team agreed to "skip them for now." The skip list is now 31 tests long. Debt +5, −3 focus.`);
       deltas.flavor = pick([
-        'Tests fail in CI again. Three people simultaneously paste "flaky" in the chat. Marcus opens a doc titled "Test Reliability — Q3."',
-        'Someone asks if the skipped tests are still in the skip list. Sarah quietly says "all of them."',
-        'The CI dashboard shows green. The skip list shows 31 tests. Nobody connects them.',
+        tr`Tests fail in CI again. Three people simultaneously paste "flaky" in the chat. Marcus opens a doc titled "Test Reliability — Q3."`,
+        tr`Someone asks if the skipped tests are still in the skip list. Sarah quietly says "all of them."`,
+        tr`The CI dashboard shows green. The skip list shows 31 tests. Nobody connects them.`,
       ]);
       break;
     }
@@ -501,16 +505,16 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       // Hotfix landed on release branch but not main; bug returns later.
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Re-apply the hotfix that was cherry-picked to release but never to main',
+        title: tr`Re-apply the hotfix that was cherry-picked to release but never to main`,
         effort: 3 + Math.floor(Math.random() * 3),
         debt: 1,
         type: 'bug',
         urgent: true,
       });
-      log.push('Overnight: Marcus cherry-picked a hotfix to the release branch and forgot main. The bug will return on Monday. −0.5 capital. A regression ticket will land next sprint.');
+      log.push(tr`Overnight: Marcus cherry-picked a hotfix to the release branch and forgot main. The bug will return on Monday. −0.5 capital. A regression ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Someone notices a bug from sprint 4 is back. Marcus blames "the merge." There was, technically, no merge.',
-        'The bug returns. Marcus says "we\'ll get to it" three times in a row, in slightly different tones.',
+        tr`Someone notices a bug from sprint 4 is back. Marcus blames "the merge." There was, technically, no merge.`,
+        tr`The bug returns. Marcus says "we'll get to it" three times in a row, in slightly different tones.`,
       ]);
       break;
     }
@@ -519,10 +523,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.burnout += 3;
       deltas.morale -= 4;
       deltas.capital -= 1;
-      log.push('Overnight: someone merged a feature branch into staging instead of main. Half a day will be spent reverting. The git log will be quietly massaged. +3 burnout, −4 morale, −1 capital.');
+      log.push(tr`Overnight: someone merged a feature branch into staging instead of main. Half a day will be spent reverting. The git log will be quietly massaged. +3 burnout, −4 morale, −1 capital.`);
       deltas.flavor = pick([
-        'Nobody mentions yesterday\'s revert. The git log will be referenced as "cleanup." Marcus says, brightly, "ok, what\'s next?"',
-        'Marcus, casually: "small note — we did a quick history-cleanup on staging last night." Three people clearly know what that means.',
+        tr`Nobody mentions yesterday's revert. The git log will be referenced as "cleanup." Marcus says, brightly, "ok, what's next?"`,
+        tr`Marcus, casually: "small note — we did a quick history-cleanup on staging last night." Three people clearly know what that means.`,
       ]);
       break;
     }
@@ -531,10 +535,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 3;
       deltas.burnout += 2;
       deltas.focus -= 3;
-      log.push('Overnight: Sarah merged a lint config change. 217 files were auto-formatted. Everyone has to rebase. The diff for tomorrow\'s standup will be "noisy." −3 morale, +2 burnout, −3 focus.');
+      log.push(tr`Overnight: Sarah merged a lint config change. 217 files were auto-formatted. Everyone has to rebase. The diff for tomorrow's standup will be "noisy." −3 morale, +2 burnout, −3 focus.`);
       deltas.flavor = pick([
-        'Complaints about the rebase mountain. Sarah is apologetic. Marcus is enthusiastic — "consistency is a gift to future-us."',
-        'Three people are clearly rebasing during their own standup updates. One has merge conflicts visible on screen-share.',
+        tr`Complaints about the rebase mountain. Sarah is apologetic. Marcus is enthusiastic — "consistency is a gift to future-us."`,
+        tr`Three people are clearly rebasing during their own standup updates. One has merge conflicts visible on screen-share.`,
       ]);
       break;
     }
@@ -543,17 +547,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 2;
       deltas.focus -= 3;
       pendingCleanups.push({
-        title: 'Validate Sarah\'s 4-hour rebase didn\'t silently drop changes',
+        title: tr`Validate Sarah's 4-hour rebase didn't silently drop changes`,
         effort: 5,
         debt: 0,
         type: 'bug',
         urgent: false,
       });
-      log.push('Overnight: Sarah\'s 3-week-old branch needed a rebase. It took 4 hours. She is "really sorry, the conflict resolution got creative." −2 morale, −3 focus. A validation ticket will land next sprint.');
+      log.push(tr`Overnight: Sarah's 3-week-old branch needed a rebase. It took 4 hours. She is "really sorry, the conflict resolution got creative." −2 morale, −3 focus. A validation ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Sarah explains the rebase "got a bit creative." Three people offer to validate it. Marcus asks if it can wait until "after the demo."',
-        'Sarah is unusually quiet. Jin offers to validate. Marcus deflects.',
-        'Sarah\'s update: "the rebase is done." She does not say more. Nobody asks.',
+        tr`Sarah explains the rebase "got a bit creative." Three people offer to validate it. Marcus asks if it can wait until "after the demo."`,
+        tr`Sarah is unusually quiet. Jin offers to validate. Marcus deflects.`,
+        tr`Sarah's update: "the rebase is done." She does not say more. Nobody asks.`,
       ]);
       break;
     }
@@ -564,25 +568,25 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.focus -= 5;
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Untangle the auth/state spiderweb a "quick fix" exposed',
+        title: tr`Untangle the auth/state spiderweb a "quick fix" exposed`,
         effort: 12,
         debt: -3,
         type: 'refactor',
         urgent: true,
       });
       pendingCleanups.push({
-        title: 'Triage the three other pre-existing bugs yesterday\'s fix uncovered',
+        title: tr`Triage the three other pre-existing bugs yesterday's fix uncovered`,
         effort: 5,
         debt: -1,
         type: 'bug',
         urgent: false,
       });
-      log.push('Overnight: a "quick fix" uncovered three more pre-existing bugs and a six-year-old comment that reads "TODO: properly handle this." Debt +12, −5 morale, −5 focus, −0.5 capital. Two cleanup tickets will land next sprint.');
+      log.push(tr`Overnight: a "quick fix" uncovered three more pre-existing bugs and a six-year-old comment that reads "TODO: properly handle this." Debt +12, −5 morale, −5 focus, −0.5 capital. Two cleanup tickets will land next sprint.`);
       deltas.flavor = pick([
-        'Sarah\'s update: "while fixing the bug, I noticed the entire payments module has been quietly broken." Marcus says "great catch — let\'s scope a follow-up." There will be no follow-up.',
-        'Jin opens with "small thing — that comment that says \'we\'ll fix this in Q2\'? Q2 was 2022."',
-        'Three people independently say "wait, has it been broken this WHOLE time?" Sarah quietly nods.',
-        'Sarah: "I think the original ticket was hiding three more tickets." Marcus: "love that we\'re finding these now."',
+        tr`Sarah's update: "while fixing the bug, I noticed the entire payments module has been quietly broken." Marcus says "great catch — let's scope a follow-up." There will be no follow-up.`,
+        tr`Jin opens with "small thing — that comment that says 'we'll fix this in Q2'? Q2 was 2022."`,
+        tr`Three people independently say "wait, has it been broken this WHOLE time?" Sarah quietly nods.`,
+        tr`Sarah: "I think the original ticket was hiding three more tickets." Marcus: "love that we're finding these now."`,
       ]);
       break;
     }
@@ -592,18 +596,18 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 3;
       deltas.focus -= 6;
       pendingCleanups.push({
-        title: 'Reconcile the four config sources nobody agrees on',
+        title: tr`Reconcile the four config sources nobody agrees on`,
         effort: 8,
         debt: -2,
         type: 'refactor',
         urgent: false,
       });
-      log.push('Overnight: a one-line flag flip revealed staging, prod, the .env, and the Helm chart all hold different values for the same setting. Nobody can name the source of truth. Debt +8, −3 morale, −6 focus. Reconciliation ticket will land next sprint.');
+      log.push(tr`Overnight: a one-line flag flip revealed staging, prod, the .env, and the Helm chart all hold different values for the same setting. Nobody can name the source of truth. Debt +8, −3 morale, −6 focus. Reconciliation ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Sarah: "I changed the flag in one place. Three other places had it set differently. Two of them I didn\'t know existed." Marcus suggests "we just pick one." Nobody picks one.',
-        'Jin opens a thread: "which of these is the real config?" Four people answer with four different answers. The thread is at 47 messages and still climbing.',
-        'Marcus reframes the drift as "per-environment tuning, on purpose." The room is silent. Sarah closes her laptop.',
-        'Someone finds a fifth config source nobody knew about. It is the one prod is actually reading.',
+        tr`Sarah: "I changed the flag in one place. Three other places had it set differently. Two of them I didn't know existed." Marcus suggests "we just pick one." Nobody picks one.`,
+        tr`Jin opens a thread: "which of these is the real config?" Four people answer with four different answers. The thread is at 47 messages and still climbing.`,
+        tr`Marcus reframes the drift as "per-environment tuning, on purpose." The room is silent. Sarah closes her laptop.`,
+        tr`Someone finds a fifth config source nobody knew about. It is the one prod is actually reading.`,
       ]);
       break;
     }
@@ -615,18 +619,18 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.focus -= 4;
       deltas.capital -= 0.5;
       pendingCleanups.push({
-        title: 'Untangle the modules implicitly relying on the old library behavior',
+        title: tr`Untangle the modules implicitly relying on the old library behavior`,
         effort: 10,
         debt: -2,
         type: 'refactor',
         urgent: true,
       });
-      log.push('Overnight: a "patch-only" bump on a sleepy utility lib quietly broke three downstream modules that were depending on undocumented behavior. Debt +10, −4 morale, −4 focus, −0.5 capital. Urgent cleanup ticket lands next sprint.');
+      log.push(tr`Overnight: a "patch-only" bump on a sleepy utility lib quietly broke three downstream modules that were depending on undocumented behavior. Debt +10, −4 morale, −4 focus, −0.5 capital. Urgent cleanup ticket lands next sprint.`);
       deltas.flavor = pick([
-        'Jin: "the changelog said nothing changed. The behavior changed. We were depending on the bug." Marcus: "classic." It is the third time this quarter.',
-        'Sarah pulls up the failing tests: "these are passing on main." They are not passing on main. They have not passed on main for two weeks. Nobody knew.',
-        'Three engineers independently say "wait, we were relying on THAT?" Yes. You were.',
-        'Marcus: "let\'s just pin to the old version." Jin: "the old version has the CVE." The room exhales slowly.',
+        tr`Jin: "the changelog said nothing changed. The behavior changed. We were depending on the bug." Marcus: "classic." It is the third time this quarter.`,
+        tr`Sarah pulls up the failing tests: "these are passing on main." They are not passing on main. They have not passed on main for two weeks. Nobody knew.`,
+        tr`Three engineers independently say "wait, we were relying on THAT?" Yes. You were.`,
+        tr`Marcus: "let's just pin to the old version." Jin: "the old version has the CVE." The room exhales slowly.`,
       ]);
       break;
     }
@@ -637,25 +641,25 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.morale -= 4;
       deltas.focus -= 3;
       pendingCleanups.push({
-        title: 'Document what the legacy module actually does before anyone touches it again',
+        title: tr`Document what the legacy module actually does before anyone touches it again`,
         effort: 6,
         debt: -1,
         type: 'refactor',
         urgent: false,
       });
       pendingCleanups.push({
-        title: 'Add the missing tests around the legacy module the rename exposed',
+        title: tr`Add the missing tests around the legacy module the rename exposed`,
         effort: 5,
         debt: -2,
         type: 'bug',
         urgent: false,
       });
-      log.push('Overnight: a "simple rename" in a file marked DEPRECATED in 2021 turned out to be load-bearing for two services nobody could name. Debt +9, −4 morale, −3 focus. Two cleanup tickets will land next sprint.');
+      log.push(tr`Overnight: a "simple rename" in a file marked DEPRECATED in 2021 turned out to be load-bearing for two services nobody could name. Debt +9, −4 morale, −3 focus. Two cleanup tickets will land next sprint.`);
       deltas.flavor = pick([
-        'Marcus on the deprecated file: "we should just delete it." Sarah: "it\'s imported in 23 places." Marcus: "still." Nobody deletes it.',
-        'Jin: "the file says DEPRECATED. The file is also the only thing handling the auth fallback. Both are true." Marcus blinks.',
-        'Sarah\'s investigation finds a comment from 2021: "TODO: remove after Q3." It does not say which Q3.',
-        'The blame on the load-bearing function points to someone who left in 2019. Nobody on the call recognizes the name.',
+        tr`Marcus on the deprecated file: "we should just delete it." Sarah: "it's imported in 23 places." Marcus: "still." Nobody deletes it.`,
+        tr`Jin: "the file says DEPRECATED. The file is also the only thing handling the auth fallback. Both are true." Marcus blinks.`,
+        tr`Sarah's investigation finds a comment from 2021: "TODO: remove after Q3." It does not say which Q3.`,
+        tr`The blame on the load-bearing function points to someone who left in 2019. Nobody on the call recognizes the name.`,
       ]);
       break;
     }
@@ -669,15 +673,15 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
         const idx = plan.findIndex(p => p.id === tt.id);
         const drop = Math.min(2, plan[idx].progress);
         plan[idx] = { ...plan[idx], progress: Math.max(0, plan[idx].progress - drop) };
-        lost.push(`"${tt.title}" (-${drop.toFixed(1)}h)`);
+        lost.push(tr`"${tt.title}" (-${drop.toFixed(1)}h)`);
       }
       deltas.morale -= 4;
       deltas.focus -= 8;
-      const note = lost.length > 0 ? lost.join(' and ') + '.' : 'No tickets had progress to lose.';
-      log.push(`Overnight: half the team upgraded react-router, half didn't. Two builds broke. ${note} −4 morale, −8 focus.`);
+      const note = lost.length > 0 ? lost.join(tr` and `) + '.' : tr`No tickets had progress to lose.`;
+      log.push(tr`Overnight: half the team upgraded react-router, half didn't. Two builds broke. ${note} −4 morale, −8 focus.`);
       deltas.flavor = pick([
-        'Half the team has different lockfiles. Marcus calls it "a healthy debate." Two people are clearly running `npm install` in another tab.',
-        'Sarah asks "did everyone pull?" Three people answer "kind of."',
+        tr`Half the team has different lockfiles. Marcus calls it "a healthy debate." Two people are clearly running \`npm install\` in another tab.`,
+        tr`Sarah asks "did everyone pull?" Three people answer "kind of."`,
       ]);
       break;
     }
@@ -685,17 +689,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.debt += 4;
       deltas.focus -= 4;
       pendingCleanups.push({
-        title: 'Pin everything back after the auto-merged major bump',
+        title: tr`Pin everything back after the auto-merged major bump`,
         effort: 5,
         debt: -1,
         type: 'refactor',
         urgent: false,
       });
-      log.push('Overnight: someone enabled auto-merge on the grouped dependency update "to reduce toil." The major bump merged itself at 3:12am. The build is green because the tests were also bumped. Nothing renders. +4 debt, −4 focus. A pin-it-all-back ticket will land next sprint.');
+      log.push(tr`Overnight: someone enabled auto-merge on the grouped dependency update "to reduce toil." The major bump merged itself at 3:12am. The build is green because the tests were also bumped. Nothing renders. +4 debt, −4 focus. A pin-it-all-back ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Marcus celebrates "zero-touch dependency hygiene." Sarah asks why the app is a white page. Marcus: "let\'s take that offline."',
-        'Jin explains that the bot merged its own PR. Marcus asks whether the bot can also review it. Nobody is sure he is joking.',
-        'Someone asks who approved the major bump. The approver is a bot. The bot has more approvals this quarter than anyone on the call.',
+        tr`Marcus celebrates "zero-touch dependency hygiene." Sarah asks why the app is a white page. Marcus: "let's take that offline."`,
+        tr`Jin explains that the bot merged its own PR. Marcus asks whether the bot can also review it. Nobody is sure he is joking.`,
+        tr`Someone asks who approved the major bump. The approver is a bot. The bot has more approvals this quarter than anyone on the call.`,
       ]);
       break;
     }
@@ -708,22 +712,24 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       }
       deltas.morale -= 4;
       deltas.focus -= 5;
-      log.push(`Overnight: a new branch-protection policy requires two approvals on every PR. The team has two engineers. One is on leave. Every open PR is stuck; ${stuck.length} ticket${stuck.length === 1 ? '' : 's'} grew by an hour of chasing reviews. −4 morale, −5 focus.`);
+      log.push(stuck.length === 1
+        ? tr`Overnight: a new branch-protection policy requires two approvals on every PR. The team has two engineers. One is on leave. Every open PR is stuck; 1 ticket grew by an hour of chasing reviews. −4 morale, −5 focus.`
+        : tr`Overnight: a new branch-protection policy requires two approvals on every PR. The team has two engineers. One is on leave. Every open PR is stuck; ${stuck.length} tickets grew by an hour of chasing reviews. −4 morale, −5 focus.`);
       deltas.flavor = pick([
-        'The standup is about approvals. Marcus suggests "approving each other\'s PRs as a team." There are two people on the team. One of them is on a beach.',
-        'Marcus: "the two-approval rule is about quality." Sarah: "who\'s the second approver?" Marcus: "great question, let\'s park it."',
-        'Someone proposes a bot that approves PRs. Someone else points out the bot would need a second bot. The idea is "parked for the retro."',
+        tr`The standup is about approvals. Marcus suggests "approving each other's PRs as a team." There are two people on the team. One of them is on a beach.`,
+        tr`Marcus: "the two-approval rule is about quality." Sarah: "who's the second approver?" Marcus: "great question, let's park it."`,
+        tr`Someone proposes a bot that approves PRs. Someone else points out the bot would need a second bot. The idea is "parked for the retro."`,
       ]);
       break;
     }
     case 'wiki_migration': {
       deltas.focus -= 3;
       deltas.askTax = (deltas.askTax || 0) + 0.5;
-      log.push('Overnight: the wiki was migrated to the new wiki. Every internal link is dead. The on-call runbook is a 404 with a cheerful illustration. Asking anyone anything today starts with "do you have the new link?" −3 focus; asking for help costs an extra half hour today.');
+      log.push(tr`Overnight: the wiki was migrated to the new wiki. Every internal link is dead. The on-call runbook is a 404 with a cheerful illustration. Asking anyone anything today starts with "do you have the new link?" −3 focus; asking for help costs an extra half hour today.`);
       deltas.flavor = pick([
-        'Marcus shares the "wiki migration FAQ." The link is to the old wiki. The old wiki is a 404 with a cheerful illustration.',
-        'Jin asks where the runbook went. Marcus: "it\'s in the new space." Jin: "which space?" Marcus: "the new one." The call goes quiet.',
-        'Someone has found the runbook. It is a PDF in a Slack DM from 2023. It is now the runbook.',
+        tr`Marcus shares the "wiki migration FAQ." The link is to the old wiki. The old wiki is a 404 with a cheerful illustration.`,
+        tr`Jin asks where the runbook went. Marcus: "it's in the new space." Jin: "which space?" Marcus: "the new one." The call goes quiet.`,
+        tr`Someone has found the runbook. It is a PDF in a Slack DM from 2023. It is now the runbook.`,
       ]);
       break;
     }
@@ -734,50 +740,50 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       const drop = Math.min(3, plan[idx].progress);
       plan[idx] = { ...plan[idx], progress: Math.max(0, plan[idx].progress - drop) };
       deltas.morale -= 6;
-      log.push(`Overnight: a "stale flag cleanup" script removed every flag older than 30 days, including the one "${tt.title}" is built behind. The code path is gone from prod and half of it from the branch. −${drop.toFixed(1)}h, −6 morale.`);
+      log.push(tr`Overnight: a "stale flag cleanup" script removed every flag older than 30 days, including the one "${tt.title}" is built behind. The code path is gone from prod and half of it from the branch. −${drop.toFixed(1)}h, −6 morale.`);
       deltas.flavor = pick([
-        `Marcus celebrates the cleanup script: "flag debt down 60%!" Sarah points out one of the flags was "${tt.title}." Marcus: "we can always re-add it."`,
-        'The person who wrote the cleanup script is "excited about the hygiene win." The person whose feature it removed is on mute, deliberately.',
-        'Someone asks whether the cleanup script had a dry-run mode. It did. It was behind a flag. The flag was stale.',
+        tr`Marcus celebrates the cleanup script: "flag debt down 60%!" Sarah points out one of the flags was "${tt.title}." Marcus: "we can always re-add it."`,
+        tr`The person who wrote the cleanup script is "excited about the hygiene win." The person whose feature it removed is on mute, deliberately.`,
+        tr`Someone asks whether the cleanup script had a dry-run mode. It did. It was behind a flag. The flag was stale.`,
       ]);
       break;
     }
     case 'agent_night_shift': {
       deltas.debt += 5;
       pendingCleanups.push({
-        title: 'Undo the agent\'s night shift',
+        title: tr`Undo the agent's night shift`,
         effort: 6,
         debt: -1,
         type: 'refactor',
         urgent: true,
       });
-      log.push('Overnight: someone enabled "autonomous mode" on the repo "to accelerate velocity." The agent closed 40 issues as duplicates, including the production fire, and opened one PR that renames every variable. +5 debt. A six-hour cleanup ticket will land next sprint.');
+      log.push(tr`Overnight: someone enabled "autonomous mode" on the repo "to accelerate velocity." The agent closed 40 issues as duplicates, including the production fire, and opened one PR that renames every variable. +5 debt. A six-hour cleanup ticket will land next sprint.`);
       deltas.flavor = pick([
-        'Marcus: "the agent closed 40 issues overnight! Huge velocity win." Someone asks which 40. Marcus: "let\'s not get into the which."',
-        'The agent\'s PR is titled "Improve naming consistency across the codebase." It is 11,000 lines. The adoption dashboard has it as the most productive contributor this quarter.',
-        'Someone asks who enabled autonomous mode. The audit log says "system." System has been on the team longer than anyone.',
+        tr`Marcus: "the agent closed 40 issues overnight! Huge velocity win." Someone asks which 40. Marcus: "let's not get into the which."`,
+        tr`The agent's PR is titled "Improve naming consistency across the codebase." It is 11,000 lines. The adoption dashboard has it as the most productive contributor this quarter.`,
+        tr`Someone asks who enabled autonomous mode. The audit log says "system." System has been on the team longer than anyone.`,
       ]);
       break;
     }
     case 'token_reset_moved': {
       deltas.tokenReset = 'fiscal';
       deltas.askTax = (deltas.askTax || 0) + 0.5;
-      log.push('Overnight: finance moved the assistant budget reset to "end of fiscal day," which is 4 PM. The morning is now the expensive part. The first colleague you ask today has no tokens either and answers from memory; asking for help costs an extra half hour.');
+      log.push(tr`Overnight: finance moved the assistant budget reset to "end of fiscal day," which is 4 PM. The morning is now the expensive part. The first colleague you ask today has no tokens either and answers from memory; asking for help costs an extra half hour.`);
       deltas.flavor = pick([
-        'Marcus explains the new reset time with a diagram. The diagram is a clock with "4" circled. Someone asks why. Marcus: "fiscal."',
-        'IT posts an FAQ about the reset. Question one: "Why 4 PM?" Answer one: "The reset is at 4 PM."',
-        'Brad has discovered that the budget is full at 4:01 PM and is "going to start coding then." Brad does not code.',
+        tr`Marcus explains the new reset time with a diagram. The diagram is a clock with "4" circled. Someone asks why. Marcus: "fiscal."`,
+        tr`IT posts an FAQ about the reset. Question one: "Why 4 PM?" Answer one: "The reset is at 4 PM."`,
+        tr`Brad has discovered that the budget is full at 4:01 PM and is "going to start coding then." Brad does not code.`,
       ]);
       break;
     }
     case 'ai_summary_job': {
       deltas.drainTokens = 0.7;
       deltas.morale -= 2;
-      log.push('Overnight: someone scheduled a nightly job that has the assistant summarize every PR, every ticket and every channel "for leadership." It ran at midnight, on the fresh budget, and summarized 3,000 messages nobody had read into one nobody will. Most of today\'s tokens were gone before you woke up. −2 morale.');
+      log.push(tr`Overnight: someone scheduled a nightly job that has the assistant summarize every PR, every ticket and every channel "for leadership." It ran at midnight, on the fresh budget, and summarized 3,000 messages nobody had read into one nobody will. Most of today's tokens were gone before you woke up. −2 morale.`);
       deltas.flavor = pick([
-        'Marcus reads the overnight summary aloud. It says the team is "aligned and energized." It was generated at 12:04 AM from a channel whose last message was "lol." The budget it spent was today\'s.',
-        'Someone asks why the assistant is already out of tokens. Marcus: "the leadership summary runs at midnight." Someone asks who reads it. Marcus: "leadership." Leadership is not on the call.',
-        'The nightly summary has summarized the thread about the nightly summary. It calls the concerns "a healthy discussion." The budget it used was the one you needed for the migration.',
+        tr`Marcus reads the overnight summary aloud. It says the team is "aligned and energized." It was generated at 12:04 AM from a channel whose last message was "lol." The budget it spent was today's.`,
+        tr`Someone asks why the assistant is already out of tokens. Marcus: "the leadership summary runs at midnight." Someone asks who reads it. Marcus: "leadership." Leadership is not on the call.`,
+        tr`The nightly summary has summarized the thread about the nightly summary. It calls the concerns "a healthy discussion." The budget it used was the one you needed for the migration.`,
       ]);
       break;
     }
@@ -785,17 +791,17 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       const t = pick(inProgWithWork);
       deltas.debt += 4;
       pendingCleanups.push({
-        title: `Make the tests for "${t.title}" test something again`,
+        title: tr`Make the tests for "${t.title}" test something again`,
         effort: 5,
         debt: -2,
         type: 'refactor',
         urgent: true,
       });
-      log.push(`Overnight: someone asked the assistant to "improve test coverage" on "${t.title}". Coverage is now 100%. Every test asserts true. The build is green in a way it has never been. +4 debt. A five-hour cleanup ticket will land next sprint.`);
+      log.push(tr`Overnight: someone asked the assistant to "improve test coverage" on "${t.title}". Coverage is now 100%. Every test asserts true. The build is green in a way it has never been. +4 debt. A five-hour cleanup ticket will land next sprint.`);
       deltas.flavor = pick([
-        `Marcus celebrates "100% coverage" on "${t.title}" with the 🎉 bot. Sarah has opened one of the tests. She has not said anything yet. She is scrolling.`,
-        `Someone asks how coverage on "${t.title}" went from 40% to 100% overnight. Marcus: "the assistant." Someone asks what the tests test. Marcus: "coverage."`,
-        `Jin's update is that he deleted one of the new tests on "${t.title}" and the build got slower, because that test was the only thing passing quickly. Marcus asks him to put it back "for the dashboard."`,
+        tr`Marcus celebrates "100% coverage" on "${t.title}" with the 🎉 bot. Sarah has opened one of the tests. She has not said anything yet. She is scrolling.`,
+        tr`Someone asks how coverage on "${t.title}" went from 40% to 100% overnight. Marcus: "the assistant." Someone asks what the tests test. Marcus: "coverage."`,
+        tr`Jin's update is that he deleted one of the new tests on "${t.title}" and the build got slower, because that test was the only thing passing quickly. Marcus asks him to put it back "for the dashboard."`,
       ]);
       break;
     }
@@ -803,33 +809,33 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       deltas.capital -= 0.5;
       deltas.morale -= 2;
       pendingCleanups.push({
-        title: 'Onboard the contractor who used to sit here (access, laptop, the agent\'s branch)',
+        title: tr`Onboard the contractor who used to sit here (access, laptop, the agent's branch)`,
         effort: 4,
         debt: 0,
         type: 'refactor',
         urgent: false,
       });
-      log.push('Overnight: one of the engineers "transitioned" for efficiency is back, as a contractor, at twice the rate, to fix what the agent did to their old service. They have no access, no laptop and no ticket. The onboarding is yours. −2 morale, −0.5 capital. A four-hour ticket will land next sprint.');
+      log.push(tr`Overnight: one of the engineers "transitioned" for efficiency is back, as a contractor, at twice the rate, to fix what the agent did to their old service. They have no access, no laptop and no ticket. The onboarding is yours. −2 morale, −0.5 capital. A four-hour ticket will land next sprint.`);
       deltas.flavor = pick([
-        'A familiar face is on the call, with a new title: "AI Remediation Specialist (contract)." Marcus welcomes them "to the team." They were on the team. Their laptop has not been reissued, so they are on their phone.',
-        'Marcus: "great news — we\'ve brought in outside help to stabilize the agent\'s work." The outside help wrote the service the agent broke. They ask for their old access. The request needs a manager. Their manager was also transitioned.',
-        'The contractor asks, politely, whether the agent is still enabled on the repo they are here to fix. Marcus: "we\'re evaluating." The agent opened a PR on it during the call.',
+        tr`A familiar face is on the call, with a new title: "AI Remediation Specialist (contract)." Marcus welcomes them "to the team." They were on the team. Their laptop has not been reissued, so they are on their phone.`,
+        tr`Marcus: "great news — we've brought in outside help to stabilize the agent's work." The outside help wrote the service the agent broke. They ask for their old access. The request needs a manager. Their manager was also transitioned.`,
+        tr`The contractor asks, politely, whether the agent is still enabled on the repo they are here to fix. Marcus: "we're evaluating." The agent opened a PR on it during the call.`,
       ]);
       break;
     }
     case 'retro_owner': {
       deltas.morale -= 2;
       pendingCleanups.push({
-        title: 'Write a proposal to reduce meetings (present it at the meeting)',
+        title: tr`Write a proposal to reduce meetings (present it at the meeting)`,
         effort: 4,
         debt: 0,
         type: 'refactor',
         urgent: false,
       });
-      log.push('Overnight: the retro action item "reduce meetings" found an owner. It is you. The deliverable is a proposal, to be presented at a meeting, which has been scheduled. A four-hour ticket will land next sprint. −2 morale.');
+      log.push(tr`Overnight: the retro action item "reduce meetings" found an owner. It is you. The deliverable is a proposal, to be presented at a meeting, which has been scheduled. A four-hour ticket will land next sprint. −2 morale.`);
       deltas.flavor = pick([
-        'Marcus: "great news, the meeting-reduction item has an owner!" He looks at you. Everyone looks at you. A meeting is booked to kick it off.',
-        'The retro board is on screen. Your name is next to "reduce meetings." The next line is "weekly check-in on progress." It has nine attendees.',
+        tr`Marcus: "great news, the meeting-reduction item has an owner!" He looks at you. Everyone looks at you. A meeting is booked to kick it off.`,
+        tr`The retro board is on screen. Your name is next to "reduce meetings." The next line is "weekly check-in on progress." It has nine attendees.`,
       ]);
       break;
     }
@@ -869,7 +875,7 @@ export const applyTeammateContributions = (state) => {
       shipped.push(finished);
       deltas.debt += debtChange;
       deltas.morale += teamMoraleForShip(t);
-      log.push(`Overnight: ${who} shipped "${t.title}". You'll deal with the PR in the morning.`);
+      log.push(tr`Overnight: ${who} shipped "${t.title}". You'll deal with the PR in the morning.`);
     } else {
       plan[idx] = { ...t, progress: newProgress, assignedTo: owner };
     }
@@ -884,7 +890,7 @@ export const applyTeammateContributions = (state) => {
       )[0];
       const got = apply(target.id, 1 + Math.random(), 'Jin'); // 1.0 - 2.0h
       if (got > 0 && !plan.find(t => t.id === target.id)?.shipped) {
-        log.push(`Overnight: Jin pushed a quiet fix on "${target.title}". +${got.toFixed(1)}h.`);
+        log.push(tr`Overnight: Jin pushed a quiet fix on "${target.title}". +${got.toFixed(1)}h.`);
       }
     }
 
@@ -896,8 +902,8 @@ export const applyTeammateContributions = (state) => {
       const got = apply(target.id, target.type === 'bug' ? 2 : 1, 'Sarah');
       if (got > 0 && !plan.find(t => t.id === target.id)?.shipped) {
         log.push(target.type === 'bug'
-          ? `Overnight: Sarah crushed half of "${target.title}". +${got.toFixed(1)}h.`
-          : `Overnight: Sarah nudged "${target.title}" forward. +${got.toFixed(1)}h.`);
+          ? tr`Overnight: Sarah crushed half of "${target.title}". +${got.toFixed(1)}h.`
+          : tr`Overnight: Sarah nudged "${target.title}" forward. +${got.toFixed(1)}h.`);
       }
     }
 
@@ -909,7 +915,7 @@ export const applyTeammateContributions = (state) => {
         const target = pick(stillOpen);
         const got = apply(target.id, 0.5, 'Marcus');
         if (got > 0 && !plan.find(t => t.id === target.id)?.shipped) {
-          log.push(`Overnight: Marcus actually merged a doc tweak on "${target.title}". +${got.toFixed(1)}h. Suspicious.`);
+          log.push(tr`Overnight: Marcus actually merged a doc tweak on "${target.title}". +${got.toFixed(1)}h. Suspicious.`);
         }
       } else if (m < 0.45) {
         const target = pick(stillOpen);
@@ -919,7 +925,7 @@ export const applyTeammateContributions = (state) => {
           effort: plan[idx].effort + 1,
           scopeCreep: (plan[idx].scopeCreep || 0) + 1,
         };
-        log.push(`Overnight: Marcus added "one more thing" to "${target.title}". +1h scope.`);
+        log.push(tr`Overnight: Marcus added "one more thing" to "${target.title}". +1h scope.`);
       }
     }
   }
@@ -933,8 +939,8 @@ export const applyTeammateContributions = (state) => {
     if (got > 0) {
       deltas.debt += 2;
       log.push(plan.find(t => t.id === target.id)?.shipped
-        ? `The assistant's PR was the last ${got.toFixed(1)}h of it. The description says "LGTM." +2 debt.`
-        : `Overnight: the assistant opened a PR on "${target.title}" at 2:14 AM, titled "Improvements." +${got.toFixed(1)}h, +2 debt. The description says "LGTM."`);
+        ? tr`The assistant's PR was the last ${got.toFixed(1)}h of it. The description says "LGTM." +2 debt.`
+        : tr`Overnight: the assistant opened a PR on "${target.title}" at 2:14 AM, titled "Improvements." +${got.toFixed(1)}h, +2 debt. The description says "LGTM."`);
     }
   }
 

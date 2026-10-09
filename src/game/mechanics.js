@@ -5,6 +5,7 @@ import { EVENTS } from '../data/events.js';
 import { mkTicket, firstUnstarted } from './backlog.js';
 import { renderCast } from './cast.js';
 import { totalRemaining, eventApplicable } from './state.js';
+import { tr } from '../i18n/index.js';
 
 export const debtSpeedPenalty = (debt) => {
   if (debt > 80) return 0.5;
@@ -83,14 +84,14 @@ export const applyChoice = (state, choice) => {
       replacement.urgent = true;
       s.sprintPlan[idx] = replacement;
       s.sprintBumped = [...s.sprintBumped, { bumped: bumped.title, replacement: replacement.title }];
-      log.push(`⚠ "${bumped.title}" was deprioritized. Replaced with: "${replacement.title}".`);
+      log.push(tr`⚠ "${bumped.title}" was deprioritized. Replaced with: "${replacement.title}".`);
     } else {
       // No refactor to bump? Just add the urgent thing on top of everything.
       const tpl = URGENT_FEATURES[Math.floor(Math.random() * URGENT_FEATURES.length)];
       const t = mkTicket(tpl, 'feature');
       t.urgent = true;
       s.sprintPlan = [...s.sprintPlan, t];
-      log.push(`🚨 New ticket forced into sprint: "${t.title}".`);
+      log.push(tr`🚨 New ticket forced into sprint: "${t.title}".`);
     }
   }
 
@@ -101,7 +102,7 @@ export const applyChoice = (state, choice) => {
       const idx = s.sprintPlan.findIndex(t => t.id === target.id);
       s.sprintPlan[idx].effort += 6;
       s.sprintPlan[idx].scopeCreep += 1;
-      log.push(`📈 "${target.title}" grew by 6 hours.`);
+      log.push(tr`📈 "${target.title}" grew by 6 hours.`);
     } else {
       // No feature to grow? Grow ANY unshipped ticket, or just add a new one.
       const anyCandidates = s.sprintPlan.filter(t => !t.shipped && t.progress < t.effort);
@@ -110,13 +111,13 @@ export const applyChoice = (state, choice) => {
         const idx = s.sprintPlan.findIndex(t => t.id === target.id);
         s.sprintPlan[idx].effort += 6;
         s.sprintPlan[idx].scopeCreep = (s.sprintPlan[idx].scopeCreep || 0) + 1;
-        log.push(`📈 "${target.title}" grew by 6 hours.`);
+        log.push(tr`📈 "${target.title}" grew by 6 hours.`);
       } else {
         const tpl = URGENT_FEATURES[Math.floor(Math.random() * URGENT_FEATURES.length)];
         const t = mkTicket(tpl, 'feature');
         t.urgent = true;
         s.sprintPlan = [...s.sprintPlan, t];
-        log.push(`🚨 New ticket forced into sprint: "${t.title}".`);
+        log.push(tr`🚨 New ticket forced into sprint: "${t.title}".`);
       }
     }
   }
@@ -126,14 +127,14 @@ export const applyChoice = (state, choice) => {
     const t = mkTicket(tpl, 'feature');
     t.urgent = true;
     s.sprintPlan = [...s.sprintPlan, t];
-    log.push(`🚨 New ticket forced into sprint: "${t.title}".`);
+    log.push(tr`🚨 New ticket forced into sprint: "${t.title}".`);
   }
 
   if (e.cancelInitiative) {
     const idx = s.sprintPlan.findIndex(t => t.strategic && !t.shipped);
     if (idx >= 0) {
       const cancelled = s.sprintPlan[idx];
-      log.push(`✗ "${cancelled.title}" CANCELLED. ${Math.round(cancelled.progress)}h of work discarded.`);
+      log.push(tr`✗ "${cancelled.title}" CANCELLED. ${Math.round(cancelled.progress)}h of work discarded.`);
       s.sprintCancelled = [...(s.sprintCancelled || []), { title: cancelled.title, hoursLost: Math.round(cancelled.progress) }];
       s.sprintPlan = s.sprintPlan.filter(t => t.id !== cancelled.id);
     }
@@ -157,12 +158,12 @@ export const applyChoice = (state, choice) => {
         // ticket survives; the new urgent thing lands on top of it anyway.
         s.sprintPlan[idx] = { ...target, shielded: false };
         s.sprintPlan = [...s.sprintPlan, replacement];
-        log.push(`🛡 "${target.title}" survived the pivot: your write-up was read aloud. "${replacement.title}" was added on top instead. The write-up will not work twice.`);
+        log.push(tr`🛡 "${target.title}" survived the pivot: your write-up was read aloud. "${replacement.title}" was added on top instead. The write-up will not work twice.`);
       } else {
         const wastedHours = Math.round(target.progress);
         s.sprintPlan[idx] = replacement;
         s.sprintCancelled = [...(s.sprintCancelled || []), { title: target.title, hoursLost: wastedHours }];
-        log.push(`✗ "${target.title}" PIVOTED. ${wastedHours}h of work discarded. Replaced with: "${replacement.title}".`);
+        log.push(tr`✗ "${target.title}" PIVOTED. ${wastedHours}h of work discarded. Replaced with: "${replacement.title}".`);
       }
     } else {
       // Nothing in-flight to pivot — they'll just add a new urgent one
@@ -170,7 +171,7 @@ export const applyChoice = (state, choice) => {
       const t = mkTicket(tpl, 'feature');
       t.urgent = true;
       s.sprintPlan = [...s.sprintPlan, t];
-      log.push(`🚨 New ticket forced into sprint: "${t.title}".`);
+      log.push(tr`🚨 New ticket forced into sprint: "${t.title}".`);
     }
   }
 
@@ -185,11 +186,11 @@ export const applyChoice = (state, choice) => {
       const { t: target, i: idx } = candidates[0];
       if (target.shielded) {
         s.sprintPlan[idx].shielded = false;
-        log.push(`🛡 "${target.title}" kept its progress: the requirements "changed" back to what your write-up said they were. The write-up will not work twice.`);
+        log.push(tr`🛡 "${target.title}" kept its progress: the requirements "changed" back to what your write-up said they were. The write-up will not work twice.`);
       } else {
         const wastedHours = Math.round(target.progress);
         s.sprintPlan[idx].progress = 0;
-        log.push(`✗ "${target.title}" needs to be rewritten. ${wastedHours}h of work thrown away.`);
+        log.push(tr`✗ "${target.title}" needs to be rewritten. ${wastedHours}h of work thrown away.`);
       }
     }
   }
@@ -202,7 +203,7 @@ export const applyChoice = (state, choice) => {
       const tpl = LEGACY_TICKETS[Math.floor(Math.random() * LEGACY_TICKETS.length)];
       const t = mkTicket(tpl, 'legacy', { legacy: true, urgent: true });
       s.sprintPlan = [...s.sprintPlan, t];
-      log.push(`📦 Legacy project assigned: "${t.title}".`);
+      log.push(tr`📦 Legacy project assigned: "${t.title}".`);
     }
   }
 
@@ -215,7 +216,8 @@ export const applyChoice = (state, choice) => {
       t.effort += e.inflateAll;
       grown += 1;
     }
-    if (grown > 0) log.push(`📏 Every open ticket grew by ${e.inflateAll}h (${grown} ticket${grown === 1 ? '' : 's'}). The work did not change. The definition of finished did.`);
+    if (grown === 1) log.push(tr`📏 Every open ticket grew by ${e.inflateAll}h (1 ticket). The work did not change. The definition of finished did.`);
+    else if (grown > 1) log.push(tr`📏 Every open ticket grew by ${e.inflateAll}h (${grown} tickets). The work did not change. The definition of finished did.`);
   }
 
   // An estimate argument "resolved" by splitting the card. Two halves, each
@@ -227,10 +229,10 @@ export const applyChoice = (state, choice) => {
       const half = Math.ceil(target.effort / 2) + 1;
       const debtHalf = Math.ceil((target.debtImpact || 0) / 2);
       const flags = { urgent: !!target.urgent, strategic: !!target.strategic, legacy: !!target.legacy };
-      const a = mkTicket({ title: `${target.title} (part 1)`, effort: half, debt: debtHalf }, target.type, flags);
-      const b = mkTicket({ title: `${target.title} (part 2)`, effort: half, debt: debtHalf }, target.type, flags);
+      const a = mkTicket({ title: tr`${target.title} (part 1)`, effort: half, debt: debtHalf }, target.type, flags);
+      const b = mkTicket({ title: tr`${target.title} (part 2)`, effort: half, debt: debtHalf }, target.type, flags);
       s.sprintPlan = [...s.sprintPlan.slice(0, idx), a, b, ...s.sprintPlan.slice(idx + 1)];
-      log.push(`✂ "${target.title}" (${target.effort}h) was split into two tickets. Together they are ${half * 2}h.`);
+      log.push(tr`✂ "${target.title}" (${target.effort}h) was split into two tickets. Together they are ${half * 2}h.`);
     }
   }
 
@@ -240,7 +242,7 @@ export const applyChoice = (state, choice) => {
     const tpl = BUGS[Math.floor(Math.random() * BUGS.length)];
     const t = mkTicket(tpl, 'bug', { urgent: true });
     s.sprintPlan = [...s.sprintPlan, t];
-    log.push(`🐛 New bug forced into sprint: "${t.title}".`);
+    log.push(tr`🐛 New bug forced into sprint: "${t.title}".`);
   }
 
   // Something ate part of the work on the ticket you were furthest along
@@ -255,7 +257,7 @@ export const applyChoice = (state, choice) => {
       const { t: target, i: idx } = candidates[0];
       const lost = Math.min(e.loseProgress, target.progress);
       s.sprintPlan[idx].progress = Math.max(0, target.progress - lost);
-      log.push(`↩ "${target.title}" lost ${lost.toFixed(1)}h of progress.`);
+      log.push(tr`↩ "${target.title}" lost ${lost.toFixed(1)}h of progress.`);
     }
   }
 
@@ -281,13 +283,13 @@ export const applyChoice = (state, choice) => {
     s.pendingCleanups = [...(s.pendingCleanups || []), {
       title: c.title, effort: c.effort, debt: c.debt ?? 0, type: c.type || 'refactor', urgent: !!c.urgent,
     }];
-    log.push(`📋 Queued for next sprint: "${c.title}" (${c.effort}h).`);
+    log.push(tr`📋 Queued for next sprint: "${c.title}" (${c.effort}h).`);
   }
 
   // A recurring cost that starts tomorrow: hours taken off the top of each
   // morning for `days` days (the sprint boundary clears it regardless).
   if (e.dailyTax) {
-    const { hours = 0.5, days = 5, label = 'a recurring sync' } = e.dailyTax;
+    const { hours = 0.5, days = 5, label = tr`a recurring sync` } = e.dailyTax;
     s.dailyTaxes = [...(s.dailyTaxes || []), { hours, days, label }];
   }
 
@@ -305,12 +307,12 @@ export const applyChoice = (state, choice) => {
     s.tokenBudget = s.tokenBudget || 100;
     s.tokens = Math.min(s.tokens || 0, s.tokenBudget) || Math.round(s.tokenBudget * 0.25);
     s.tokenUsage = s.tokenUsage || 0;
-    log.push(`🪙 The team's assistant budget is now a number: ${s.tokenBudget} tokens a day. ${s.tokens} left today.`);
+    log.push(tr`🪙 The team's assistant budget is now a number: ${s.tokenBudget} tokens a day. ${s.tokens} left today.`);
   }
   // A negative number spends; a large one empties the meter for the day.
   if (e.tokens && e.tokens < 0) {
     spendTokens(s, -e.tokens);
-    if (s.tokens === 0) log.push('🪙 No tokens left for today.');
+    if (s.tokens === 0) log.push(tr`🪙 No tokens left for today.`);
   }
   // A reply that uses the assistant if there is budget, and does the manual
   // version at the manual price if there is not.
@@ -319,10 +321,10 @@ export const applyChoice = (state, choice) => {
     if (!s.aiMandate || (s.tokens || 0) >= tokens) {
       if (s.aiMandate) spendTokens(s, tokens);
       if (focus) s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining + focus);
-      if (ok) log.push(ok);
+      if (ok) log.push(tr(ok));
     } else {
       if (elseFocus) s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining + elseFocus);
-      if (elseLog) log.push(elseLog);
+      if (elseLog) log.push(tr(elseLog));
     }
   }
   // "Right-sizing": the budget shrinks to this fraction, for good, and the
@@ -332,7 +334,7 @@ export const applyChoice = (state, choice) => {
     s.tokenBudget = Math.max(20, Math.round(before * e.cutTokenBudget));
     s.tokens = Math.min(s.tokens || 0, s.tokenBudget);
     s.aiEfficiency = true;
-    log.push(`🪙 The assistant budget was "right-sized" from ${before} to ${s.tokenBudget} tokens a day.`);
+    log.push(tr`🪙 The assistant budget was "right-sized" from ${before} to ${s.tokenBudget} tokens a day.`);
   }
 
   if (e.promise) s.promise = e.promise;
@@ -398,8 +400,8 @@ export const applyChoice = (state, choice) => {
     ? choice.logByDesc[descIdx]
     : null;
   const rawLog = overrideLog || choice.log;
-  const renderedChoiceLog = rawLog ? renderCast(rawLog, cast) : null;
-  const renderedRolled = rolled.map(l => renderCast(l, cast));
+  const renderedChoiceLog = rawLog ? renderCast(tr(rawLog), cast) : null;
+  const renderedRolled = rolled.map(l => renderCast(tr(l), cast));
   s.dayLog = [...s.dayLog, ...[renderedChoiceLog, ...renderedRolled, ...log].filter(Boolean)];
   return s;
 };
@@ -415,7 +417,7 @@ export const tickDailyTaxes = (taxes = []) => {
   for (const t of taxes) {
     if (!t || !(t.days > 0) || !(t.hours > 0)) continue;
     hours += t.hours;
-    log.push(`⏰ ${t.label}: ${t.hours}h gone before you opened a ticket.`);
+    log.push(tr`⏰ ${t.label}: ${t.hours}h gone before you opened a ticket.`);
     if (t.days - 1 > 0) kept.push({ ...t, days: t.days - 1 });
   }
   return { taxes: kept, hours, log };
@@ -444,10 +446,10 @@ export const refillTokens = (s) => {
   const used = budget > 0 ? (s.tokenUsage || 0) / budget : 0;
   if (used > 0.8 && budget > 20) {
     budget = Math.max(20, Math.round(budget * 0.9));
-    log.push(`🪙 Yesterday's assistant usage was "high." Leadership read it as waste. Today's budget is ${budget}.`);
+    log.push(tr`🪙 Yesterday's assistant usage was "high." Leadership read it as waste. Today's budget is ${budget}.`);
   } else if (used < 0.2 && budget > 20) {
     budget = Math.max(20, Math.round(budget * 0.9));
-    log.push(`🪙 Yesterday's assistant usage was "low." Leadership read it as resistance. Today's budget is ${budget}.`);
+    log.push(tr`🪙 Yesterday's assistant usage was "low." Leadership read it as resistance. Today's budget is ${budget}.`);
   }
   const tokens = s.tokenReset === 'fiscal' ? Math.round(budget * 0.5) : budget;
   return { tokenBudget: budget, tokens, tokenUsage: 0, log };
@@ -471,14 +473,14 @@ export const contextSwitchCost = (switchesSoFar = 0) => {
 };
 
 const CONTEXT_SWITCH_FLAVORS = [
-  (h) => `Context switch. You re-read the ticket, found the branch, re-ran the failing test you forgot was failing. ${h}h gone before the first keystroke.`,
-  (h) => `You switched tickets. The old one is still open in a tab. So are 41 others. The new one needs a different Node version. ${h}h.`,
-  (h) => `Switching. The second ticket's branch is 300 commits behind main. The rebase "should be quick." ${h}h.`,
-  (h) => `New ticket, same brain. It took ${h}h to stop thinking about the last one. Marcus pinged twice in that time to ask about a third.`,
-  (h) => `Context switch. The ticket description says "see thread." The thread is 212 messages. You start at the bottom. ${h}h.`,
-  (h) => `You open the next ticket. CI for the previous one goes red while you watch. You do not look. ${h}h later you are pretending you did not see it.`,
-  (h) => `Context switch. The dev environment for this one "just needs" a VPN, a token, and a Confluence page that 404s. ${h}h. The page is still 404.`,
-  (h) => `Switching. You pulled main. Main does not build. Main has not built since Tuesday. "Known issue." ${h}h.`,
+  (h) => tr`Context switch. You re-read the ticket, found the branch, re-ran the failing test you forgot was failing. ${h}h gone before the first keystroke.`,
+  (h) => tr`You switched tickets. The old one is still open in a tab. So are 41 others. The new one needs a different Node version. ${h}h.`,
+  (h) => tr`Switching. The second ticket's branch is 300 commits behind main. The rebase "should be quick." ${h}h.`,
+  (h) => tr`New ticket, same brain. It took ${h}h to stop thinking about the last one. Marcus pinged twice in that time to ask about a third.`,
+  (h) => tr`Context switch. The ticket description says "see thread." The thread is 212 messages. You start at the bottom. ${h}h.`,
+  (h) => tr`You open the next ticket. CI for the previous one goes red while you watch. You do not look. ${h}h later you are pretending you did not see it.`,
+  (h) => tr`Context switch. The dev environment for this one "just needs" a VPN, a token, and a Confluence page that 404s. ${h}h. The page is still 404.`,
+  (h) => tr`Switching. You pulled main. Main does not build. Main has not built since Tuesday. "Known issue." ${h}h.`,
 ];
 
 export const applyContextSwitch = (state, switchesSoFar) => {
@@ -520,8 +522,8 @@ export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
   // action bonuses stack multiplicatively
   let bonus = 1;
   const bonusNotes = [];
-  if (s.pairBonus) { bonus *= 1.5; bonusNotes.push('pairing +50%'); }
-  if (s.boothBonus) { bonus *= 1.3; bonusNotes.push('focus mode +30%'); }
+  if (s.pairBonus) { bonus *= 1.5; bonusNotes.push(tr`pairing +50%`); }
+  if (s.boothBonus) { bonus *= 1.3; bonusNotes.push(tr`focus mode +30%`); }
   const speed = debtPen * burnPen * focusMul * moraleMul * bonus;
   const hoursAvailable = s.dayFocusRemaining;
   const hoursNeeded = t.effort - t.progress;
@@ -536,13 +538,13 @@ export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
   // sustained work also slowly drains focus
   s.focus = Math.max(0, s.focus - hoursWorked * 2);
 
-  let workLog = `Worked ${hoursWorked.toFixed(1)}h on "${t.title}"`;
+  let workLog = tr`Worked ${hoursWorked.toFixed(1)}h on "${t.title}"`;
   const modifiers = [];
-  if (debtPen < 1) modifiers.push(`debt ${Math.round(debtPen * 100)}%`);
-  if (burnPen < 1) modifiers.push(`burnout ${Math.round(burnPen * 100)}%`);
-  if (focusMul < 1) modifiers.push(`focus ${Math.round(focusMul * 100)}%`);
-  if (moraleMul < 0.95) modifiers.push(`morale ${Math.round(moraleMul * 100)}%`);
-  else if (moraleMul > 1.05) modifiers.push(`morale +${Math.round((moraleMul - 1) * 100)}%`);
+  if (debtPen < 1) modifiers.push(tr`debt ${Math.round(debtPen * 100)}%`);
+  if (burnPen < 1) modifiers.push(tr`burnout ${Math.round(burnPen * 100)}%`);
+  if (focusMul < 1) modifiers.push(tr`focus ${Math.round(focusMul * 100)}%`);
+  if (moraleMul < 0.95) modifiers.push(tr`morale ${Math.round(moraleMul * 100)}%`);
+  else if (moraleMul > 1.05) modifiers.push(tr`morale +${Math.round((moraleMul - 1) * 100)}%`);
   modifiers.push(...bonusNotes);
   if (modifiers.length > 0) workLog += ` (${modifiers.join(', ')})`;
 
@@ -563,11 +565,11 @@ export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
     if (t.type === 'refactor') {
       // Devs care about codebase health. Refactors feel GREAT. PMs do not notice.
       s.morale = Math.min(100, s.morale + 14);
-      shipNote = ' Devs are happier. Nobody else noticed.';
+      shipNote = tr` Devs are happier. Nobody else noticed.`;
     } else if (t.legacy) {
       // Legacy paydown — engineering hero moment, also satisfies the team
       s.morale = Math.min(100, s.morale + 16);
-      shipNote = ' The legacy code is gone. The codebase is lighter. You are lighter.';
+      shipNote = tr` The legacy code is gone. The codebase is lighter. You are lighter.`;
     } else if (t.type === 'bug') {
       // Bug fixes split the difference — small wins for both sides
       s.morale = Math.min(100, s.morale + 6);
@@ -577,12 +579,12 @@ export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
       // Strategic feature — biggest political win
       s.capital = Math.max(0, Math.min(5, s.capital + 1.5));
       s.morale = Math.min(100, s.morale + 4);
-      shipNote = ' Leadership noticed. You got Slack reactions from VPs.';
+      shipNote = tr` Leadership noticed. You got Slack reactions from VPs.`;
     } else if (t.urgent) {
       // Urgent feature — PM relief, but no real pride
       s.capital = Math.max(0, Math.min(5, s.capital + 1));
       s.morale = Math.max(0, s.morale - 2);
-      shipNote = ' Marcus is relieved. You feel hollow.';
+      shipNote = tr` Marcus is relieved. You feel hollow.`;
     } else if (t.type === 'feature') {
       // Regular feature — moves the political needle, mild engineer satisfaction
       s.capital = Math.max(0, Math.min(5, s.capital + 0.75));
@@ -591,9 +593,9 @@ export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
     } else {
       s.morale = Math.min(100, s.morale + 4);
     }
-    workLog += `. ✓ SHIPPED. Debt ${debtChange >= 0 ? '+' : ''}${debtChange}.${shipNote}`;
+    workLog += tr`. ✓ SHIPPED. Debt ${debtChange >= 0 ? '+' : ''}${debtChange}.${shipNote}`;
   } else {
-    workLog += `. Progress ${Math.round(t.progress)}/${t.effort}.`;
+    workLog += tr`. Progress ${Math.round(t.progress)}/${t.effort}.`;
   }
   // bonuses are consumed
   s.pairBonus = false;
@@ -604,9 +606,9 @@ export const workOnTicket = (state, ticketId, maxHours = Infinity) => {
   // Taking a teammate-owned ticket without asking has a social cost.
   if (stolenFrom) {
     s.morale = Math.max(0, s.morale - 4);
-    s.dayLog = [...s.dayLog, `(You took "${t.title}" from @${stolenFrom} without asking. They'll find out at standup. −4 morale.)`];
+    s.dayLog = [...s.dayLog, tr`(You took "${t.title}" from @${stolenFrom} without asking. They'll find out at standup. −4 morale.)`];
   } else if (pairedInWith) {
-    s.dayLog = [...s.dayLog, `(You paired in on @${pairedInWith}'s ticket — both names on the commit. No standup drama.)`];
+    s.dayLog = [...s.dayLog, tr`(You paired in on @${pairedInWith}'s ticket — both names on the commit. No standup drama.)`];
   }
   // Track this work session in the burn-up chart
   s.hourHistory = [...(s.hourHistory || []), {

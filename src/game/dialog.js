@@ -2,6 +2,7 @@
 
 import { getEventNode } from './state.js';
 import { isDescEligible, descText, renderCast } from './cast.js';
+import { tr } from '../i18n/index.js';
 
 // Pick the opener variant to show for a description pool.
 //
@@ -51,9 +52,11 @@ export const resolveEventText = (ev, state) => {
     && isStartNode && !!state.lastChaosFlavor;
   // Function-form descriptions get the resolved string fed through renderCast
   // too, so cast placeholders inside the returned template still substitute.
+  // Data strings are translated here; function-form openers build their text
+  // with tr`` themselves.
   const description = useChaosAsDesc
     ? state.lastChaosFlavor
-    : renderCast(typeof raw === 'function' ? raw(state, state.eventCast) : raw, state.eventCast);
+    : renderCast(typeof raw === 'function' ? raw(state, state.eventCast) : tr(raw), state.eventCast);
 
   const choices = (node.choices || []).filter(c => !c.requires || c.requires(state));
   return { node, isStartNode, description, choices };
