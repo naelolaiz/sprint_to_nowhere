@@ -149,13 +149,21 @@ export const applyChoice = (state, choice) => {
     if (candidates.length > 0) {
       candidates.sort((a, b) => b.t.progress - a.t.progress);
       const { t: target, i: idx } = candidates[0];
-      const wastedHours = Math.round(target.progress);
       const tpl = URGENT_FEATURES[Math.floor(Math.random() * URGENT_FEATURES.length)];
       const replacement = mkTicket(tpl, 'feature');
       replacement.urgent = true;
-      s.sprintPlan[idx] = replacement;
-      s.sprintCancelled = [...(s.sprintCancelled || []), { title: target.title, hoursLost: wastedHours }];
-      log.push(`✗ "${target.title}" PIVOTED. ${wastedHours}h of work discarded. Replaced with: "${replacement.title}".`);
+      if (target.shielded) {
+        // The decision record you wrote gets quoted back at the room. The
+        // ticket survives; the new urgent thing lands on top of it anyway.
+        s.sprintPlan[idx] = { ...target, shielded: false };
+        s.sprintPlan = [...s.sprintPlan, replacement];
+        log.push(`🛡 "${target.title}" survived the pivot: your write-up was read aloud. "${replacement.title}" was added on top instead. The write-up will not work twice.`);
+      } else {
+        const wastedHours = Math.round(target.progress);
+        s.sprintPlan[idx] = replacement;
+        s.sprintCancelled = [...(s.sprintCancelled || []), { title: target.title, hoursLost: wastedHours }];
+        log.push(`✗ "${target.title}" PIVOTED. ${wastedHours}h of work discarded. Replaced with: "${replacement.title}".`);
+      }
     } else {
       // Nothing in-flight to pivot — they'll just add a new urgent one
       const tpl = URGENT_FEATURES[Math.floor(Math.random() * URGENT_FEATURES.length)];
@@ -175,9 +183,14 @@ export const applyChoice = (state, choice) => {
     if (candidates.length > 0) {
       candidates.sort((a, b) => b.t.progress - a.t.progress);
       const { t: target, i: idx } = candidates[0];
-      const wastedHours = Math.round(target.progress);
-      s.sprintPlan[idx].progress = 0;
-      log.push(`✗ "${target.title}" needs to be rewritten. ${wastedHours}h of work thrown away.`);
+      if (target.shielded) {
+        s.sprintPlan[idx].shielded = false;
+        log.push(`🛡 "${target.title}" kept its progress: the requirements "changed" back to what your write-up said they were. The write-up will not work twice.`);
+      } else {
+        const wastedHours = Math.round(target.progress);
+        s.sprintPlan[idx].progress = 0;
+        log.push(`✗ "${target.title}" needs to be rewritten. ${wastedHours}h of work thrown away.`);
+      }
     }
   }
 

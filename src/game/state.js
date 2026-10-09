@@ -85,6 +85,8 @@ export const initialState = () => {
     pendingEvents: [],             // event ids that open tomorrow morning, ahead of the day's roll
     askTaxToday: 0,                // extra hours an ask-a-colleague costs today; resets each morning
     boothClosedToday: false,       // every phone booth is booked today; resets each morning
+    dndToday: false,               // headphones on: halves the odds of a desk-side ambush today
+    boardAccurateUntilDay: 0,      // you moved every card to its true column; the audit stays away until this day
     scheduledEvents: [],           // today's disruptions, each with the minute (after 9:00) it lands
     resumeTicketId: null,          // the ticket an interruption pulled you off; sitting back down is free
     leaving: false,                // you called it a day; the last calendar items land on your way out
@@ -111,6 +113,8 @@ export const pickEvent = (state, exclude = null, recent = []) => {
     if (e.atHome && !state.atHome) return false;
     if (state.atHome && e.inOffice) return false;
     if (e.once && (state.onceFired || []).includes(e.id)) return false;
+    // An accurate board buys one day without the velocity audit. One.
+    if (e.id === 'velocity_audit' && (state.boardAccurateUntilDay || 0) >= state.currentDay) return false;
     if (e.requires && !e.requires(state)) return false;
     return true;
   });
