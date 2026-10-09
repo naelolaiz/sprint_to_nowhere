@@ -17,6 +17,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
     eid === 'on_call' ? 'fire' :
     eid === 'pivot' || eid === 'requirements_changed' ? 'pivot' :
     eid === 'tickets_down' || eid === 'network_down' ? 'down' :
+    eid === 'token_limit' || eid === 'ai_mandate' ? 'limit' :
     eid === 'broken_package' ? 'sdk' :
     'code';
 

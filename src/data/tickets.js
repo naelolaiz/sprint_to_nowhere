@@ -51,6 +51,9 @@ export const FEATURES = [
   { title: "Multi-tenant white-label theming", effort: 18, debt: 13 },
   { title: "Per-row commenting & threads", effort: 12, debt: 8 },
   { title: "Sortable, resizable, freezable columns", effort: 14, debt: 9 },
+  { title: "AI summary at the top (no data may go in)", effort: 10, debt: 9 },
+  { title: "Agentic toggle (default on, does nothing yet)", effort: 8, debt: 7 },
+  { title: "\"How AI helped\" field on every form", effort: 6, debt: 5 },
 ];
 
 export const BUGS = [
@@ -86,6 +89,9 @@ export const BUGS = [
   { title: "Keyboard shortcut conflicts with screen readers", effort: 6, debt: 2 },
   { title: "Bulk delete confirms after the delete", effort: 6, debt: 3 },
   { title: "Search ignores diacritics inconsistently", effort: 8, debt: 3 },
+  { title: "AI summary summarizes a different ticket", effort: 6, debt: 3 },
+  { title: "Support agent answers customers with 'Limit reached'", effort: 8, debt: 4 },
+  { title: "AI review step passes everything, including the outage", effort: 4, debt: 2 },
 ];
 
 export const REFACTORS = [
@@ -114,6 +120,8 @@ export const REFACTORS = [
   { title: "Standardize the date-time handling", effort: 10, debt: -9 },
   { title: "Audit and prune npm dependencies", effort: 8, debt: -6 },
   { title: "Add a real CI cache for the builds", effort: 8, debt: -5 },
+  { title: "Make the generated tests assert something", effort: 10, debt: -8 },
+  { title: "Remove the AI review step nobody reads", effort: 6, debt: -5 },
 ];
 
 export const LEGACY_TICKETS = [
@@ -131,6 +139,8 @@ export const LEGACY_TICKETS = [
   { title: "Maintain the unmaintained Ruby billing gem", effort: 14, debt: 12 },
   { title: "Inherit the in-house feature-flag service", effort: 16, debt: 13 },
   { title: "Own the unowned pre-acquisition CRM bridge", effort: 18, debt: 15 },
+  { title: "Inherit the AI pilot the transitioned team built", effort: 16, debt: 13 },
+  { title: "Own the chatbot the contractor left half-trained", effort: 14, debt: 12 },
 ];
 
 export const STRATEGIC_INITIATIVES = [
@@ -146,6 +156,8 @@ export const STRATEGIC_INITIATIVES = [
   { title: "[STRATEGIC] AR mobile companion (board pitch)", effort: 18, debt: 15 },
   { title: "[STRATEGIC] Crypto tipping for power users", effort: 16, debt: 14 },
   { title: "[STRATEGIC] Generative-design landing pages", effort: 18, debt: 15 },
+  { title: "[STRATEGIC] Replace support with agents (then rehire support)", effort: 20, debt: 16 },
+  { title: "[STRATEGIC] AI-native rebrand of the unchanged product", effort: 16, debt: 13 },
 ];
 
 export const PROMISES = [
@@ -165,4 +177,6 @@ export const URGENT_FEATURES = [
   { title: "[CEO] Launch banner with new tagline", effort: 6, debt: 8 },
   { title: "[CEO] Customer-of-the-month microsite", effort: 10, debt: 10 },
   { title: "[CEO] Investor-friendly metrics dashboard", effort: 12, debt: 12 },
+  { title: "[CEO] AI demo for the board (in prod, not real)", effort: 12, debt: 12 },
+  { title: "[CEO] Make it agentic (a toggle is fine)", effort: 10, debt: 10 },
 ];

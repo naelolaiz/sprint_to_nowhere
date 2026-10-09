@@ -48,7 +48,7 @@ const NARRATIVE_IDS = new Set([
   'pandora_dependency_surprise', 'pandora_legacy_tax',
 ]);
 
-const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = false, tokenReset = 'midnight' }) => {
+const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = false, tokenReset = 'midnight', aiEfficiency = false }) => {
   if (Math.random() > 0.6) return;
 
   const inProg = plan.filter(t => !t.shipped && t.progress < t.effort);
@@ -100,6 +100,10 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
   if (aiMandate) {
     events.push({ id: 'agent_night_shift', weight: 3 });
     if (tokenReset !== 'fiscal') events.push({ id: 'token_reset_moved', weight: 2 });
+    events.push({ id: 'ai_summary_job', weight: 2 });
+    if (inProgWithWork.length > 0) events.push({ id: 'ai_test_rewrite', weight: 3 });
+    // The people "transitioned" for efficiency come back, at a rate.
+    if (aiEfficiency) events.push({ id: 'contractor_rehire', weight: 3 });
   }
 
   // Bias the pool: 60% of the time, restrict to narrative events when any are
@@ -766,6 +770,53 @@ const applyChaos = ({ plan, shipped, log, deltas, pendingCleanups, aiMandate = f
       ]);
       break;
     }
+    case 'ai_summary_job': {
+      deltas.drainTokens = 0.7;
+      deltas.morale -= 2;
+      log.push('Overnight: someone scheduled a nightly job that has the assistant summarize every PR, every ticket and every channel "for leadership." It ran at midnight, on the fresh budget, and summarized 3,000 messages nobody had read into one nobody will. Most of today\'s tokens were gone before you woke up. −2 morale.');
+      deltas.flavor = pick([
+        'Marcus reads the overnight summary aloud. It says the team is "aligned and energized." It was generated at 12:04 AM from a channel whose last message was "lol." The budget it spent was today\'s.',
+        'Someone asks why the assistant is already out of tokens. Marcus: "the leadership summary runs at midnight." Someone asks who reads it. Marcus: "leadership." Leadership is not on the call.',
+        'The nightly summary has summarized the thread about the nightly summary. It calls the concerns "a healthy discussion." The budget it used was the one you needed for the migration.',
+      ]);
+      break;
+    }
+    case 'ai_test_rewrite': {
+      const t = pick(inProgWithWork);
+      deltas.debt += 4;
+      pendingCleanups.push({
+        title: `Make the tests for "${t.title}" test something again`,
+        effort: 5,
+        debt: -2,
+        type: 'refactor',
+        urgent: true,
+      });
+      log.push(`Overnight: someone asked the assistant to "improve test coverage" on "${t.title}". Coverage is now 100%. Every test asserts true. The build is green in a way it has never been. +4 debt. A five-hour cleanup ticket will land next sprint.`);
+      deltas.flavor = pick([
+        `Marcus celebrates "100% coverage" on "${t.title}" with the 🎉 bot. Sarah has opened one of the tests. She has not said anything yet. She is scrolling.`,
+        `Someone asks how coverage on "${t.title}" went from 40% to 100% overnight. Marcus: "the assistant." Someone asks what the tests test. Marcus: "coverage."`,
+        `Jin's update is that he deleted one of the new tests on "${t.title}" and the build got slower, because that test was the only thing passing quickly. Marcus asks him to put it back "for the dashboard."`,
+      ]);
+      break;
+    }
+    case 'contractor_rehire': {
+      deltas.capital -= 0.5;
+      deltas.morale -= 2;
+      pendingCleanups.push({
+        title: 'Onboard the contractor who used to sit here (access, laptop, the agent\'s branch)',
+        effort: 4,
+        debt: 0,
+        type: 'refactor',
+        urgent: false,
+      });
+      log.push('Overnight: one of the engineers "transitioned" for efficiency is back, as a contractor, at twice the rate, to fix what the agent did to their old service. They have no access, no laptop and no ticket. The onboarding is yours. −2 morale, −0.5 capital. A four-hour ticket will land next sprint.');
+      deltas.flavor = pick([
+        'A familiar face is on the call, with a new title: "AI Remediation Specialist (contract)." Marcus welcomes them "to the team." They were on the team. Their laptop has not been reissued, so they are on their phone.',
+        'Marcus: "great news — we\'ve brought in outside help to stabilize the agent\'s work." The outside help wrote the service the agent broke. They ask for their old access. The request needs a manager. Their manager was also transitioned.',
+        'The contractor asks, politely, whether the agent is still enabled on the repo they are here to fix. Marcus: "we\'re evaluating." The agent opened a PR on it during the call.',
+      ]);
+      break;
+    }
     case 'retro_owner': {
       deltas.morale -= 2;
       pendingCleanups.push({
@@ -790,7 +841,7 @@ export const applyTeammateContributions = (state) => {
   const log = [];
   const shipped = [];
   const pendingCleanups = [];
-  const deltas = { debt: 0, morale: 0, burnout: 0, capital: 0, focus: 0, flavor: null, askTax: 0 };
+  const deltas = { debt: 0, morale: 0, burnout: 0, capital: 0, focus: 0, flavor: null, askTax: 0, drainTokens: 0 };
 
   const inProgress = () => plan.filter(t => !t.shipped && t.progress < t.effort);
 
@@ -873,8 +924,22 @@ export const applyTeammateContributions = (state) => {
     }
   }
 
+  // The assistant also "contributes" overnight, once there is a mandate: a
+  // small PR on whichever ticket it found open, with the debt to match.
+  // Half an hour of progress, two points of debt, every other night.
+  if (state.aiMandate && inProgress().length > 0 && Math.random() < 0.5) {
+    const target = pick(inProgress());
+    const got = apply(target.id, 0.5, 'the assistant');
+    if (got > 0) {
+      deltas.debt += 2;
+      log.push(plan.find(t => t.id === target.id)?.shipped
+        ? `The assistant's PR was the last ${got.toFixed(1)}h of it. The description says "LGTM." +2 debt.`
+        : `Overnight: the assistant opened a PR on "${target.title}" at 2:14 AM, titled "Improvements." +${got.toFixed(1)}h, +2 debt. The description says "LGTM."`);
+    }
+  }
+
   // Chaos roll — sometimes the office just has a night.
-  applyChaos({ plan, shipped, log, deltas, pendingCleanups, aiMandate: !!state.aiMandate, tokenReset: state.tokenReset || 'midnight' });
+  applyChaos({ plan, shipped, log, deltas, pendingCleanups, aiMandate: !!state.aiMandate, tokenReset: state.tokenReset || 'midnight', aiEfficiency: !!state.aiEfficiency });
 
   return {
     sprintPlan: plan,
@@ -889,5 +954,6 @@ export const applyTeammateContributions = (state) => {
     chaosFlavor: deltas.flavor,
     askTax: deltas.askTax || 0,
     tokenReset: deltas.tokenReset || null,
+    drainTokens: deltas.drainTokens || 0,
   };
 };

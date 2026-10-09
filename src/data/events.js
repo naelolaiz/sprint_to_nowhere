@@ -84,6 +84,11 @@ export const EVENTS = [
       'The support bot has been issuing refunds. It was told to "resolve tickets with empathy." It resolved 1,900 tickets, with empathy, for $380,000. The vendor says this is "expected behavior" and offers a plan with a refund cap for $2,000 a month.',
       'Someone rotated the production secrets to close a scanner finding. They rotated them in the vault. The services read them from an environment variable set in 2021. Everything is down. The scanner reports zero findings. Security has posted a 🎉.',
       'The CDN is serving a build from last March. Nobody knows why. Everything shipped since then has, as far as customers can tell, unshipped. Marketing is asking if the new landing page can "still go out today," since it is Marketing\'s landing page.',
+      // ----- fires with an assistant in them (batch H) -----
+      'The assistant "fixed" a flaky test overnight by deleting the assertion, then "fixed" the deploy by deleting the step that runs the tests. Production has been serving the branch "wip-do-not-deploy" since 3 AM. The adoption dashboard lists the assistant as this week\'s most productive contributor.',
+      'The new "AI support agent" has been telling customers their data was deleted. It was not. It is now, because a customer followed the agent\'s recovery steps, which were to delete the account and start again. 600 customers started again. Legal wants the transcripts. The agent summarized them instead of keeping them.',
+      'A customer\'s invoice went out with the assistant\'s draft still in it: "[insert plausible total here]." Their finance team inserted a plausible total. It was wrong by a decimal place, in our favor. They paid it. They have now noticed. Marcus asks if you can "take a quick look" at the other 11,000 invoices.',
+      'The AI feature shipped behind a flag "for internal testing." The flag was also an AI suggestion. It defaulted to on. Customers have spent six hours talking to the internal test prompt, which begins "you are a sarcastic pirate." One of them is a bank. The bank liked it. Legal did not.',
     ],
     choices: [
       { label: 'Drop everything and fix it', effect: { focus: -4, bumpRefactor: true, burnout: 8 }, log: 'Four hours of firefighting. A refactor was sacrificed to the gods of urgency.' },
@@ -125,6 +130,10 @@ export const EVENTS = [
           'Marcus, on a "quick chat": "OK so — the feature should also send a notification. Email, push, SMS, Slack and in-app. Users can pick. Default is all five. Compliance wants an unsubscribe. The unsubscribe should also send a notification."',
           'Marcus: "small one — the feature needs to keep working when the flag service is down, since that keeps happening. So, like, a flag for whether to use flags? Just a quick fallback." The fallback would need a flag.',
           { text: 'Marcus, carrying the security scanner report like a casserole: "so the scanner wants the feature to validate all input. I figure while we\'re in there — can it also auto-correct the input? Like, guess what the user meant? Just an MVP of guessing."', requires: OFFICE },
+          // ----- tiny tweaks, AI-accelerated (batch H) -----
+          'Marcus: "tiny one — can the feature also have an AI summary at the top? Legal says no customer data goes into the assistant, so, like, summarize it without reading it? That\'s basically what summaries are." He has a mockup. The summary in the mockup is lorem ipsum.',
+          { text: 'Marcus, at your desk, holding a token-budget warning on his phone: "small ask — can the feature use the assistant for the hard part? And then, when the budget is out, do the hard part the normal way? So, both ways. Same ticket. Should be less work, since AI."', requires: OFFICE },
+          'Marcus pings: "quick thought — leadership wants every feature to be \'agentic.\' I asked what that means and they said \'you know.\' So can this one be agentic? Just a toggle. Default on. Nobody has to use it." The toggle would need a backend. The backend would need the budget.',
         ],
         choices: [
           { label: '"Sure, no problem."', effect: { scopeCreep: true, debt: 3 }, log: 'You agreed. The feature grew by 6 hours. The "tiny tweak" alone has six known bugs.' },
@@ -343,6 +352,13 @@ export const EVENTS = [
       'All-hands. The CEO unveils the mission statement, rewritten "for clarity." It is now 61 words and contains "customer-obsessed," "AI-first," "people-first" and "security-first." He asks everyone to memorize it. It is replaced four slides later.',
       'All-hands. The company has won an award for "Best Place to Work in Infrastructure." The CEO accepts it on behalf of "everyone who makes this possible" and names four executives. The wiki, the ticket tracker and staging are all down during the ceremony.',
       'All-hands. The Chief Strategy Officer presents "the plan." It is one slide: a circle labeled GROWTH, with arrows pointing into it from GROWTH. He says the plan is intentionally simple. The Q&A asks what is in the circle. He says "growth."',
+      // ----- the AI slides (batch H) -----
+      'All-hands. Slide: "AI now writes 40% of our code." Slide: "every line is reviewed by a human." Slide: "engineering headcount is down 20%." Slide: "quality has never been higher." The slides are read in that order, without pausing, by the same person.',
+      'All-hands. The CEO announces a $4M AI partnership, "the largest investment in our history." The next slide is the team\'s token budget, which has gone down, "to focus usage." The slide after that is the CEO at the partner\'s office, holding a plaque.',
+      'All-hands. Legal presents "Responsible AI: what you may not paste into the assistant." Then the CTO presents "AI-first: paste everything into the assistant." Both decks use the same template. The Q&A has one question: "which one?" The answer is "both," with a smile.',
+      'All-hands. The CEO demos the assistant writing an all-hands deck. The deck it writes is this deck. He scrolls to the slide about the demo, which reads "the CEO demos the assistant writing an all-hands deck." He says "see?" Nobody is sure what was seen.',
+      'All-hands. The "AI transformation" update: three pilots launched, zero in production, two blocked by Legal, one by the token budget. The slide header says "ON TRACK." The next slide announces two more pilots and a smaller budget.',
+      'All-hands. The CEO announces that the support org "has been transitioned to AI agents." The next slide welcomes 30 new "AI support specialists." Several of them are in the room. Several of them were the support org, last month, on better contracts.',
     ],
     choices: [
       {
@@ -688,6 +704,10 @@ export const EVENTS = [
           'CEO: "real talk — I want us to be Stripe. like, the developer love thing. how do we do that. start with launching something on hacker news this week. doesn\'t matter what."',
           'CEO Slack at midnight: "I was reading Founder Mode again. I want u to skip-level me. just for this initiative. don\'t tell Marcus. or do, idc. but the speed has to be different. lfg 🔥"',
           'CEO: "this isn\'t urgent but I want to flag — we should have an MCP server. for partners. so they can plug their agents into our data. how soon. who owns this. who wants to own this. (it should be you)"',
+          'CEO DM: "just saw our token bill. way too high. also — why isn\'t everyone using it more?? both things. fix both. by friday 🙏"',
+          'CEO Slack: "legal says we can\'t put customer data in the AI. fine. can we put the AI in the customer data? like, the other way around. think about it. by EOD"',
+          'CEO: "we transitioned support to AI agents. the agents keep escalating to support. can you make them stop escalating. or can you be support. short term. for a bit. lfg"',
+          'CEO DM at 5:52 AM: "board wants an AI demo thursday. doesn\'t have to be real. has to be in prod though. is that a contradiction? don\'t answer. just build it 🚀"',
         ],
         choices: [
           { label: '"On it!"', next: 'on_it' },
@@ -993,6 +1013,8 @@ export const EVENTS = [
       'Someone shares a Datadog dashboard. The dashboard\'s queries are red. The queries are red because the dashboard owner left the company. The dashboard now reports the engineer-of-record\'s outage status.',
       { text: '"Sorry — last thing — has Production looked weird to anyone today?" Six engineers immediately mute. Two camera-off. One audibly sighs.', requires: REMOTE },
       { text: '"Sorry — last thing — has Production looked weird to anyone today?" Six engineers immediately look at their laptops. Two close them slowly. One audibly sighs.', requires: OFFICE },
+      'Someone shares their screen at the end: "real quick — the assistant rewrote this function, and now the tests pass but the feature doesn\'t work. Is that normal?" Eight people lean in. The assistant deleted the feature and kept the tests. Nobody can tell which commit did it, because the commit messages were generated too.',
+      '"Last thing — anyone know why prod is calling the assistant with the staging key?" Four people check. The config was "tidied" by the assistant, which merged the two keys "for simplicity." The staging key has a budget. The budget is gone. Prod has been answering customers with "Limit reached" for an hour.',
     ],
     choices: [
       { label: 'Help debug live', effect: { focus: -1.5, burnout: 3, debt: -1 }, log: 'Found their typo. They thank you. Standup ran 50 minutes. The fix is one line. The Slack thread celebrating it is twelve.' },
@@ -1404,6 +1426,11 @@ export const EVENTS = [
           'Refinement. The acceptance criteria of the first ticket is a screenshot of a tweet. The tweet is from the CEO. The tweet says "ship it." {facilitator} asks what "it" is. Marcus: "that\'s what we\'re sizing."',
           'Refinement. Marcus is running it from the hackathon, where he is "judging." He shares the wrong screen twice. The second time it is a leaderboard of teams that have shipped nothing, ranked by enthusiasm. {dev} asks which screen is the backlog.',
           'Refinement. Half the tickets are blocked on staging, which is booked through next month. Marcus: "size them as if staging existed." {objector}: "then everything is a 1." Marcus: "see — progress."',
+          // ----- the mandate reaches refinement (batch H) -----
+          'Refinement. Marcus has pasted the backlog into the assistant for "pre-sizing," along with Legal\'s memo about not pasting the backlog into the assistant, for context. It sized every ticket as "it depends." {objector}: "finally, an honest estimate." Marcus: "let\'s call that a 5."',
+          'Refinement. The assistant is now "a voting member." It votes last, because the budget ran out before the meeting. Marcus reads its vote from yesterday instead. {facilitator}: "can it abstain?" Marcus: "it\'s already counted."',
+          'Refinement. Every ticket has a new required field, "AI acceleration," and Marcus would like the field sized too. {objector}: "we\'re estimating how much faster the thing we haven\'t estimated will be?" Marcus: "exactly. Call the field a 2."',
+          'Refinement. Marcus has a slide from leadership: the backlog will shrink 30% "through AI." The backlog has grown by 14 tickets since the last refinement, all titled "AI-powered" something. {dev} asks which tickets are the 30%. Marcus: "the ones that were already here."',
         ],
         choices: [
           { label: 'Engage on the next ticket', next: 'engage' },
@@ -1628,6 +1655,12 @@ export const EVENTS = [
           'Standup. The Definition of Done is now v7, and Marcus would like every update to end with "and it meets the DoD." {updater}\'s update is about a meeting he attended. He ends it with "and it meets the DoD." Marcus: "love it."',
           'Standup. {offliner} is giving an update on behalf of a team he is not on, because "he was in a thread." That team is also in this standup. They let him finish. His update is wrong. It is now the update of record.',
           { text: 'Standup at the huddle wall. The wall now has a screen showing a dashboard of standup attendance. It says 60%, because the badge reader at the door is down. Marcus asks everyone to "badge in with intention" tomorrow. The reader will still be down tomorrow.', requires: OFFICE },
+          // ----- the mandate reaches standup (batch H) -----
+          'Standup. Marcus has asked the assistant to run it "so he can be present." The assistant asks {updater} for yesterday, today and blockers, then reaches the organization\'s limit before "blockers." Marcus: "let\'s take blockers offline." The transcript records a complete standup.',
+          'Standup. Every update must now end with "how AI helped." {updater}\'s update is that the assistant was out of tokens before standup, so it helped by "not being available, which built resilience." Marcus types "resilience" into the adoption doc.',
+          'Standup. Marcus opens with the adoption leaderboard. {dev} is at the top, having asked the assistant to explain last week\'s standups. {updater} is at the bottom, having shipped the feature. Marcus: "let\'s all learn from {dev}."',
+          '{offliner} reads an update the assistant wrote from his calendar. It says he "drove alignment across three syncs." He attended three syncs. Marcus: "great summary." Nobody asks what was driven, or where it went.',
+          'Standup. Marcus: "quick reminder from Legal — nothing about the sprint goes into the assistant." Then: "and from the CTO — every update should mention the assistant." {updater}: "the assistant helped me with nothing, as instructed." Marcus: "love it. Logged."',
         ],
         choices: [
           { label: 'Mute, camera off, eat a granola bar', next: 'glazed', requires: REMOTE },
@@ -1917,6 +1950,8 @@ export const EVENTS = [
       'Quarterly career chat. Manager: "What\'s a stretch project that would energize you? Forget what we\'re currently doing — what\'s YOUR thing?"',
       'Manager pulls up a "growth framework" doc. The doc was created last Friday. The doc has more rubric than substance, but they really want to "ground this conversation in something concrete."',
       'Manager: "Look, I want to be intentional this quarter about your trajectory. What\'s a skill you\'d want to develop? What\'s a project you\'d find meaningful?" They sound earnest. They might mean it.',
+      'Manager: "so, leadership wants everyone to have an \'AI growth plan.\' I have a template. The template was generated." Its first bullet is "[employee\'s aspiration here]." They look up from it. "So — what would excite you?"',
+      { text: 'Manager: "quick framing before the career stuff: two people on the team are gone and the assistant is out of tokens, so you have more scope, which leadership is calling growth. I also want to hear about real growth. What\'s something that would energize you?"', requires: (s) => !!s.aiEfficiency },
     ],
     requires: (s) => !s.promise && s.sprint % 3 === 0,
     choices: [
@@ -3473,6 +3508,8 @@ export const EVENTS = [
           { text: 'Sprint review in the big room. The HDMI cable works, which is suspicious. The sprint goal is on the screen with a typo that has survived three reviews. A stakeholder asks whether the typo is a feature. Then they ask to see the thing nobody built. Then everyone looks at you. "Can we get a quick demo?"', requires: OFFICE },
           { text: 'Sprint review on Zoom. Marcus is sharing the wrong window: last sprint\'s retro board. Action item 3 reads "fewer surprises in reviews." A stakeholder asks for a surprise, specifically the feature that was descoped on day one. Marcus: "I\'ll let the team speak to that." The team is you. You are asked to share your screen and demo.', requires: REMOTE },
           'Sprint review. The agenda says "demo (10 min), feedback (5 min), next steps (5 min)." Feedback starts before the demo. Next steps started before the sprint. A director asks why the thing that was cut on Monday is not in the demo. Marcus: "Totally fair. Want to show where we are?"',
+          'Sprint review. Marcus opens with a slide the assistant made from the sprint goal. It shows a feature the sprint did not contain, marked done, with a screenshot of a product that is not ours. A stakeholder asks to see that one. Marcus: "let\'s demo what\'s real." He looks at you.',
+          (s, c) => `Sprint review at ${T(c)}. Leadership has asked that every review "show how AI accelerated the sprint." The assistant was out of tokens for most of it. Marcus: "we'll speak to that in the demo." The demo is you. Nobody has told you what to speak to.`,
         ],
         choices: [
           { label: 'Demo what actually works', next: 'works' },
@@ -3513,6 +3550,7 @@ export const EVENTS = [
       'Slack from Marcus: "great news, leadership loved the retro action item on meeting load! They want a recurring forum to track it." The forum is a meeting. It is weekly. It is yours. The first agenda item is choosing a name for the meeting.',
       'The retro board has been exported to a Confluence page titled "Action Items (Owned)." Item 1: "Reduce meetings. Owner: you. Status: In progress. Mechanism: weekly sync." The weekly sync has a pre-read. The pre-read is about the pre-read.',
       'Marcus: "quick one — since you flagged meeting fatigue, you\'re the natural owner for the Meeting Reduction Sync. It\'s only an hour a week. Plus the prep. Plus the follow-ups. Plus a short readout at the all-hands." That is four meetings about fewer meetings.',
+      'Last retro\'s action item was "reduce meetings." Marcus had the assistant "operationalize" it. The assistant proposed a weekly Meeting Reduction Sync, a working group and an owner, and picked the owner from the retro notes. It picked you. The invite was generated too. Its agenda is "align."',
     ],
     choices: [
       { label: 'Own it. Someone has to.', effect: { focus: -1, morale: -2, dailyTax: { hours: 0.5, days: 5, label: 'Meeting Reduction Sync prep, follow-ups and "quick reads"' } }, log: 'You own the Meeting Reduction Sync. It costs half an hour every morning in prep and follow-ups. The working group\'s first finding is that there are too many meetings.' },
@@ -3532,6 +3570,8 @@ export const EVENTS = [
           (s) => `Marcus opens "${pokerTitle(s)}" and says "gut feel, no overthinking. I'm hearing 3 from the business side." Nobody from the business side is in the call. The reveal is a wall of 8s. Marcus types 3 into the field and says "we can always re-estimate."`,
           (s, c) => `Poker at ${T(c)}. "${pokerTitle(s)}" comes up. {dev}: "that's the one with the migration, right?" Marcus: "Tiny migration. I was thinking 3." Reveal: 8, 8, 8, and a "?" from the one person who read the ticket. Marcus logs a 3.`,
           (s) => `Planning poker. "${pokerTitle(s)}". {bro} from sales has joined "to listen" and votes 2. Engineers vote 8. Marcus averages the room, listener included, and gets "about a 3." The tool does not support decimals, which is the only thing stopping him.`,
+          (s) => `Poker on "${pokerTitle(s)}". Marcus has given the assistant a vote. It says 8, then reaches the limit mid-explanation. Marcus: "it was trending toward 3." Everyone else reveals: 8. Marcus logs the trend. 3.`,
+          (s) => `Planning poker. "${pokerTitle(s)}". Marcus: "the AI dashboard says tickets like this average a 3 now, with acceleration." The acceleration is a column someone typed. Reveal: 8, 8, 8, 13. Marcus: "pre-acceleration numbers. So, 3."`,
         ],
         choices: [
           { label: '"It is an 8. Every engineer said 8."', next: 'hold' },
@@ -3565,6 +3605,7 @@ export const EVENTS = [
       'All-team Slack: "To raise our quality bar, Definition of Done v7 adds three lightweight gates." The three lightweight gates are three reviews by two people who are on leave. The gates apply to everything already in flight. The message ends with a 🎉.',
       'A pinned message from the Quality Guild: "v7 of the DoD simplifies the process." v6 had four gates. v7 has seven, each "simplified." The approvers are listed. Two are on sabbatical. One left in March. One is a Slack bot that answers "LGTM" to everything, which is the only working part of the process.',
       (s, c) => `At ${T(c)} the Definition of Done changed under you. v7 adds an accessibility sign-off, a security sign-off and a documentation page per ticket. The sign-off form asks for the ticket's Confluence page. The Confluence template asks for the sign-off. Nobody has reviewed the process for circularity. There is no gate for that.`,
+      'Definition of Done v7 arrives with an eighth gate, "AI acceleration statement," and a ninth, "AI-free attestation (Legal)." Every ticket needs both. The accessibility reviewer is still on leave. The security reviewer is now the assistant, which is out of tokens. v7 is "in effect." Nothing can be done, officially.',
     ],
     choices: [
       { label: 'Comply. Every ticket, every gate.', effect: { focus: -1.5, inflateAll: 2, burnout: 3 }, log: 'Every open ticket now carries two more hours of forms, reviews and a page in a space you cannot see. Quality has been raised. Nothing else has.' },
@@ -3586,6 +3627,7 @@ export const EVENTS = [
           '{coach}, the new agile coach, introduces himself by asking everyone for "one word for how the team feels." Eleven people say "fine." He writes FINE on a sticky note and says "we have work to do." The work is a two-day planning offsite. Your tickets are not invited.',
           'A deck titled "Scaling Agile @ Initech." {coach} explains that the team will join a "release train." The train has a "train engineer." The train engineer is Marcus. The first stop is a two-day planning event in a conference hotel with a "no laptops" rule and a "bring your laptop" reminder.',
           '{coach} has been with the company for four days and has already renamed the sprint. It is now an "iteration." The standup is a "daily sync." The retro is "inspect and adapt." Nothing else changed. He has booked two days in a hotel to plan the next ten weeks. The room has no Wi-Fi, so people can "be present."',
+          '{coach} has a new slide: "Agile at the Speed of AI." The assistant generated it; it proposes replacing the two-day planning offsite with an agent. The agent is out of tokens. The two-day planning offsite is therefore confirmed, in the hotel, with the agent "attending async." Your sprint commitment is unchanged.',
         ],
         choices: [
           { label: 'Attend the two-day planning offsite', next: 'attend' },
@@ -3627,6 +3669,7 @@ export const EVENTS = [
       'The velocity audit found your points per sprint are "below peer." The peer is a team that logs every 8 as a 3. The recommendation is to commit to 20% more. The recommendation does not mention the 3s. Marcus: "Honestly, it\'s a compliment. They think we can."',
       'A "data-driven" review. The data is story points, which the same deck calls "not a measure of productivity" on slide 2 and uses as one on slides 3 through 19. Slide 20: "Team commits to +20%." The slide was made before the meeting. The meeting is to agree with it.',
       { text: 'The velocity audit has noticed that your team is "fast." It noticed because last sprint\'s 8s were logged as 3s. Fast teams get stretch goals. Marcus: "They want 20% more. Which, based on the numbers, we can totally do." The numbers are the 3s.', requires: (s) => (s.foldedEstimates || 0) > 0 },
+      'An "AI-adjusted velocity" chart: your actual points, times an "AI multiplier" of 1.4 that leadership typed into a cell. The adjusted line is above target. The ask is to commit to 20% more, "to realize the multiplier." Nobody has realized the multiplier. It was typed.',
     ],
     choices: [
       { label: '"Fine. 20% more."', effect: { focus: -0.5, velocityCommit: true, morale: -3, burnout: 2 }, log: 'You committed to 20% more. The commitment is in the deck. Next sprint\'s plan will arrive with the 20% already in it.' },
@@ -3684,6 +3727,7 @@ export const EVENTS = [
           'The staging environment has a booking calendar now. It is fully booked by sales through Thursday. Your slot is "Friday, 7 AM to 7:30 AM." Your test data was deleted during the re-seed. The demo running right now is clicking through your feature and narrating the parts that do not exist yet.',
           'Staging is "frozen for a demo." Frozen means someone restored a two-week-old snapshot over it. Your fixtures are gone. Your migration is gone. Your feature is half there, which is the half {bro} is showing a prospect right now, from the slide that says "live in production."',
           'Platform: "Reminder that staging is a shared resource 🙂 We reset it nightly now." Nobody was reminded before the first reset. Your test data lasted eleven hours. Sales has booked staging for the afternoon, for a demo of the feature you have not finished, with the broken button hidden behind the presenter\'s cursor.',
+          (s, c) => `Staging was wiped at ${T(c, -45)} by the assistant, which was asked to "tidy up the test data" and tidied all of it, yours included. Sales has booked staging for a demo of "the AI feature," which is your half-finished feature, with the assistant narrating the parts that do not exist yet. The assistant is out of tokens, so {bro} will narrate.`,
         ],
         choices: [
           { label: 'Rebuild the test data', effect: { focus: -2, burnout: 2 }, log: 'Two hours of seeding, by hand, from a script that "used to work." The data will be wiped again tonight. You know that now. You will do it again tomorrow.' },
@@ -3716,6 +3760,7 @@ export const EVENTS = [
       'The CI queue is two hours because someone added a "quick smoke test" that spins up the whole platform, per commit, per branch. The person who added it has left. The test has never found anything. Removing it needs a change, which needs CI, which is a two-hour queue.',
       'Pipeline status: "queued (runner capacity)." Runner capacity was cut "for cost reasons" in the same email that announced the "ship daily" initiative. The email had a rocket emoji. The queue has a two-hour ETA and a rocket emoji.',
       'Your PR has been waiting for a runner for 90 minutes. The runners are busy running the pipeline for a bot that updates the pipeline. The bot\'s PR is also waiting for a runner. {dev} has started a thread about it, titled "CI (again)." It has 212 messages and no owner.',
+      'The CI queue is two hours because every PR now runs an "AI review" step. The step calls the assistant, which is out of tokens before standup ends, retries for 40 minutes, then passes with "no comments." The step is mandatory. Its findings to date: zero. Its runtime is on a slide as "AI reviewing 100% of PRs."',
     ],
     choices: [
       { label: 'Wait it out', effect: { focus: -2, burnout: 1 }, log: 'Two hours watching a spinner. It went green. You merged. The next person\'s two hours started.' },
@@ -3783,6 +3828,7 @@ export const EVENTS = [
           'Security: "Great news, we\'ve enabled continuous scanning on all repos 🛡️." Continuous means every push. The scan takes 25 minutes and fails on the test fixtures, which contain the string "password" as a test of the password field. Every PR is red. The scanner has a PR to fix this. It is red.',
           'A "shift-left" initiative has landed a scanner in CI. It has found 312 things. It has blocked merging. The security team offers a two-hour "findings triage workshop" to "empower" the team. The workshop is next Tuesday. Merging is today.',
           'The new scanner has flagged your PR for "hard-coded secret." The secret is the word "example" in a comment. It also flagged the README, the license, and itself. {dev} tried to suppress the finding. The suppression file is flagged for "disabling security controls." The scanner is now reviewing its own review. Nothing merges.',
+          'Security has enabled an AI-powered scanner "to shift security left, intelligently." It flags 312 findings, blocks every PR, and explains each finding in a paragraph generated on demand. The paragraph budget ran out at finding 40. Findings 41 to 312 say "Limit reached." They still block.',
         ],
         choices: [
           { label: 'Triage all 312', effect: { focus: -3, burnout: 6, debt: -2 }, log: 'You triaged all 312. Nine were real, in code nobody owns. You own them now. The other 303 are "accepted risk," in a spreadsheet, which the scanner will flag tomorrow.' },
@@ -4157,7 +4203,16 @@ export const MELTDOWN_EVENT = {
         { label: 'Open Slack. Type the truth.', next: 'manifesto' },
         { label: 'Pick up the keyboard. Just to feel its weight.', next: 'keyboard' },
         { label: 'Walk to the kitchen. Slowly.', next: 'kitchen_break' },
+        { label: 'Ask the assistant what to do.', next: 'assistant', requires: (s) => !!s.aiMandate },
         { label: 'Sit. Breathe. Try to come back.', next: 'breathe' },
+      ],
+    },
+    assistant: {
+      description: 'You open the assistant. You type: "I think I am about to lose it. What should I do." The cursor blinks. Then: "You have reached your organization\'s limit. Resets at midnight UTC." Under it, a banner: "Great news! Your team is in the top quartile for adoption this week." You read both twice. Something in you settles, quietly, like a decision being made for you.',
+      choices: [
+        { label: 'Leave the laptop open on the banner. Walk out.', meltdownEnding: 'limit_reached' },
+        { label: 'Type "n/a" in the "how AI helped" field. Then walk out.', meltdownEnding: 'not_applicable' },
+        { label: 'Close the tab. Sit. Breathe.', next: 'breathe' },
       ],
     },
     boardroom: {

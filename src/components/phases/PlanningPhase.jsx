@@ -27,6 +27,10 @@ const PLANNING_QUIPS = [
   "Every sprint is a draft.",
   "The work expands to fill the sprint, then exceeds it.",
   "If it scares you, it's a 13.",
+  "The assistant sized this sprint. It said \"it depends.\"",
+  "AI-adjusted capacity is capacity, multiplied by a cell.",
+  "Every ticket is AI-accelerated. The budget ran out at nine.",
+  "Legal says keep the tickets out of the assistant. Leadership says put them in. Size for both.",
 ];
 
 let _quipDeck = [];

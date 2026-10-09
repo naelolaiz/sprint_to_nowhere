@@ -4,6 +4,7 @@ import { CheckCircle2, XCircle, TrendingUp, TrendingDown, ArrowRight } from 'luc
 import { C } from '../../data/theme.js';
 import { TicketIcon } from '../common/TicketIcon.jsx';
 import { Btn } from '../common/Btn.jsx';
+import { aiRetroLine } from '../../data/aiFlavors.js';
 
 export const RetroPhase = ({ s, onNext }) => {
   const debtChange = s.debt - s.debtAtSprintStart;
@@ -97,6 +98,9 @@ export const RetroPhase = ({ s, onNext }) => {
             </div>
           </div>
           <div className="text-sm italic mt-3" style={{ color: C.textDim }}>"{flavor}"</div>
+          {s.aiMandate && (
+            <div className="text-sm italic mt-2" style={{ color: C.textDim }}>"{aiRetroLine(s)}"</div>
+          )}
         </div>
 
         {s.sprintsSurvived >= 10 && (

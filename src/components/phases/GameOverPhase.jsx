@@ -3,6 +3,7 @@
 import { Skull, Flame, RotateCcw } from 'lucide-react';
 import { C } from '../../data/theme.js';
 import { MELTDOWN_FLAVORS } from '../../data/meltdownFlavors.js';
+import { AI_GAME_OVER } from '../../data/aiFlavors.js';
 import { Btn } from '../common/Btn.jsx';
 
 export const GameOverPhase = ({ s, onRestart }) => {
@@ -22,8 +23,8 @@ export const GameOverPhase = ({ s, onRestart }) => {
         </h1>
         <div className="text-sm mb-8 text-left" style={{ color: C.textDim, lineHeight: 1.7 }}>
           {meltdown ? meltdown.body : isBurnout
-            ? 'You stopped responding to Slack on a Tuesday afternoon. Your manager called twice and you let it ring. You typed a resignation email, deleted it, typed it again, sent it. Your manager replied within seven minutes asking if you could "circle back next week." There is no next week.'
-            : 'Tech debt reached 100. The senior engineers have circulated a Google Doc titled "A Modest Proposal: Rewrite." A consultant has been hired. You are updating your résumé.'}
+            ? s.aiMandate ? AI_GAME_OVER.burnout : 'You stopped responding to Slack on a Tuesday afternoon. Your manager called twice and you let it ring. You typed a resignation email, deleted it, typed it again, sent it. Your manager replied within seven minutes asking if you could "circle back next week." There is no next week.'
+            : s.aiMandate ? AI_GAME_OVER.debt : 'Tech debt reached 100. The senior engineers have circulated a Google Doc titled "A Modest Proposal: Rewrite." A consultant has been hired. You are updating your résumé.'}
         </div>
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 text-center">
           <div className="p-3 sm:p-4" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>

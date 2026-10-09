@@ -338,6 +338,9 @@ export const nextDay = (prev) => {
   // A night that moved the budget reset makes this morning the expensive one.
   const tokenReset = team.tokenReset || prev.tokenReset || 'midnight';
   const tok = refillTokens({ ...prev, tokenReset });
+  // A job that ran on the fresh budget overnight leaves the morning mostly
+  // spent, and the spend counts as usage, which leadership reads as waste.
+  const drained = team.drainTokens ? Math.round(tok.tokens * team.drainTokens) : 0;
   const next = {
     ...prev,
     hourHistory: history,
@@ -372,8 +375,8 @@ export const nextDay = (prev) => {
     leaving: false,
     tokenReset,
     tokenBudget: tok.tokenBudget,
-    tokens: tok.tokens,
-    tokenUsage: 0,
+    tokens: tok.tokens - drained,
+    tokenUsage: drained,
     dayLog: [...team.log, ...archiveLog, ...tax.log, ...tok.log],
     subPhase: 'event',
     dialogNode: 'start',
