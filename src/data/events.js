@@ -1786,14 +1786,14 @@ export const EVENTS = [
         ],
         choices: [
           { label: 'Get back to work', effect: { focus: -0.5, capital: -0.5, burnout: 1 }, log: 'A clean drift. You bought back ~10 minutes of morning. Marcus saw it; he didn\'t name it.' },
-          { label: 'Marcus walks over after standup, "everything good?"', next: 'office_bail_followup' },
+          { label: 'Get ahead of it: walk over to Marcus\'s desk and explain', next: 'office_bail_followup' },
         ],
       },
       office_bail_followup: {
-        description: 'Marcus is at the side of your desk. "Hey — everything good? You ducked out a little early." It\'s a question that isn\'t a question.',
+        description: 'You walk over to Marcus\'s desk to get ahead of it. He sees you coming and speaks first: "Hey — everything good? You ducked out a little early." It\'s a question that isn\'t a question. You came to explain; now you are answering.',
         choices: [
           { label: '"Yeah, sorry, had to look at something."', effect: { focus: -1.5, capital: 0.5, burnout: 5, addUrgentFeature: true }, log: 'You said it lightly. Marcus said "all good!" lightly. He used the next 50 minutes to add a ticket to your sprint that he couldn\'t add at standup.' },
-          { label: '"I\'m at standup capacity for the week, Marcus."', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You named the dynamic. Marcus blinked twice and said "totally fair." He went back to his desk. He\'ll bring this up in your next 1:1, gently.' },
+          { label: '"I\'m at standup capacity for the week, Marcus."', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You named the dynamic. Marcus blinked twice and said "totally fair." You went back to your desk. He\'ll bring this up in your next 1:1, gently.' },
         ],
       },
       // ----- fake_drop: low-cost escape, slight political tax -----
@@ -1805,11 +1805,11 @@ export const EVENTS = [
         ],
         choices: [
           { label: 'Get back to work', effect: { focus: -0.5, capital: -0.5, burnout: 1 }, log: 'A clean escape with a small political tab. You bought back ~10 minutes of morning.' },
-          { label: 'Marcus DMs you a calendar invite to "sync"', next: 'fake_drop_followup' },
+          { label: 'Smooth it over: DM Marcus "sorry, connection died!"', next: 'fake_drop_followup' },
         ],
       },
       fake_drop_followup: {
-        description: 'A 30-minute "sync" appears on your calendar for 4:30 PM today. The title is "[catch-up — should be quick]." There is no agenda. The other invitee is {offliner}.',
+        description: 'Marcus replies before you have sent the second line: "no worries at all!! let\'s just catch up 🙂" A 30-minute "sync" appears on your calendar for 4:30 PM today. The title is "[catch-up — should be quick]." There is no agenda. The other invitee is {offliner}.',
         choices: [
           { label: 'Accept', effect: { focus: -1.5, capital: 0.5, burnout: 5, addUrgentFeature: true }, log: 'You took Marcus\'s 4:30 catch-up. It ran 50 minutes. He and {offliner} used it to add a ticket to your sprint that they couldn\'t add at standup.' },
           { label: 'Decline with "conflict"', effect: { focus: -0.5, capital: -1, burnout: 2 }, log: 'You declined Marcus\'s 4:30 catch-up. He rebooked it twice. The third invite has "[REQUIRED]" in the title.' },
