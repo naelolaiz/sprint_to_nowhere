@@ -195,10 +195,15 @@ export const applyChoice = (state, choice) => {
   }
 
   if (e.addLegacy) {
-    const tpl = LEGACY_TICKETS[Math.floor(Math.random() * LEGACY_TICKETS.length)];
-    const t = mkTicket(tpl, 'legacy', { legacy: true, urgent: true });
-    s.sprintPlan = [...s.sprintPlan, t];
-    log.push(`📦 Legacy project assigned: "${t.title}".`);
+    // `true` is one project; a number is that many, as when two people's
+    // tickets become yours "with AI assistance".
+    const count = e.addLegacy === true ? 1 : Math.max(1, Math.floor(e.addLegacy));
+    for (let i = 0; i < count; i++) {
+      const tpl = LEGACY_TICKETS[Math.floor(Math.random() * LEGACY_TICKETS.length)];
+      const t = mkTicket(tpl, 'legacy', { legacy: true, urgent: true });
+      s.sprintPlan = [...s.sprintPlan, t];
+      log.push(`📦 Legacy project assigned: "${t.title}".`);
+    }
   }
 
   // Definition-of-Done style process changes: every open ticket needs more of
@@ -293,6 +298,43 @@ export const applyChoice = (state, choice) => {
   // "We believe in you": next sprint arrives with 20% more in it.
   if (e.velocityCommit) s.velocityCommit = true;
 
+  // ----- the assistant's budget -----
+  // The mandate turns the meter on. The team found the budget before you did.
+  if (e.aiMandate) {
+    s.aiMandate = true;
+    s.tokenBudget = s.tokenBudget || 100;
+    s.tokens = Math.min(s.tokens || 0, s.tokenBudget) || Math.round(s.tokenBudget * 0.25);
+    s.tokenUsage = s.tokenUsage || 0;
+    log.push(`🪙 The team's assistant budget is now a number: ${s.tokenBudget} tokens a day. ${s.tokens} left today.`);
+  }
+  // A negative number spends; a large one empties the meter for the day.
+  if (e.tokens && e.tokens < 0) {
+    spendTokens(s, -e.tokens);
+    if (s.tokens === 0) log.push('🪙 No tokens left for today.');
+  }
+  // A reply that uses the assistant if there is budget, and does the manual
+  // version at the manual price if there is not.
+  if (e.useAssistant) {
+    const { tokens = 10, focus = 0, log: ok, elseFocus = focus, elseLog } = e.useAssistant;
+    if (!s.aiMandate || (s.tokens || 0) >= tokens) {
+      if (s.aiMandate) spendTokens(s, tokens);
+      if (focus) s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining + focus);
+      if (ok) log.push(ok);
+    } else {
+      if (elseFocus) s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining + elseFocus);
+      if (elseLog) log.push(elseLog);
+    }
+  }
+  // "Right-sizing": the budget shrinks to this fraction, for good, and the
+  // limit event gets likelier.
+  if (e.cutTokenBudget) {
+    const before = s.tokenBudget || 100;
+    s.tokenBudget = Math.max(20, Math.round(before * e.cutTokenBudget));
+    s.tokens = Math.min(s.tokens || 0, s.tokenBudget);
+    s.aiEfficiency = true;
+    log.push(`🪙 The assistant budget was "right-sized" from ${before} to ${s.tokenBudget} tokens a day.`);
+  }
+
   if (e.promise) s.promise = e.promise;
   if (e.clearPromise) s.promise = null;
 
@@ -377,6 +419,38 @@ export const tickDailyTaxes = (taxes = []) => {
     if (t.days - 1 > 0) kept.push({ ...t, days: t.days - 1 });
   }
   return { taxes: kept, hours, log };
+};
+
+// ----- THE ASSISTANT'S BUDGET -----
+// Spending past zero is not possible. What happens after zero is the manual
+// version of whatever you were doing, at the manual price. Mutates `s`,
+// which callers pass as their working copy; returns what was actually spent.
+export const spendTokens = (s, n) => {
+  const have = Math.max(0, s.tokens || 0);
+  const spent = Math.min(have, Math.max(0, n));
+  s.tokens = have - spent;
+  s.tokenUsage = (s.tokenUsage || 0) + spent;
+  return spent;
+};
+
+// The morning refill. Leadership reads yesterday's usage as waste when it was
+// high and as resistance when it was low; both cost the team tokens, so the
+// budget only ever goes down. Once finance has moved the reset to 4 PM, the
+// morning starts with half.
+export const refillTokens = (s) => {
+  if (!s.aiMandate) return { tokenBudget: s.tokenBudget || 0, tokens: s.tokens || 0, tokenUsage: 0, log: [] };
+  let budget = s.tokenBudget || 100;
+  const log = [];
+  const used = budget > 0 ? (s.tokenUsage || 0) / budget : 0;
+  if (used > 0.8 && budget > 20) {
+    budget = Math.max(20, Math.round(budget * 0.9));
+    log.push(`🪙 Yesterday's assistant usage was "high." Leadership read it as waste. Today's budget is ${budget}.`);
+  } else if (used < 0.2 && budget > 20) {
+    budget = Math.max(20, Math.round(budget * 0.9));
+    log.push(`🪙 Yesterday's assistant usage was "low." Leadership read it as resistance. Today's budget is ${budget}.`);
+  }
+  const tokens = s.tokenReset === 'fiscal' ? Math.round(budget * 0.5) : budget;
+  return { tokenBudget: budget, tokens, tokenUsage: 0, log };
 };
 
 // ----- CONTEXT SWITCHING -----

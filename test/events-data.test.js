@@ -17,6 +17,7 @@ const KNOWN_EFFECTS = new Set([
   'chance', 'dailyTax', 'inflateAll', 'splitTicket', 'foldEstimate', 'velocityCommit',
   'addUrgentBug', 'loseProgress', 'queueEvent', 'askTax', 'addCleanup',
   'queueToday', 'boothClosed',
+  'tokens', 'useAssistant', 'aiMandate', 'cutTokenBudget',
 ]);
 const KNOWN_CHOICE_KEYS = new Set(['label', 'effect', 'log', 'next', 'requires', 'logByDesc', 'meltdownEnding']);
 

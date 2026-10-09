@@ -7,6 +7,7 @@
 import { EVENTS } from '../data/events.js';
 import { CAST_POOLS } from '../data/cast.js';
 import { stageEvent } from './flow.js';
+import { spendTokens } from './mechanics.js';
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -294,7 +295,11 @@ export const applyAction = (prev, kind) => {
     // Some days asking costs more: the colleague's tools are logged out too,
     // or the answer lives in a channel that no longer exists.
     const askTax = s.askTaxToday || 0;
-    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1 - askTax);
+    // Under the mandate the colleague pastes your question into the
+    // assistant first. That spends the team's tokens; with none left they
+    // answer from memory, which is slower.
+    const noTokens = s.aiMandate && spendTokens(s, 20) === 0 ? 0.5 : 0;
+    s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 1 - askTax - noTokens);
     s.capital = Math.max(0, s.capital - 0.5);
     s.focus = Math.min(100, s.focus + 5);
     // Find the least-progressed unfinished ticket and bump it
@@ -321,6 +326,7 @@ export const applyAction = (prev, kind) => {
     } else {
       s.dayLog = [...s.dayLog, `You went to ask ${helper} for help. Nothing to ask about. You both stared at their screen for a polite minute.`];
     }
+    if (noTokens > 0) s.dayLog = [...s.dayLog, `${helper} tried the assistant first. No tokens. They answered from memory, slower, with a story about 2019. An extra half hour.`];
   }
   return s;
 };

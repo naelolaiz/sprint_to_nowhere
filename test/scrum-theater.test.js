@@ -159,7 +159,7 @@ describe('once-per-run events', () => {
 
   it('exist and are gated out after they fire', () => {
     expect(once.length).toBeGreaterThan(0);
-    const fresh = { ...initialState(), phase: 'execution', sprint: 5, currentDay: 2, sprintPlan: [ticket()] };
+    const fresh = { ...initialState(), phase: 'execution', sprint: 5, currentDay: 2, sprintPlan: [ticket()], aiMandate: true };
     for (const ev of once) {
       expect(eventApplicable(ev, fresh), `${ev.id} should be eligible before firing`).toBe(true);
       const after = flow.stageEvent(fresh, ev);
