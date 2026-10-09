@@ -85,6 +85,9 @@ export const initialState = () => {
     pendingEvents: [],             // event ids that open tomorrow morning, ahead of the day's roll
     askTaxToday: 0,                // extra hours an ask-a-colleague costs today; resets each morning
     boothClosedToday: false,       // every phone booth is booked today; resets each morning
+    scheduledEvents: [],           // today's disruptions, each with the minute (after 9:00) it lands
+    resumeTicketId: null,          // the ticket an interruption pulled you off; sitting back down is free
+    leaving: false,                // you called it a day; the last calendar items land on your way out
   };
 };
 

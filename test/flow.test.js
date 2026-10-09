@@ -44,7 +44,10 @@ describe('startSprint', () => {
     ];
     const out = flow.startSprint(s);
     expect(out.phase).toBe('execution');
-    expect(out.subPhase).toBe('event');
+    // The morning opens with a ceremony or at the desk with the day's
+    // disruptions on the clock; either way the day has something in it.
+    expect(['event', 'work']).toContain(out.subPhase);
+    expect(out.scheduledEvents.length + (out.subPhase === 'event' ? 1 : 0)).toBeGreaterThan(0);
     expect(out.currentDay).toBe(1);
     expect(out.sprintPlan).toHaveLength(6);
     expect(new Set(out.sprintPlan.map(t => t.id)).size).toBe(6);
@@ -52,8 +55,10 @@ describe('startSprint', () => {
     expect(out.pendingCleanups).toEqual([]);
     expect(out.hourHistory[0]).toEqual({ day: 0, hours: out.sprintPlan.reduce((a, t) => a + t.effort, 0), kind: 'start' });
     expect(out.dayLog.filter(l => /Carry-over/.test(l))).toHaveLength(2);
-    expect(out.currentEvent).toBeTruthy();
-    expect(out.recentEventIds).toContain(out.currentEvent.id);
+    if (out.subPhase === 'event') {
+      expect(out.currentEvent).toBeTruthy();
+      expect(out.recentEventIds).toContain(out.currentEvent.id);
+    }
   });
 
   it('sometimes has management force a strategic initiative in', () => {
@@ -217,8 +222,8 @@ describe('nextDay', () => {
     expect(out.dayFocusRemaining).toBe(8);
     expect(out.atHome).toBe(false);
     expect(out.actionsToday).toEqual({});
-    expect(out.subPhase).toBe('event');
-    expect(out.currentEvent).toBeTruthy();
+    expect(['event', 'work']).toContain(out.subPhase);
+    expect(out.scheduledEvents.length + (out.subPhase === 'event' ? 1 : 0)).toBeGreaterThan(0);
     expect(out.dayLog.some(l => /^old$/.test(l))).toBe(false);
     expect(out.focus).toBe(100 - Math.floor(36 * 0.4));
   });
@@ -242,7 +247,7 @@ describe('nextDay', () => {
       debtNight.sprintPlan[0].progress = 3;
       const d = flow.nextDay(debtNight);
       expect(d.phase).toBe('execution');
-      expect(d.subPhase).toBe('event');
+      expect(['event', 'work']).toContain(d.subPhase);
       if (d.debt >= 100) {
         sawDebt = true;
         expect(d.currentEvent).not.toBe(MELTDOWN_EVENT);

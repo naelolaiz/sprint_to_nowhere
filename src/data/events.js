@@ -2130,7 +2130,7 @@ export const EVENTS = [
           'A calendar invite appears: "Org Update — All Hands — Mandatory." Thirty minutes from now. The body of the invite is empty. Slack is unusually quiet. People are typing in DMs.',
           'A 9 AM all-staff Slack message from the CEO: "I\'ll be in touch later today with some important updates. Please make sure your laptop is charged and you\'re reachable." It is currently 9:01.',
           'You arrive at your desk. Your manager\'s status is "🔒 in a meeting." So is your skip-level\'s. So is your skip-skip\'s. The cafe is unusually empty. Three other engineers are at their desks not typing.',
-          'A "Quick Org Note" email from People hits your inbox. The body is one sentence: "Please join the all-staff meeting at 11 AM today. Calendar invite to follow." It is 10:43.',
+          (s, c) => `A "Quick Org Note" email from People hits your inbox. The body is one sentence: "Please join the all-staff meeting at ${T(c, 17)} today. Calendar invite to follow." It is ${T(c, 0)}.`,
           'Sarah DMs you: "u seeing this?" You haven\'t seen anything yet. Two minutes later a calendar invite arrives. It says "Org Update." There are 412 attendees. Some of them won\'t be by tomorrow.',
         ],
         choices: [

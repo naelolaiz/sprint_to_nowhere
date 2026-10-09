@@ -5,6 +5,7 @@ import { C, FONT } from '../../data/theme.js';
 import { renderCast } from '../../game/cast.js';
 import { resolveEventText } from '../../game/dialog.js';
 import { contextSwitchCost } from '../../game/mechanics.js';
+import { clockMinutes, clockText, minutesToClock, WORKDAY_START_MIN } from '../../game/clock.js';
 import { TicketCard } from '../common/TicketCard.jsx';
 import { BurnDown } from '../common/BurnDown.jsx';
 import { Btn } from '../common/Btn.jsx';
@@ -47,13 +48,13 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           borderBottom: `1px solid ${C.border}`,
           backgroundImage: `linear-gradient(to bottom, ${C.surface} 0%, ${C.bg} 100%)`,
         }}>
-          <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt} burnout={s.burnout} morale={s.morale} atHome={s.atHome} stayedLate={s.stayedLate}/>
+          <Stage subPhase={s.subPhase} currentEvent={s.currentEvent} debt={s.debt} burnout={s.burnout} morale={s.morale} atHome={s.atHome} stayedLate={s.stayedLate} clock={clockMinutes(s)}/>
         </div>
 
         {/* Action area (scrollable on desktop, flows on mobile) */}
         <div className="flex-1 p-3 sm:p-6 lg:overflow-auto">
         <div className="text-xs tracking-[0.3em] mb-4" style={{ color: C.amberDim }}>
-          DAY {s.currentDay} OF 5 · {s.dayFocusRemaining.toFixed(1)}h FOCUS LEFT
+          DAY {s.currentDay} OF 5 · {clockText(s).toUpperCase()} · {s.dayFocusRemaining.toFixed(1)}h FOCUS LEFT
         </div>
 
         {s.subPhase === 'event' && Ev && (() => {
@@ -100,6 +101,12 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                 ? `What do you want to do? ${s.dayFocusRemaining.toFixed(1)}h remaining.`
                 : 'No hours left. End the day.'}
             </div>
+            {s.dayFocusRemaining > 0 && (s.scheduledEvents || []).length > 0 && (
+              <div className="text-xs mb-3" style={{ color: C.textDimmer }}>
+                📅 Something on your calendar at {minutesToClock(WORKDAY_START_MIN + s.scheduledEvents[0].at)}. The invite has no title.
+                {s.scheduledEvents.length > 1 ? ` Also ${s.scheduledEvents.length - 1} more after that.` : ''}
+              </div>
+            )}
 
             {/* Active bonuses display */}
             {(s.pairBonus || s.boothBonus) && (

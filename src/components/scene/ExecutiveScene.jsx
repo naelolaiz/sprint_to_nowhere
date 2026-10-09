@@ -3,8 +3,9 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
+import { SkyPane } from './Sky.jsx';
 
-export const ExecutiveScene = () => (
+export const ExecutiveScene = ({ clock = 10 * 60 }) => (
   <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
     {/* Office walls */}
     <rect x="20" y="20" width="360" height="140" fill={C.surface} stroke={C.amber} strokeWidth="1"/>
@@ -19,18 +20,11 @@ export const ExecutiveScene = () => (
     <rect x="20" y="138" width="360" height="22" fill={C.surface2} opacity="0.4"/>
     <line x1="20" y1="138" x2="380" y2="138" stroke={C.borderHi} strokeWidth="0.4" opacity="0.6"/>
 
-    {/* Window with skyline behind the desk */}
-    <rect x="240" y="40" width="120" height="58" fill="#0a0c14" stroke={C.borderHi} strokeWidth="0.8"/>
+    {/* Window with skyline behind the desk: the corner office gets the view */}
+    <SkyPane id="exec" x={240} y={40} w={120} h={58} clock={clock}
+      buildings={[[0.06, 0.69, 0.1], [0.18, 0.6, 0.08], [0.28, 0.52, 0.13], [0.43, 0.66, 0.08], [0.52, 0.55, 0.12], [0.65, 0.62, 0.07], [0.73, 0.48, 0.15], [0.9, 0.59, 0.08]]}/>
     <line x1="300" y1="40" x2="300" y2="98" stroke={C.borderHi} strokeWidth="0.5"/>
     <line x1="240" y1="69" x2="360" y2="69" stroke={C.borderHi} strokeWidth="0.5"/>
-    {/* Skyline silhouette */}
-    {[
-      [248, 80, 12, 18], [262, 75, 10, 23], [274, 70, 16, 28],
-      [292, 78, 9, 20], [302, 72, 14, 26], [318, 76, 8, 22],
-      [328, 68, 18, 30], [348, 74, 10, 24],
-    ].map(([x, y, w, h], i) => (
-      <rect key={i} x={x} y={y} width={w} height={h} fill="#1a1c20"/>
-    ))}
 
     {/* CEO Slack-style ping panel — over to the left so it doesn't overlap the window */}
     <g transform="translate(110 50)">
