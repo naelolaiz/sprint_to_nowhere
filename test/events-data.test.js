@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { EVENTS, MELTDOWN_EVENT } from '../src/data/events.js';
-import { EVENT_CAST_RULES } from '../src/data/cast.js';
+import { EVENT_CAST_RULES, CAST_POOLS } from '../src/data/cast.js';
 import { initialState } from '../src/game/state.js';
 
 const KNOWN_EFFECTS = new Set([
@@ -221,6 +221,27 @@ describe('event data', () => {
     for (const d of EVENTS.find(e => e.id === 'return_to_office').descriptions) {
       const text = render(d);
       expect(/booth/i.test(text) && /call/i.test(text), `office-day opener: ${text.slice(0, 70)}`).toBe(true);
+    }
+  });
+
+  // A choice is something the player decides. A narrated label (one that is
+  // not a quoted line) is an instruction to the player, so it can never open
+  // with someone else as the subject: "Marcus walks over" is a thing that
+  // happens to you, and belongs in a description or a log, not on a button.
+  it('narrated choice labels are the player\'s own actions', () => {
+    const names = new Set([
+      ...Object.values(CAST_POOLS).flat(),
+      'Marcus', 'Logan', 'Priya', 'Stefan', 'Karen', 'He', 'She', 'They', 'Someone', 'Everyone', 'Nobody',
+    ]);
+    for (const ev of ALL) {
+      for (const { key, node } of nodesOf(ev)) {
+        for (const c of node.choices || []) {
+          if (/^["'“«]/.test(c.label)) continue;
+          const first = c.label.match(/^\{?[\w-]+\}?/)?.[0] || '';
+          const other = /^\{\w+\}$/.test(first) || names.has(first);
+          expect(other, `${ev.id}/${key}: "${c.label}" is something someone else does`).toBe(false);
+        }
+      }
     }
   });
 
