@@ -78,6 +78,14 @@ export const ScreenContent = ({ kind }) => {
       <text x="-9" y="-3.5" fontSize="2" fontFamily={FONT} fill={C.rustDim}>undefined</text>
     </g>
   );
+  if (kind === 'limit') return (
+    <g>
+      <rect x="-11" y="-13" width="22" height="9" fill={C.surface2}/>
+      <text x="0" y="-9.5" textAnchor="middle" fontSize="2.4" fontWeight="700" fontFamily={FONT} fill={C.amber}>LIMIT REACHED</text>
+      <text x="0" y="-7" textAnchor="middle" fontSize="2" fontFamily={FONT} fill={C.textDim}>resets at midnight</text>
+      <text x="0" y="-5" textAnchor="middle" fontSize="2" fontFamily={FONT} fill={C.textDimmer}>[ upgrade ]</text>
+    </g>
+  );
   if (kind === 'pivot') return (
     <g>
       <rect x="-11" y="-13" width="22" height="9" fill={C.rust} opacity="0.25"/>

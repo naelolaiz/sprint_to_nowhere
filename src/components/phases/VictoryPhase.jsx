@@ -3,6 +3,7 @@
 import { Award, RotateCcw } from 'lucide-react';
 import { C } from '../../data/theme.js';
 import { Btn } from '../common/Btn.jsx';
+import { AI_VICTORY_LINE } from '../../data/aiFlavors.js';
 
 export const VictoryPhase = ({ s, onRestart }) => (
   <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
@@ -15,6 +16,7 @@ export const VictoryPhase = ({ s, onRestart }) => (
       <div className="text-sm mb-8" style={{ color: C.textDim, lineHeight: 1.7 }}>
         After {s.sprint} sprints, the tech debt is below 15. The tests pass. The docs are accurate. New hires understand the deployment process.<br/><br/>
         This has never happened before. Someone is filming a documentary.
+        {s.aiMandate && (<><br/><br/>{AI_VICTORY_LINE}</>)}
       </div>
       <Btn onClick={onRestart}><span className="flex items-center gap-2"><RotateCcw size={14}/>PLAY AGAIN</span></Btn>
     </div>

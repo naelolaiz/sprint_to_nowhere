@@ -51,6 +51,16 @@ export const MELTDOWN_FLAVORS = {
     sub: 'EXIT WITHOUT NOTICE',
     body: 'You drove home in silence with the radio off. You did not check Slack on the way. By the time you got home you had three missed calls and eleven Slack mentions. You opened a beer. You sent the resignation in the morning. They processed it in 48 hours.',
   },
+  limit_reached: {
+    title: 'Limit Reached',
+    sub: 'RESETS AT MIDNIGHT UTC',
+    body: 'You left the laptop open on the banner. Marcus found it at 4 PM and read it as a status update. He reacted with 🚀. By the time anyone noticed you were gone, the adoption dashboard had logged a full day of usage from your account: the window was open, and the window is what it counts. HR\'s email asked you to "reflect on your AI journey." You did not reply. The budget reset at midnight. You did not.',
+  },
+  not_applicable: {
+    title: 'Not Applicable',
+    sub: 'FORM REJECTED',
+    body: 'You typed "n/a." The form rejected it. You typed it again. The form rejected it again, with a tip: "try describing how AI accelerated this." You typed "it did not." The form accepted that. You walked out past the slide that says AI-FIRST BY Q3. The ticket is still open. Its "how AI helped" field is the truest thing in the tracker.',
+  },
   walked_off: {
     title: 'You Just Kept Walking',
     sub: 'STATUS UNKNOWN',
