@@ -3,6 +3,7 @@
 import { Wrench, AlertTriangle, Zap, MessageSquare, Users, Coffee, XCircle, Flame, Briefcase, Clock, Archive, Sparkles, Heart, Megaphone } from 'lucide-react';
 import { formatClock } from '../game/cast.js';
 import { firstUnstarted } from '../game/backlog.js';
+import { tr } from '../i18n/index.js';
 
 // Context predicates for choices and descriptions that only fit one location.
 // REMOTE: player is working from home (Zoom/Slack-huddle dynamics apply —
@@ -25,12 +26,12 @@ const T = (cast, offsetMin) => formatClock(cast, offsetMin);
 // the card on the board instead of a hard-coded "auth-module refactor".
 const refactorName = (s) => {
   const r = (s?.sprintPlan || []).find(t => t.type === 'refactor' && !t.shipped && t.progress < t.effort);
-  return r ? `"${r.title}"` : 'the refactor';
+  return r ? tr`"${r.title}"` : tr`the refactor`;
 };
 
 // The card a sizing ceremony argues about: the first untouched one on the
 // board, the same one `splitTicket` cuts in two if the argument is "resolved".
-const pokerTitle = (s) => firstUnstarted(s?.sprintPlan)?.title || 'the next ticket';
+const pokerTitle = (s) => firstUnstarted(s?.sprintPlan)?.title || tr`the next ticket`;
 
 export const EVENTS = [
   {
@@ -840,10 +841,10 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          { text: (s) => `Manager stops by your desk. "Quick one — ${refactorName(s)}. We need to bump it for now. Sales is asking when the feature they promised ships and we need to focus."`, requires: OFFICE },
-          (s) => `Manager DMs: "hey got 5? need to talk re: priorities for this sprint." You jump on. "So — ${refactorName(s)}. Can we move it? Sales has a deal that needs the feature they promised."`,
+          { text: (s) => tr`Manager stops by your desk. "Quick one — ${refactorName(s)}. We need to bump it for now. Sales is asking when the feature they promised ships and we need to focus."`, requires: OFFICE },
+          (s) => tr`Manager DMs: "hey got 5? need to talk re: priorities for this sprint." You jump on. "So — ${refactorName(s)}. Can we move it? Sales has a deal that needs the feature they promised."`,
           { text: 'Manager pulls you aside in the morning. "Look — between us — leadership saw the velocity dip last sprint. We can\'t do another sprint that\'s mostly cleanup. The refactor needs to wait. The feature sales promised can\'t."', requires: OFFICE },
-          (s) => `Manager writes one of those long DMs that ends with "thoughts?" The DM's actual content is: "we need to bump ${refactorName(s)} in favor of the feature sales promised."`,
+          (s) => tr`Manager writes one of those long DMs that ends with "thoughts?" The DM's actual content is: "we need to bump ${refactorName(s)} in favor of the feature sales promised."`,
           'Manager joins your async refactor doc with a comment: "Can we discuss this 1:1?" The 1:1 was scheduled six minutes ago. The agenda, added four minutes ago, is one line: "the feature sales promised."',
         ],
         choices: [
@@ -983,8 +984,8 @@ export const EVENTS = [
       'HR forgot to put it on your calendar. The candidate is already in the lobby. You skim the resume.',
       'A meeting invite from 23 minutes ago. Subject: "Loop interview — please attend." You did not get a heads-up. The candidate is already on Zoom.',
       'You\'re subbing for someone who called in sick. You haven\'t read the resume. The candidate has done the take-home. You haven\'t read that either.',
-      (s, c) => `Recruiter pings: "Hey! You're in the loop for the Senior PM interview at ${T(c, 6)}! Got a question bank for you." It is ${T(c)}.`,
-      (s, c) => `Interview at ${T(c)}. The candidate has already been through 4 rounds. You are the 5th round. You don't know what's left to evaluate.`,
+      (s, c) => tr`Recruiter pings: "Hey! You're in the loop for the Senior PM interview at ${T(c, 6)}! Got a question bank for you." It is ${T(c)}.`,
+      (s, c) => tr`Interview at ${T(c)}. The candidate has already been through 4 rounds. You are the 5th round. You don't know what's left to evaluate.`,
       'You\'re on a panel for "values alignment." You don\'t know what the values are this quarter. You decide to ask the candidate questions about teamwork and pretend the answers reveal a value.',
       'You\'re interviewing a senior. They walk through their take-home with confidence. The take-home solution is, you slowly realize, copied verbatim from a Medium article you wrote two years ago.',
       'You\'re interviewing a junior. They are nervous. They are also better than you were at their level. You feel a complicated thing.',
@@ -1865,7 +1866,7 @@ export const EVENTS = [
         ],
       },
       reply_mgr: {
-        description: (s, c) => `You DM your manager. They reply: "thanks! actually can you also look at the dashboard issue tonight? want to be ahead of it before tomorrow." It is ${T(c)}. The workshop is not done.`,
+        description: (s, c) => tr`You DM your manager. They reply: "thanks! actually can you also look at the dashboard issue tonight? want to be ahead of it before tomorrow." It is ${T(c)}. The workshop is not done.`,
         choices: [
           { label: '"OK"', effect: { focus: -1, burnout: 8 }, log: 'You agreed to extra work during the wellbeing workshop. The irony was lost on no one. {facilitator} was talking about boundaries on the slide above your manager\'s name.' },
           { label: '"I\'m in a workshop, can it wait?"', next: 'wait_mgr' },
@@ -1971,14 +1972,14 @@ export const EVENTS = [
       open: {
         description: (s) => {
           const swap = {
-            rust:     "you'll be inheriting the Java 7 admin tool. The one nobody at HQ wants. The original team was reorged.",
-            arch:     "we need you embedded in maintenance for the legacy tax module — patching CVEs and customer escalations. Architectural work is on hold this half.",
-            impact:   "you're moving to maintenance-only mode for the Synergy Platform. It's still got 14 enterprise customers. They are loud.",
-            ai:       "we need someone on the SOAP API the legal team uses. It can't be deprecated until 2028. We thought of you.",
-            platform: "you'll own the AngularJS 1.x dashboard from the 2017 acquisition. We're not investing in greenfield this year.",
+            rust:     tr`you'll be inheriting the Java 7 admin tool. The one nobody at HQ wants. The original team was reorged.`,
+            arch:     tr`we need you embedded in maintenance for the legacy tax module — patching CVEs and customer escalations. Architectural work is on hold this half.`,
+            impact:   tr`you're moving to maintenance-only mode for the Synergy Platform. It's still got 14 enterprise customers. They are loud.`,
+            ai:       tr`we need someone on the SOAP API the legal team uses. It can't be deprecated until 2028. We thought of you.`,
+            platform: tr`you'll own the AngularJS 1.x dashboard from the 2017 acquisition. We're not investing in greenfield this year.`,
           };
-          const what = swap[s.promise] || "an inherited maintenance project from a wound-down team.";
-          return `Manager finds you. "Hey — got some good news. Remember in your 1:1 you said you wanted to grow? HQ has a project for your team. ${what} Your manager — me — thinks it'll be a great learning opportunity."`;
+          const what = swap[s.promise] || tr`an inherited maintenance project from a wound-down team.`;
+          return tr`Manager finds you. "Hey — got some good news. Remember in your 1:1 you said you wanted to grow? HQ has a project for your team. ${what} Your manager — me — thinks it'll be a great learning opportunity."`;
         },
         choices: [
           { label: '"...sure."', effect: { addLegacy: true, clearPromise: true, capital: -1 }, log: 'A legacy project was assigned. The promise has been... reframed.' },
@@ -2226,7 +2227,7 @@ export const EVENTS = [
           'A calendar invite appears: "Org Update — All Hands — Mandatory." Thirty minutes from now. The body of the invite is empty. Slack is unusually quiet. People are typing in DMs.',
           'A 9 AM all-staff Slack message from the CEO: "I\'ll be in touch later today with some important updates. Please make sure your laptop is charged and you\'re reachable." It is currently 9:01.',
           'You arrive at your desk. Your manager\'s status is "🔒 in a meeting." So is your skip-level\'s. So is your skip-skip\'s. The cafe is unusually empty. Three other engineers are at their desks not typing.',
-          (s, c) => `A "Quick Org Note" email from People hits your inbox. The body is one sentence: "Please join the all-staff meeting at ${T(c, 17)} today. Calendar invite to follow." It is ${T(c, 0)}.`,
+          (s, c) => tr`A "Quick Org Note" email from People hits your inbox. The body is one sentence: "Please join the all-staff meeting at ${T(c, 17)} today. Calendar invite to follow." It is ${T(c, 0)}.`,
           'Sarah DMs you: "u seeing this?" You haven\'t seen anything yet. Two minutes later a calendar invite arrives. It says "Org Update." There are 412 attendees. Some of them won\'t be by tomorrow.',
         ],
         choices: [
@@ -2524,7 +2525,7 @@ export const EVENTS = [
           'A bell rings. Then a recorded voice: "ATTENTION. PLEASE PROCEED CALMLY TO THE NEAREST EXIT. THIS IS A DRILL." You were finally getting into a flow state. This is the third drill this quarter.',
           'A long, loud strobe and a klaxon. Six seconds in you remember today\'s the announced drill. You were nine minutes into a complicated debugging session.',
           'The fire alarm goes off WITHOUT a "this is a drill" announcement. Everyone freezes. Then someone says "this isn\'t scheduled, right?" Then the announcement plays: "PLEASE EVACUATE. THIS IS A DRILL." Then everyone exhales.',
-          { text: (s, c) => `Calendar reminder: "Building Drill — please be near an exit at ${T(c, 1)}." It is ${T(c)}. You did not see the reminder until just now. You have been in a meeting in a windowless conference room.` },
+          { text: (s, c) => tr`Calendar reminder: "Building Drill — please be near an exit at ${T(c, 1)}." It is ${T(c)}. You did not see the reminder until just now. You have been in a meeting in a windowless conference room.` },
           'The PA system clicks on. A voice that is clearly the office manager reading from a paper script begins: "Attention employees. We will be conducting a routine evacuation drill today. Please cooperate fully with your assigned warden."',
         ],
         choices: [
@@ -2599,15 +2600,15 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          { text: (s, c) => `You're at the conference room at ${T(c)} sharp. The room is empty. You check the invite — you're in the right place. Slack: "Marcus is finishing up another thing, will be a few minutes." It is now ${T(c, 8)}.`, requires: OFFICE },
-          { text: (s, c) => `You join the Zoom at ${T(c)} sharp. You are alone in the meeting. At ${T(c, 4)} a Slack message arrives: "running 5 min late, sorry — getting coffee." At ${T(c, 9)} the same person posts: "ok actually 10 — got cornered at the espresso machine."`, requires: REMOTE },
-          { text: (s, c) => `The room is booked ${T(c)}–${T(c, 30)}. You arrive at ${T(c)}. The previous meeting is still in there. The previous meeting is run by a VP. The VP makes brief eye contact with you and turns back to her group.`, requires: OFFICE },
-          { text: (s, c) => `The meeting is supposed to start at ${T(c)}. At ${T(c)} you are the only one on the call. At ${T(c, 5)} a "running late, my prev ran over" Slack lands. At ${T(c, 11)} a different attendee posts the same. At ${T(c, 14)} Marcus joins, audio not working.`, requires: REMOTE },
+          { text: (s, c) => tr`You're at the conference room at ${T(c)} sharp. The room is empty. You check the invite — you're in the right place. Slack: "Marcus is finishing up another thing, will be a few minutes." It is now ${T(c, 8)}.`, requires: OFFICE },
+          { text: (s, c) => tr`You join the Zoom at ${T(c)} sharp. You are alone in the meeting. At ${T(c, 4)} a Slack message arrives: "running 5 min late, sorry — getting coffee." At ${T(c, 9)} the same person posts: "ok actually 10 — got cornered at the espresso machine."`, requires: REMOTE },
+          { text: (s, c) => tr`The room is booked ${T(c)}–${T(c, 30)}. You arrive at ${T(c)}. The previous meeting is still in there. The previous meeting is run by a VP. The VP makes brief eye contact with you and turns back to her group.`, requires: OFFICE },
+          { text: (s, c) => tr`The meeting is supposed to start at ${T(c)}. At ${T(c)} you are the only one on the call. At ${T(c, 5)} a "running late, my prev ran over" Slack lands. At ${T(c, 11)} a different attendee posts the same. At ${T(c, 14)} Marcus joins, audio not working.`, requires: REMOTE },
           { text: 'You\'ve been waiting in the room for 9 minutes. The participants are all pinging in Slack saying "joining in 2." None have joined. The meeting was supposed to be 30 minutes. There are now 21 minutes left.', requires: OFFICE },
           'Calendar invite says: "Quick sync (15 min)." It is hour two. The other six people have spent the last 18 minutes deciding who is the right person to be in the meeting. The right person is not in the meeting. The right person is in another meeting that was scheduled to discuss who the right person is.',
           { text: 'You\'re on Zoom. The host is in a coffee shop with very loud espresso machines. The host has not muted. The host is also clearly talking to a barista. Six other people are typing "🤐" in the chat.', requires: REMOTE },
           'You join the call. Marcus opens with: "before we start — Logan is going to drop in for the first 5 minutes. So let\'s do intros first." Logan stays for 41 minutes and intros never end.',
-          { text: (s, c) => `${T(c)} meeting. At ${T(c, 2)} someone's laptop lid closes mid-sentence. At ${T(c, 5)} the lid reopens — different person. At ${T(c, 7)} you realize Marcus has been double-booked and is on a different call in the same room, behind a curtain.`, requires: OFFICE },
+          { text: (s, c) => tr`${T(c)} meeting. At ${T(c, 2)} someone's laptop lid closes mid-sentence. At ${T(c, 5)} the lid reopens — different person. At ${T(c, 7)} you realize Marcus has been double-booked and is on a different call in the same room, behind a curtain.`, requires: OFFICE },
           'The host posts the agenda 4 minutes after the meeting was supposed to end. The agenda is "OPEN DISCUSSION." There are 11 attendees. None of them know each other\'s names.',
           { text: 'You\'re at the conference room. Marcus is in the room — physically — but on his phone. He waves you to wait. He\'s on a different meeting. With his other team. He\'ll be "right with you." This goes on for 17 minutes.', requires: OFFICE },
         ],
@@ -2619,8 +2620,8 @@ export const EVENTS = [
       },
       wait: {
         descriptions: [
-          { text: (s, c) => `At ${T(c, 11)}, {bro} from sales walks in carrying a coffee. "Sorry sorry — Doug is having TROUBLE at the espresso bar." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally arrives, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`, requires: OFFICE },
-          { text: (s, c) => `At ${T(c, 11)}, {bro} from sales joins, audio first, video later, holding a coffee. "Sorry sorry — the espresso bar had a whole thing." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally joins, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`, requires: REMOTE },
+          { text: (s, c) => tr`At ${T(c, 11)}, {bro} from sales walks in carrying a coffee. "Sorry sorry — Doug is having TROUBLE at the espresso bar." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally arrives, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`, requires: OFFICE },
+          { text: (s, c) => tr`At ${T(c, 11)}, {bro} from sales joins, audio first, video later, holding a coffee. "Sorry sorry — the espresso bar had a whole thing." At ${T(c, 14)} the platform-team rep dials in. At ${T(c, 17)} Marcus finally joins, apologizes, and asks if anyone has seen the agenda.\n\nNobody has.`, requires: REMOTE },
         ],
         choices: [
           { label: 'Push to start anyway', next: 'start' },
@@ -2629,40 +2630,40 @@ export const EVENTS = [
       },
       coffee_grab: {
         descriptions: [
-          { text: (s, c) => `You go to the kitchen. Doug is there, mid-dictation about the milk. By the time you extract yourself it's ${T(c, 13)}. Back in the conference room the meeting has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`, requires: OFFICE },
-          { text: (s, c) => `You go to your kitchen. The dishwasher needs emptying. You empty it. You wipe the counter. By the time you're back it's ${T(c, 13)} and the call has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`, requires: REMOTE },
+          { text: (s, c) => tr`You go to the kitchen. Doug is there, mid-dictation about the milk. By the time you extract yourself it's ${T(c, 13)}. Back in the conference room the meeting has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`, requires: OFFICE },
+          { text: (s, c) => tr`You go to your kitchen. The dishwasher needs emptying. You empty it. You wipe the counter. By the time you're back it's ${T(c, 13)} and the call has started without you. Marcus is mid-sentence: "...so basically we need to align on strategy."`, requires: REMOTE },
         ],
         choices: [
           { label: 'Sit down quietly', effect: { focus: -1, burnout: 5 }, log: 'You missed the first 8 minutes. The first 8 minutes were the only useful 8 minutes. The next 50 were not.' },
         ],
       },
       dm_marcus: {
-        description: (s, c) => `Marcus DMs back at ${T(c, 12)}: "omg sorry running 5 min late — actually 10. our prev is going long bc Brad raised something." At ${T(c, 23)} Marcus joins. The prev ran 53 minutes over. This meeting was scheduled to end at ${T(c, 30)}.`,
+        description: (s, c) => tr`Marcus DMs back at ${T(c, 12)}: "omg sorry running 5 min late — actually 10. our prev is going long bc Brad raised something." At ${T(c, 23)} Marcus joins. The prev ran 53 minutes over. This meeting was scheduled to end at ${T(c, 30)}.`,
         choices: [
           { label: 'Sigh, push to start', next: 'start' },
         ],
       },
       no_agenda: {
-        description: (s, c) => `Marcus searches his Slack DMs for the agenda. By the time he finds it, it's ${T(c, 23)}. The "30-minute sync" has now started 23 minutes late on a 30-minute booking.`,
+        description: (s, c) => tr`Marcus searches his Slack DMs for the agenda. By the time he finds it, it's ${T(c, 23)}. The "30-minute sync" has now started 23 minutes late on a 30-minute booking.`,
         choices: [
           { label: 'Sigh, push to start', next: 'start' },
         ],
       },
       start: {
-        description: (s, c) => `The meeting starts at ${T(c, 18)}. Marcus presents slide 1 of 8. At ${T(c, 35)} {bro} interrupts: "Wait — I have to drop at ${T(c, 30)} for another sync. Can we do the action items now?"`,
+        description: (s, c) => tr`The meeting starts at ${T(c, 18)}. Marcus presents slide 1 of 8. At ${T(c, 35)} {bro} interrupts: "Wait — I have to drop at ${T(c, 30)} for another sync. Can we do the action items now?"`,
         choices: [
           { label: '"We just started."', next: 'we_started' },
           { label: '"Sure, what action items?"', next: 'no_action_items' },
         ],
       },
       we_started: {
-        description: (s, c) => `Marcus: "Yeah we're only on slide 3. Maybe just stay 5 more minutes?" {bro} stays. At ${T(c, 42)} {bro} stands up: "I really have to go — can someone send me the recording? I trust whatever the room decides." {bro} leaves.`,
+        description: (s, c) => tr`Marcus: "Yeah we're only on slide 3. Maybe just stay 5 more minutes?" {bro} stays. At ${T(c, 42)} {bro} stands up: "I really have to go — can someone send me the recording? I trust whatever the room decides." {bro} leaves.`,
         choices: [
           { label: 'Continue without {bro}', next: 'without' },
         ],
       },
       no_action_items: {
-        description: (s, c) => `Marcus, flustered: "We — we haven't gotten there yet, that was going to be the last slide." {bro}: "OK, I'll catch up async then." {bro} leaves at ${T(c, 33)}. Marcus has lost his place in the deck.`,
+        description: (s, c) => tr`Marcus, flustered: "We — we haven't gotten there yet, that was going to be the last slide." {bro}: "OK, I'll catch up async then." {bro} leaves at ${T(c, 33)}. Marcus has lost his place in the deck.`,
         choices: [
           { label: 'Wait for Marcus to recover', next: 'without' },
         ],
@@ -2675,7 +2676,7 @@ export const EVENTS = [
         ],
       },
       circles: {
-        description: (s, c) => `For 25 minutes the conversation goes in circles. "We should ask {bro}." "{bro} just left." "Can someone Slack {bro}?" "{bro} is in their next meeting." "OK so we'll just — bring it to {bro} async." "...wasn't that what this meeting was for?"\n\nThe meeting ends at ${T(c, 44)}. Fourteen minutes over a 30-minute booking. Your next meeting was supposed to start at ${T(c, 30)}.`,
+        description: (s, c) => tr`For 25 minutes the conversation goes in circles. "We should ask {bro}." "{bro} just left." "Can someone Slack {bro}?" "{bro} is in their next meeting." "OK so we'll just — bring it to {bro} async." "...wasn't that what this meeting was for?"\n\nThe meeting ends at ${T(c, 44)}. Fourteen minutes over a 30-minute booking. Your next meeting was supposed to start at ${T(c, 30)}.`,
         choices: [
           { label: 'Pack up, you\'re late for your next one', effect: { focus: -2.5, burnout: 11, addUrgentFeature: true }, log: 'You were 14 minutes late to your next meeting. They had already started without you. You missed the only part relevant to your work. A follow-up ticket was assigned to you. Marcus assigned it.' },
         ],
@@ -3015,8 +3016,8 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          (s, c) => `A calendar invite drops at ${T(c, -13)} titled "[CEO + Eng] Agentic AI Kickoff — MANDATORY." It is at ${T(c)}. The location is the boardroom. The CEO is "personally invested" per Marcus. There is no agenda.`,
-          (s, c) => `CEO Slack to #engineering: "🚨 BIG ONE 🚨 — AI strategy kickoff at ${T(c, 13)}. Drop everything. Logan and the founder of an AI startup will be there. We're going to MOVE on this." The startup's name is "Synapsai." It was founded yesterday.`,
+          (s, c) => tr`A calendar invite drops at ${T(c, -13)} titled "[CEO + Eng] Agentic AI Kickoff — MANDATORY." It is at ${T(c)}. The location is the boardroom. The CEO is "personally invested" per Marcus. There is no agenda.`,
+          (s, c) => tr`CEO Slack to #engineering: "🚨 BIG ONE 🚨 — AI strategy kickoff at ${T(c, 13)}. Drop everything. Logan and the founder of an AI startup will be there. We're going to MOVE on this." The startup's name is "Synapsai." It was founded yesterday.`,
           'You walk into the office. There is catering. There is catering on a Tuesday. The CEO is holding a printed deck titled "AGENTIC EVERYTHING." Marcus is wearing a blazer over a hoodie.',
           'A Loom from the CEO at 6:14 AM: "I want to share what I have been thinking." The Loom is 22 minutes. It is mostly him pacing in front of a whiteboard with the word "AGENTIC" written 14 times in different fonts.',
         ],
@@ -3210,7 +3211,7 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          (s, c) => `Slack #announcements at ${T(c)}: "🎉 BIG NEWS — we're excited to announce that effective today, the product is now called 'Sparkflow.' (Formerly: Synergyse.) Comms will follow up with brand guidelines. Please update everything by Friday." Friday is in two days.`,
+          (s, c) => tr`Slack #announcements at ${T(c)}: "🎉 BIG NEWS — we're excited to announce that effective today, the product is now called 'Sparkflow.' (Formerly: Synergyse.) Comms will follow up with brand guidelines. Please update everything by Friday." Friday is in two days.`,
           'A 23-page brand guidelines PDF lands in your inbox. The new name is "Lumen." (Two competitors are also named Lumen.) You are asked to "update all internal references" by EOQ. There are 4,200 internal references.',
           'Email from the CMO: "We\'re sunsetting the Synergyse name in favor of \'Mosaic.\' Please update all docs, code references, customer-facing strings, and internal Slack channels. The new logo is attached. (.fig only.)"',
           'CEO Slack: "team — i had a vision on the peloton. we\'re renaming. \'Vibe.\' that\'s it. that\'s the product. branding is doing assets. eng team please go through the codebase. should be quick 🚀"',
@@ -3503,13 +3504,13 @@ export const EVENTS = [
       open: {
         descriptions: [
           'Sprint review. Marcus reads the sprint goal aloud from a slide he did not write. He reads it twice, because the first time it did not sound like a goal. The stakeholders nod. One of them asks for the thing that was descoped on day one. Marcus: "Great question." He turns to you. "Want to demo where we are?"',
-          (s, c) => `Sprint review at ${T(c)}. Eleven stakeholders. Four are "optional." All four came. The deck is titled "Sprint ${s.sprint} Review (FINAL) (v3)." Slide 2 is the sprint goal, edited since Monday to match what got built. Slide 3 says "DEMO" and has your name on it.`,
+          (s, c) => tr`Sprint review at ${T(c)}. Eleven stakeholders. Four are "optional." All four came. The deck is titled "Sprint ${s.sprint} Review (FINAL) (v3)." Slide 2 is the sprint goal, edited since Monday to match what got built. Slide 3 says "DEMO" and has your name on it.`,
           '"Quick review, no pressure, just show what we\'ve got." The VP of Sales has joined. He has brought a customer. The customer has brought a list. The top item on the list was descoped on Monday "to protect the sprint." Marcus looks at you. "Shall we demo?"',
           { text: 'Sprint review in the big room. The HDMI cable works, which is suspicious. The sprint goal is on the screen with a typo that has survived three reviews. A stakeholder asks whether the typo is a feature. Then they ask to see the thing nobody built. Then everyone looks at you. "Can we get a quick demo?"', requires: OFFICE },
           { text: 'Sprint review on Zoom. Marcus is sharing the wrong window: last sprint\'s retro board. Action item 3 reads "fewer surprises in reviews." A stakeholder asks for a surprise, specifically the feature that was descoped on day one. Marcus: "I\'ll let the team speak to that." The team is you. You are asked to share your screen and demo.', requires: REMOTE },
           'Sprint review. The agenda says "demo (10 min), feedback (5 min), next steps (5 min)." Feedback starts before the demo. Next steps started before the sprint. A director asks why the thing that was cut on Monday is not in the demo. Marcus: "Totally fair. Want to show where we are?"',
           'Sprint review. Marcus opens with a slide the assistant made from the sprint goal. It shows a feature the sprint did not contain, marked done, with a screenshot of a product that is not ours. A stakeholder asks to see that one. Marcus: "let\'s demo what\'s real." He looks at you.',
-          (s, c) => `Sprint review at ${T(c)}. Leadership has asked that every review "show how AI accelerated the sprint." The assistant was out of tokens for most of it. Marcus: "we'll speak to that in the demo." The demo is you. Nobody has told you what to speak to.`,
+          (s, c) => tr`Sprint review at ${T(c)}. Leadership has asked that every review "show how AI accelerated the sprint." The assistant was out of tokens for most of it. Marcus: "we'll speak to that in the demo." The demo is you. Nobody has told you what to speak to.`,
         ],
         choices: [
           { label: 'Demo what actually works', next: 'works' },
@@ -3546,7 +3547,7 @@ export const EVENTS = [
     requires: (s) => s.sprint >= 2,
     descriptions: [
       'Last retro\'s action item was "reduce meetings." It has become a weekly 60-minute meeting called Meeting Reduction Sync. There is a working group. The working group has a kickoff. You have been named the owner, because you raised it.',
-      (s, c) => `A calendar invite lands at ${T(c)}: "Meeting Reduction Sync (weekly)." Organizer: Marcus. Required: 9 people. Agenda: "align on the meeting reduction framework." The description thanks you for "championing this." You said one sentence in a retro. You are now the owner.`,
+      (s, c) => tr`A calendar invite lands at ${T(c)}: "Meeting Reduction Sync (weekly)." Organizer: Marcus. Required: 9 people. Agenda: "align on the meeting reduction framework." The description thanks you for "championing this." You said one sentence in a retro. You are now the owner.`,
       'Slack from Marcus: "great news, leadership loved the retro action item on meeting load! They want a recurring forum to track it." The forum is a meeting. It is weekly. It is yours. The first agenda item is choosing a name for the meeting.',
       'The retro board has been exported to a Confluence page titled "Action Items (Owned)." Item 1: "Reduce meetings. Owner: you. Status: In progress. Mechanism: weekly sync." The weekly sync has a pre-read. The pre-read is about the pre-read.',
       'Marcus: "quick one — since you flagged meeting fatigue, you\'re the natural owner for the Meeting Reduction Sync. It\'s only an hour a week. Plus the prep. Plus the follow-ups. Plus a short readout at the all-hands." That is four meetings about fewer meetings.',
@@ -3565,13 +3566,13 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          (s) => `Planning poker on "${pokerTitle(s)}". Marcus, before anyone votes: "I was thinking 3?" Everyone reveals. Everyone shows 8. Marcus: "Interesting. So, 3?"`,
-          (s) => `Poker. The ticket is "${pokerTitle(s)}". The tool is the new one, where the cards take four seconds to flip. Marcus flips first: 3. Then he says "no peeking!" Everyone else flips: 8, 8, 8, 13. Marcus: "Let's split the difference. 3."`,
-          (s) => `Marcus opens "${pokerTitle(s)}" and says "gut feel, no overthinking. I'm hearing 3 from the business side." Nobody from the business side is in the call. The reveal is a wall of 8s. Marcus types 3 into the field and says "we can always re-estimate."`,
-          (s, c) => `Poker at ${T(c)}. "${pokerTitle(s)}" comes up. {dev}: "that's the one with the migration, right?" Marcus: "Tiny migration. I was thinking 3." Reveal: 8, 8, 8, and a "?" from the one person who read the ticket. Marcus logs a 3.`,
-          (s) => `Planning poker. "${pokerTitle(s)}". {bro} from sales has joined "to listen" and votes 2. Engineers vote 8. Marcus averages the room, listener included, and gets "about a 3." The tool does not support decimals, which is the only thing stopping him.`,
-          (s) => `Poker on "${pokerTitle(s)}". Marcus has given the assistant a vote. It says 8, then reaches the limit mid-explanation. Marcus: "it was trending toward 3." Everyone else reveals: 8. Marcus logs the trend. 3.`,
-          (s) => `Planning poker. "${pokerTitle(s)}". Marcus: "the AI dashboard says tickets like this average a 3 now, with acceleration." The acceleration is a column someone typed. Reveal: 8, 8, 8, 13. Marcus: "pre-acceleration numbers. So, 3."`,
+          (s) => tr`Planning poker on "${pokerTitle(s)}". Marcus, before anyone votes: "I was thinking 3?" Everyone reveals. Everyone shows 8. Marcus: "Interesting. So, 3?"`,
+          (s) => tr`Poker. The ticket is "${pokerTitle(s)}". The tool is the new one, where the cards take four seconds to flip. Marcus flips first: 3. Then he says "no peeking!" Everyone else flips: 8, 8, 8, 13. Marcus: "Let's split the difference. 3."`,
+          (s) => tr`Marcus opens "${pokerTitle(s)}" and says "gut feel, no overthinking. I'm hearing 3 from the business side." Nobody from the business side is in the call. The reveal is a wall of 8s. Marcus types 3 into the field and says "we can always re-estimate."`,
+          (s, c) => tr`Poker at ${T(c)}. "${pokerTitle(s)}" comes up. {dev}: "that's the one with the migration, right?" Marcus: "Tiny migration. I was thinking 3." Reveal: 8, 8, 8, and a "?" from the one person who read the ticket. Marcus logs a 3.`,
+          (s) => tr`Planning poker. "${pokerTitle(s)}". {bro} from sales has joined "to listen" and votes 2. Engineers vote 8. Marcus averages the room, listener included, and gets "about a 3." The tool does not support decimals, which is the only thing stopping him.`,
+          (s) => tr`Poker on "${pokerTitle(s)}". Marcus has given the assistant a vote. It says 8, then reaches the limit mid-explanation. Marcus: "it was trending toward 3." Everyone else reveals: 8. Marcus logs the trend. 3.`,
+          (s) => tr`Planning poker. "${pokerTitle(s)}". Marcus: "the AI dashboard says tickets like this average a 3 now, with acceleration." The acceleration is a column someone typed. Reveal: 8, 8, 8, 13. Marcus: "pre-acceleration numbers. So, 3."`,
         ],
         choices: [
           { label: '"It is an 8. Every engineer said 8."', next: 'hold' },
@@ -3604,7 +3605,7 @@ export const EVENTS = [
       'Marcus pastes a link in the channel: "DoD v7 — please read, effective immediately, applies retroactively." Retroactively means your open tickets. Each one now needs a threat model, an a11y checklist and a "decision record." The decision record template has a required field called "decision." It is 200 characters max.',
       'All-team Slack: "To raise our quality bar, Definition of Done v7 adds three lightweight gates." The three lightweight gates are three reviews by two people who are on leave. The gates apply to everything already in flight. The message ends with a 🎉.',
       'A pinned message from the Quality Guild: "v7 of the DoD simplifies the process." v6 had four gates. v7 has seven, each "simplified." The approvers are listed. Two are on sabbatical. One left in March. One is a Slack bot that answers "LGTM" to everything, which is the only working part of the process.',
-      (s, c) => `At ${T(c)} the Definition of Done changed under you. v7 adds an accessibility sign-off, a security sign-off and a documentation page per ticket. The sign-off form asks for the ticket's Confluence page. The Confluence template asks for the sign-off. Nobody has reviewed the process for circularity. There is no gate for that.`,
+      (s, c) => tr`At ${T(c)} the Definition of Done changed under you. v7 adds an accessibility sign-off, a security sign-off and a documentation page per ticket. The sign-off form asks for the ticket's Confluence page. The Confluence template asks for the sign-off. Nobody has reviewed the process for circularity. There is no gate for that.`,
       'Definition of Done v7 arrives with an eighth gate, "AI acceleration statement," and a ninth, "AI-free attestation (Legal)." Every ticket needs both. The accessibility reviewer is still on leave. The security reviewer is now the assistant, which is out of tokens. v7 is "in effect." Nothing can be done, officially.',
     ],
     choices: [
@@ -3623,7 +3624,7 @@ export const EVENTS = [
       open: {
         descriptions: [
           'A transformation consultant has been engaged "to help the team scale agile." {coach} has a lanyard and a framework. The framework has a train. The train has a two-day planning event in a hotel with no Wi-Fi, next week, attendance "strongly voluntary." Your sprint commitment is unchanged.',
-          (s, c) => `All-team invite at ${T(c)}: "Agile Transformation Kickoff with {coach}." {coach} opens with "I'm not here to add process." Slide 4 is the process. It has 23 ceremonies. One of them is the ceremony for retiring ceremonies. It has never been held. The first real one is a two-day planning offsite.`,
+          (s, c) => tr`All-team invite at ${T(c)}: "Agile Transformation Kickoff with {coach}." {coach} opens with "I'm not here to add process." Slide 4 is the process. It has 23 ceremonies. One of them is the ceremony for retiring ceremonies. It has never been held. The first real one is a two-day planning offsite.`,
           '{coach}, the new agile coach, introduces himself by asking everyone for "one word for how the team feels." Eleven people say "fine." He writes FINE on a sticky note and says "we have work to do." The work is a two-day planning offsite. Your tickets are not invited.',
           'A deck titled "Scaling Agile @ Initech." {coach} explains that the team will join a "release train." The train has a "train engineer." The train engineer is Marcus. The first stop is a two-day planning event in a conference hotel with a "no laptops" rule and a "bring your laptop" reminder.',
           '{coach} has been with the company for four days and has already renamed the sprint. It is now an "iteration." The standup is a "daily sync." The retro is "inspect and adapt." Nothing else changed. He has booked two days in a hotel to plan the next ten weeks. The room has no Wi-Fi, so people can "be present."',
@@ -3664,7 +3665,7 @@ export const EVENTS = [
     requires: (s) => s.sprint >= 3,
     descriptions: [
       'A chart of your velocity is in the leadership deck, next to a team of twelve. Your line is lower. Nobody normalized by headcount because the deck is "directional." Marcus: "They\'d love us to commit to 20% more next sprint. We believe in you."',
-      (s) => `"Velocity Review — Sprint ${s.sprint}." A director shares a chart with two lines. One is your team. One is "Platform (12 engineers)." The axes are unlabeled. The conclusion is labeled: "Commit +20%." Marcus, in chat: "we got this 💪".`,
+      (s) => tr`"Velocity Review — Sprint ${s.sprint}." A director shares a chart with two lines. One is your team. One is "Platform (12 engineers)." The axes are unlabeled. The conclusion is labeled: "Commit +20%." Marcus, in chat: "we got this 💪".`,
       'Marcus forwards a slide from the ops review. Title: "Velocity Opportunity." It is your burn chart with a dotted line drawn 20% higher in PowerPoint. The dotted line is called "ambition." The ask is to hit the dotted line. It was drawn by someone who has never seen a ticket.',
       'The velocity audit found your points per sprint are "below peer." The peer is a team that logs every 8 as a 3. The recommendation is to commit to 20% more. The recommendation does not mention the 3s. Marcus: "Honestly, it\'s a compliment. They think we can."',
       'A "data-driven" review. The data is story points, which the same deck calls "not a measure of productivity" on slide 2 and uses as one on slides 3 through 19. Slide 20: "Team commits to +20%." The slide was made before the meeting. The meeting is to agree with it.',
@@ -3682,7 +3683,7 @@ export const EVENTS = [
     requires: (s) => s.currentDay === 3 && s.sprintPlan.some(t => !t.shipped && t.progress > 0),
     descriptions: [
       'Wednesday. Marcus: "Small update from leadership: the sprint goal is now the other thing." The tickets are the same tickets. The goal is a different goal. He asks everyone to "re-anchor." Nobody knows what the other thing is yet. It will be in a doc.',
-      (s, c) => `${T(c)}, day three. A Slack announcement: "Sprint goal updated ✏️." The new goal is a sentence from the CEO's all-hands, pasted whole. It contains the word "delight." Your in-progress ticket does not delight anyone. It is now "off-goal."`,
+      (s, c) => tr`${T(c)}, day three. A Slack announcement: "Sprint goal updated ✏️." The new goal is a sentence from the CEO's all-hands, pasted whole. It contains the word "delight." Your in-progress ticket does not delight anyone. It is now "off-goal."`,
       'Marcus edits the sprint goal in place. The board keeps history. Monday: "Ship the export." Wednesday: "Enable growth through platform excellence." The tickets did not change. The way they are judged did. The retro will praise the team\'s adaptability.',
       'A new pinned message: "Mid-sprint goal refresh — same tickets, new focus 🎯." The new focus is the opposite of the old focus. {bro} from sales reacts with 🚀. The ticket you have spent two days on is now "a distraction from the goal."',
       'Marcus, apologetic: "I know we\'re mid-sprint. Leadership re-prioritized. The goal is now the other thing. The tickets don\'t change, we just... emphasize differently." The emphasis is that your most-progressed ticket is the wrong one.',
@@ -3698,7 +3699,7 @@ export const EVENTS = [
     requires: (s) => s.currentDay === 3,
     descriptions: [
       'No-Meeting Wednesday was announced in a meeting. Your Wednesday now holds an "exception sync," a "quick alignment" and the retrospective on No-Meeting Wednesday. All three have "[no-meeting]" in the invite title, in brackets, as a courtesy.',
-      (s, c) => `It is Wednesday, ${T(c)}. The calendar is clear, as promised. Then three invites arrive in one minute: "[NMW exception] Sync," "[NMW exception] Quick alignment," and "[NMW] Retro on No-Meeting Wednesday." The last one is 90 minutes.`,
+      (s, c) => tr`It is Wednesday, ${T(c)}. The calendar is clear, as promised. Then three invites arrive in one minute: "[NMW exception] Sync," "[NMW exception] Quick alignment," and "[NMW] Retro on No-Meeting Wednesday." The last one is 90 minutes.`,
       'Slack from Marcus: "Reminder: No-Meeting Wednesday 🙌 — protecting focus time! (Two small exceptions today, plus a short one to discuss how NMW is going.)" The short one is longer than the two exceptions combined.',
       'No-Meeting Wednesday has a steering committee. It meets on Wednesdays. Today\'s agenda: "exception policy," "alignment on alignment," and "NMW retro." Attendance is "optional (please attend)." {doug} has already replied-all asking whether the exception sync counts as a meeting.',
       'The "focus day" has arrived. It has a kickoff. The kickoff is a meeting. It is followed by a "working session," which is a meeting with laptops, and a "retro on focus day," which is a meeting about the meeting. All three invites say "no agenda, just vibes."',
@@ -3723,11 +3724,11 @@ export const EVENTS = [
       open: {
         descriptions: [
           'Staging was reset last night "for the sales demo." Your test data is gone. The demo is at 2 PM, on staging, using your half-finished feature, with a sticker over the broken button. The sticker says "coming soon." {bro} put it there.',
-          (s, c) => `A message in #platform at ${T(c)}: "Heads up, staging has been wiped and re-seeded for a customer demo 🙏 please don't deploy until EOD." Your test data was on staging. Your branch is deployed to staging. The customer will see your branch. The branch has a button that does nothing.`,
+          (s, c) => tr`A message in #platform at ${T(c)}: "Heads up, staging has been wiped and re-seeded for a customer demo 🙏 please don't deploy until EOD." Your test data was on staging. Your branch is deployed to staging. The customer will see your branch. The branch has a button that does nothing.`,
           'The staging environment has a booking calendar now. It is fully booked by sales through Thursday. Your slot is "Friday, 7 AM to 7:30 AM." Your test data was deleted during the re-seed. The demo running right now is clicking through your feature and narrating the parts that do not exist yet.',
           'Staging is "frozen for a demo." Frozen means someone restored a two-week-old snapshot over it. Your fixtures are gone. Your migration is gone. Your feature is half there, which is the half {bro} is showing a prospect right now, from the slide that says "live in production."',
           'Platform: "Reminder that staging is a shared resource 🙂 We reset it nightly now." Nobody was reminded before the first reset. Your test data lasted eleven hours. Sales has booked staging for the afternoon, for a demo of the feature you have not finished, with the broken button hidden behind the presenter\'s cursor.',
-          (s, c) => `Staging was wiped at ${T(c, -45)} by the assistant, which was asked to "tidy up the test data" and tidied all of it, yours included. Sales has booked staging for a demo of "the AI feature," which is your half-finished feature, with the assistant narrating the parts that do not exist yet. The assistant is out of tokens, so {bro} will narrate.`,
+          (s, c) => tr`Staging was wiped at ${T(c, -45)} by the assistant, which was asked to "tidy up the test data" and tidied all of it, yours included. Sales has booked staging for a demo of "the AI feature," which is your half-finished feature, with the assistant narrating the parts that do not exist yet. The assistant is out of tokens, so {bro} will narrate.`,
         ],
         choices: [
           { label: 'Rebuild the test data', effect: { focus: -2, burnout: 2 }, log: 'Two hours of seeding, by hand, from a script that "used to work." The data will be wiped again tonight. You know that now. You will do it again tomorrow.' },
@@ -3756,7 +3757,7 @@ export const EVENTS = [
     title: 'The CI queue',
     descriptions: [
       'You push. The pipeline runs the full suite on every change, including the README. The queue is two hours. There is a fast lane. The fast lane needs a ticket. The ticketing system is down.',
-      (s, c) => `Pushed at ${T(c)}. Position in queue: 41. Estimated start: ${T(c, 118)}. Ahead of you: a typo fix, a branch called "test-do-not-merge" that has been merging for three weeks, and a nightly job that runs at noon.`,
+      (s, c) => tr`Pushed at ${T(c)}. Position in queue: 41. Estimated start: ${T(c, 118)}. Ahead of you: a typo fix, a branch called "test-do-not-merge" that has been merging for three weeks, and a nightly job that runs at noon.`,
       'The CI queue is two hours because someone added a "quick smoke test" that spins up the whole platform, per commit, per branch. The person who added it has left. The test has never found anything. Removing it needs a change, which needs CI, which is a two-hour queue.',
       'Pipeline status: "queued (runner capacity)." Runner capacity was cut "for cost reasons" in the same email that announced the "ship daily" initiative. The email had a rocket emoji. The queue has a two-hour ETA and a rocket emoji.',
       'Your PR has been waiting for a runner for 90 minutes. The runners are busy running the pipeline for a bot that updates the pipeline. The bot\'s PR is also waiting for a runner. {dev} has started a thread about it, titled "CI (again)." It has 212 messages and no owner.',
@@ -3773,7 +3774,7 @@ export const EVENTS = [
     title: 'Please sign in again',
     descriptions: [
       'IT shortened the SSO session to 15 minutes "for security." Every tool logs you out mid-command. The terminal, the wiki, the ticket tracker, the tool that lets you ask IT about it. The MFA app wants your face. Your face is tired.',
-      (s, c) => `${T(c)}: signed out. ${T(c, 15)}: signed out. ${T(c, 30)}: signed out of a page that was telling you how to stay signed in. The security announcement calls this "frictionless."`,
+      (s, c) => tr`${T(c)}: signed out. ${T(c, 15)}: signed out. ${T(c, 30)}: signed out of a page that was telling you how to stay signed in. The security announcement calls this "frictionless."`,
       'A new security posture: "zero trust." It means every tool trusts you for a quarter of an hour. Your deploy script needs four tools. It takes sixteen minutes. The last tool asks you to sign in again, and the deploy starts over, and so do you.',
       'Slack from IT: "You may notice more frequent sign-in prompts today. This is expected and improves our security score 🔒." The security score is a number on a dashboard. The dashboard needs you to sign in. Twice.',
       'The password manager has logged you out. Its password is in the password manager. The recovery email went to an inbox that needs SSO. SSO needs the MFA app. The MFA app needs a Wi-Fi network that needs SSO. You write your password on a sticky note, which is the thing the policy was for.',
@@ -3788,7 +3789,7 @@ export const EVENTS = [
     title: 'Feature flags are down',
     descriptions: [
       'The flag service is unreachable. Every flag is now its default. Your feature\'s default is on in production and off in staging, because the defaults were set by two different people in two different years. Customers are seeing a thing nobody has tested. Testers cannot see it at all.',
-      (s, c) => `At ${T(c)} the feature-flag service stopped answering. Every flag fell back to its default. Yours defaults to on in prod, "for the demo," and off everywhere else, "for safety." The safe environments are safe. The customers are the demo.`,
+      (s, c) => tr`At ${T(c)} the feature-flag service stopped answering. Every flag fell back to its default. Yours defaults to on in prod, "for the demo," and off everywhere else, "for safety." The safe environments are safe. The customers are the demo.`,
       'Platform: "flag service is degraded, flags may evaluate to defaults 🙏." The defaults were written in 2023 by someone optimising for a different product. Your half-built feature has a default of "true," written as a placeholder, in a file nobody reads, which is now the only file that matters.',
       'The flag service is down. The runbook says to flip the flags in the admin UI. The admin UI is behind a flag. Someone suggests deploying with the flag hard-coded off. Deploys are gated on a flag check. The gate is down, so deploys are, cautiously, also off.',
       'The flag vendor had an outage. Their status page says "operational." Your feature is live for everyone in production and invisible on staging. Support has questions. QA has a different set of questions. Neither set can be answered without the flag service.',
@@ -3803,7 +3804,7 @@ export const EVENTS = [
     title: 'Mandatory update: "about 7 minutes"',
     descriptions: [
       'A dialog: "Your device must restart to install a required security update. Estimated time: 7 minutes." There is no "later." There was a "later" yesterday. You pressed it. The update remembers.',
-      (s, c) => `${T(c)}. "Restarting in 60 seconds to apply a required update." Your terminal has a change you have not committed. Your editor has a tab you have not saved. The countdown does not care about either. Estimated time: 7 minutes. It will be 90.`,
+      (s, c) => tr`${T(c)}. "Restarting in 60 seconds to apply a required update." Your terminal has a change you have not committed. Your editor has a tab you have not saved. The countdown does not care about either. Estimated time: 7 minutes. It will be 90.`,
       'IT pushed an update "with no user impact." The user impact is a forced restart, a 90-minute "optimising your apps" bar, and a new default browser. The browser is the one with the AI sidebar. The sidebar opens on every page. It wants to summarise your terminal.',
       'The device management tool has decided it is time. "Installing update 1 of 4." Each one needs a restart. Each restart needs your password, which is in the password manager, which needs the update to finish. The progress bar reaches 100% and starts over, as a courtesy.',
       { text: 'The laptop restarts itself in the middle of a sentence. On the lock screen: "Working on updates. 3%. Do not turn off your computer." Your branch had uncommitted changes. The office has a loaner laptop. It is a 2019 model with the previous version of everything, including the update.', requires: OFFICE },
@@ -3824,7 +3825,7 @@ export const EVENTS = [
       open: {
         descriptions: [
           'A scanner has been enabled "to shift security left." It flags 312 findings in legacy code and blocks every PR until they are fixed, including the PR that tunes the scanner. The security team\'s dashboard shows the number going up. They are pleased with the visibility.',
-          (s, c) => `Since ${T(c)}, every PR is blocked by a new "security gate." It found 312 issues, 300 of them in a vendored library from 2019 and 12 in the scanner's own config file. The fix for the config file is a PR. The PR is blocked by the gate.`,
+          (s, c) => tr`Since ${T(c)}, every PR is blocked by a new "security gate." It found 312 issues, 300 of them in a vendored library from 2019 and 12 in the scanner's own config file. The fix for the config file is a PR. The PR is blocked by the gate.`,
           'Security: "Great news, we\'ve enabled continuous scanning on all repos 🛡️." Continuous means every push. The scan takes 25 minutes and fails on the test fixtures, which contain the string "password" as a test of the password field. Every PR is red. The scanner has a PR to fix this. It is red.',
           'A "shift-left" initiative has landed a scanner in CI. It has found 312 things. It has blocked merging. The security team offers a two-hour "findings triage workshop" to "empower" the team. The workshop is next Tuesday. Merging is today.',
           'The new scanner has flagged your PR for "hard-coded secret." The secret is the word "example" in a comment. It also flagged the README, the license, and itself. {dev} tried to suppress the finding. The suppression file is flagged for "disabling security controls." The scanner is now reviewing its own review. Nothing merges.',
@@ -3850,7 +3851,7 @@ export const EVENTS = [
     title: 'The channel has moved',
     descriptions: [
       'The team channel is now called #team-platform-v2-final-use-this-one. History was not migrated. The pinned onboarding doc links to the old channel. The old channel is archived, which means you can read it but nobody will answer. Three people are still posting there.',
-      (s, c) => `At ${T(c)} a bot announces: "This channel is being migrated to the new workspace structure 🎉 Please move to #eng-team-platform-2." The link goes to a channel with no members. The old channel will be archived "at EOD." The thread with the deploy steps is in the old channel. It is not pinned. It never was.`,
+      (s, c) => tr`At ${T(c)} a bot announces: "This channel is being migrated to the new workspace structure 🎉 Please move to #eng-team-platform-2." The link goes to a channel with no members. The old channel will be archived "at EOD." The thread with the deploy steps is in the old channel. It is not pinned. It never was.`,
       'Workspace re-org. Every channel has a new prefix, a new owner, and no history. The announcement is in the old channel, which you can no longer post in. The new channel\'s description says "see old channel for context."',
       'IT consolidated "redundant" channels. The on-call channel and the bake-sale channel have been merged, because they had "similar membership." The runbook link now resolves to a photo of a lemon drizzle. The lemon drizzle has 14 reactions.',
       'Slack: "#team-platform has been renamed to #team-platform-OLD-DO-NOT-USE." A new channel exists. Its name is #team-platform. It is empty. The thread that explained why the deploy script needs the VPN is in the OLD-DO-NOT-USE one. {jin} is searching for it. {jin} has been searching for forty minutes.',
@@ -3873,7 +3874,7 @@ export const EVENTS = [
       open: {
         descriptions: [
           'A postmortem for last week\'s outage. The template says "blameless" in the title, in bold. Slide 3 is "Timeline (who did what)." Slide 4 is "Root cause: human error." Slide 5 has a photo of the human. The human is in the room. The runbook the timeline says "should have been followed" is a link to a page called "Runbook (TODO)."',
-          (s, c) => `Postmortem at ${T(c)}. The facilitator opens with "this is a blameless space." The first question, from a director, is "so who approved the deploy?" The facilitator writes the name on the whiteboard, under the word BLAMELESS, which is still there from the previous postmortem. Action item one: "follow the runbook." There is no runbook.`,
+          (s, c) => tr`Postmortem at ${T(c)}. The facilitator opens with "this is a blameless space." The first question, from a director, is "so who approved the deploy?" The facilitator writes the name on the whiteboard, under the word BLAMELESS, which is still there from the previous postmortem. Action item one: "follow the runbook." There is no runbook.`,
           'The incident review doc, from the template "Blameless Postmortem v3," has a section called "Contributing factors (no names)." The contributing factors are three names. The "action items" section says "be more careful" and "follow the runbook." The runbook link is a 404. It is assigned to one of the names.',
           '"Blameless postmortem" is on the calendar. Blameless, it turns out, means nobody will be fired in the meeting. The meeting has a slide titled "Accountability." It is a list of people, sorted by seniority, ascending, which is the order in which they will be asked why the runbook was not followed. The runbook does not exist.',
           'The postmortem template was updated by the Quality Guild to be "truly blameless." Names have been replaced with roles: "the engineer who merged it," "the engineer who reviewed it," "the engineer who was on call." There are three engineers on the team. {dev} has already worked out which one they are. All three roles "should have consulted the runbook." Nobody has seen the runbook.',
@@ -3899,7 +3900,7 @@ export const EVENTS = [
     requires: (s) => s.sprint >= 2,
     descriptions: [
       'Three days a week in the office, "for collaboration." Your team is in another time zone. You commuted fifty minutes to take video calls alone, in a phone booth, with the person you would have called from home. The booths are all booked. By people on video calls.',
-      (s, c) => `RTO day. Badge-in recorded at ${T(c)}, the dashboard says, with a green tick. The floor is a sea of empty desks and one person on a call with their camera off. Every booth is booked until 5 PM. The booking app offers you "Thursday, 7:30 AM." You have four calls today.`,
+      (s, c) => tr`RTO day. Badge-in recorded at ${T(c)}, the dashboard says, with a green tick. The floor is a sea of empty desks and one person on a call with their camera off. Every booth is booked until 5 PM. The booking app offers you "Thursday, 7:30 AM." You have four calls today.`,
       'Facilities has sent a cheerful email about "the energy of being together." The energy is nine people on nine separate video calls at adjacent desks, each hearing the other eight. The booths are full. The "quiet zone" has a sales standup in it. You have four calls today.',
       'In-office day. Your 1:1 is on Zoom, because your manager is remote today. Your standup is on Zoom, because the team is remote. The one in-person interaction is {doug}, who wants to talk about the kitchen. Every phone booth is booked, by people taking calls with people at home. You have four calls.',
       'The collaboration day. The office has been "reconfigured for collaboration," which means the desks are closer together and the booths have been converted into a "collaboration pod" that seats six and is booked by sales until Friday. You have four calls and nowhere to take them.',
@@ -3915,7 +3916,7 @@ export const EVENTS = [
     requires: (s) => s.currentDay === 5,
     descriptions: [
       'Timesheets are due by noon. Every hour needs a project code. Meetings have no project code. "Other" is rejected by the form. "Admin" is capped at one hour. You had six hours of meetings this week and one hour of admin, and the form wants to know what you were really doing.',
-      (s, c) => `A reminder at ${T(c)}: "Timesheets due 12:00 — thanks for your accuracy!" The timesheet tool has 41 project codes. None of them is "the meeting about the timesheet tool." The tool times out after ten minutes of inactivity. Reading the code list takes eleven.`,
+      (s, c) => tr`A reminder at ${T(c)}: "Timesheets due 12:00 — thanks for your accuracy!" The timesheet tool has 41 project codes. None of them is "the meeting about the timesheet tool." The tool times out after ten minutes of inactivity. Reading the code list takes eleven.`,
       'Finance has rolled out "activity-based time tracking" so leadership can "see where the time goes." The time goes to meetings. Meetings are not a category. The guidance doc says to "allocate meeting time to the project it most benefits." No project benefits from the meetings.',
       'The timesheet rejects your week: "Hours (38) do not match contracted hours (40)." You add two hours of "Other." Rejected: "Other requires a justification." You write "meetings." Rejected: "Please select a project." The dashboard will say whichever project you pick is over budget.',
       'Friday, timesheet day. {jin} at the next desk is on their third attempt. The form has a new mandatory field: "Value delivered (1-5)." For the sprint goal change meeting, {jin} enters 1. The form says "Please enter a value between 3 and 5." {jin} enters 3. The form thanks them for their honesty.',
@@ -3931,7 +3932,7 @@ export const EVENTS = [
     title: 'Phishing simulation',
     descriptions: [
       'You report the "urgent invoice" email, as trained. It was the real CFO. The real invoice is now 48 hours late. Security thanks you for your vigilance and assigns you a training module for reporting a real email, which the module calls "a false positive event."',
-      (s, c) => `An email at ${T(c)}: "URGENT: action required on your account." You hover over the link, as trained. It goes to the real HR system. You report it anyway, as trained. It was the real HR system, with a real deadline, which you have now missed. Security awards you a "Vigilant" badge and a 25-minute module.`,
+      (s, c) => tr`An email at ${T(c)}: "URGENT: action required on your account." You hover over the link, as trained. It goes to the real HR system. You report it anyway, as trained. It was the real HR system, with a real deadline, which you have now missed. Security awards you a "Vigilant" badge and a 25-minute module.`,
       'The quarterly phishing test. You passed, by ignoring an email that turned out to be the test. You also ignored the real onboarding email for the new expense tool, which looked identical. Your expenses are rejected. Security has assigned everyone a module anyway, "to keep sharp."',
       'Security sends a company-wide email: "Congratulations, 94% of you spotted this quarter\'s simulation!" The email asks you to click a link to see your score. Half the company reports the email. Security assigns the half that reported it a module on "recognising legitimate communications." You are in that half.',
       'You click "Report phishing" on an email about mandatory phishing training. The email was legitimate. The training is now mandatory and overdue. Its first lesson is "when in doubt, report it." You are in doubt. You report the training. The system is "looking into it." The module is still assigned.',
@@ -3951,7 +3952,7 @@ export const EVENTS = [
       open: {
         descriptions: [
           'Performance season. The self-assessment form is "designed to be lightweight": nine sections, 2,000 characters each, due Friday. The form times out after twenty minutes and does not save. There is a "save draft" button. It is decorative.',
-          (s, c) => `HR, at ${T(c)}: "Your self-assessment is open! Keep it brief 🙂 Due Friday." Brief is nine sections. Each has a prompt like "Describe your impact against the leadership principles, with examples." The principles were updated last week. The old ones are still in the form. The form logs you out every twenty minutes.`,
+          (s, c) => tr`HR, at ${T(c)}: "Your self-assessment is open! Keep it brief 🙂 Due Friday." Brief is nine sections. Each has a prompt like "Describe your impact against the leadership principles, with examples." The principles were updated last week. The old ones are still in the form. The form logs you out every twenty minutes.`,
           'The self-assessment tool wants "three examples of exceeding expectations" per value. There are eight values. The tool has a word count minimum and a twenty-minute session. Due Friday. Your manager has told you, kindly, that "it mostly doesn\'t matter," and also that calibration is based on it.',
           'Self-assessment season. The guidance says "be concise." The form rejects sections under 500 characters. It also rejects sections over 2,000. It also logs you out every twenty minutes, taking the section with it. Due Friday. It is a review of your resilience.',
           'Performance review time. Your manager will "mostly copy from your self-assessment," so it had better be good. The form is in a tool that only works in one browser, which is not the browser IT installed last week. Nine sections, Friday, no saving, twenty minutes a session.',
@@ -3977,7 +3978,7 @@ export const EVENTS = [
     requires: (s) => s.sprint >= 2 && s.currentDay <= 3,
     descriptions: [
       'Two days of "innovation time," announced the same week as the release. The sprint commitment is unchanged. Attendance is "strongly encouraged," which is a phrase with a dashboard. Prizes are stickers. The judges are the people who set the release date.',
-      (s, c) => `A calendar block from ${T(c)}: "HACKATHON 🚀 (2 days)." Underneath, in the description: "Note: sprint deliverables are not affected." They are not affected in the sense that they are still due. The hackathon has a theme. The theme is "velocity."`,
+      (s, c) => tr`A calendar block from ${T(c)}: "HACKATHON 🚀 (2 days)." Underneath, in the description: "Note: sprint deliverables are not affected." They are not affected in the sense that they are still due. The hackathon has a theme. The theme is "velocity."`,
       'The hackathon kickoff. "No managers, no tickets, just building!" The CTO then presents a list of "suggested problem areas," which is the roadmap. Teams that pick a roadmap item get "priority support." Teams that do not get a sticker. The sprint is still the sprint. The demos are tomorrow at five.',
       'Hackathon week. The company has rented a space with beanbags. The beanbags are for "ideation." Ideation is scheduled: 9:00 to 9:30. Building is 9:30 to 17:00, today and tomorrow. Demos are tomorrow at 17:00. The demo that wins will be "parked" by Monday. The release is Thursday. Nobody has moved the release.',
       '"Two days to build anything you want!" says the invite. "Please align your project with Q3 OKRs," says the follow-up. "Attendance is optional," says HR. "Visible non-participation will be reflected in the engagement survey," says nobody, out loud, in a way you can quote. Demos are tomorrow at five.',
@@ -4002,8 +4003,8 @@ export const EVENTS = [
     nodes: {
       open: {
         descriptions: [
-          (s, c) => `An all-hands slide, forwarded by Marcus at ${T(c, -25)}: "AI-FIRST BY Q3." Every ticket must now state "how AI accelerated it." The approved assistant has a token budget per team per day. It is ${T(c)}. The budget ran out at ${T(c, -5)}.`,
-          (s, c) => `Email from the CTO: "Effective today, we are an AI-first engineering org." Attached: a 40-page "AI acceleration playbook," written by the assistant. The assistant is now rate-limited per team, per day. The team found the limit at ${T(c, -10)}. It is ${T(c)}.`,
+          (s, c) => tr`An all-hands slide, forwarded by Marcus at ${T(c, -25)}: "AI-FIRST BY Q3." Every ticket must now state "how AI accelerated it." The approved assistant has a token budget per team per day. It is ${T(c)}. The budget ran out at ${T(c, -5)}.`,
+          (s, c) => tr`Email from the CTO: "Effective today, we are an AI-first engineering org." Attached: a 40-page "AI acceleration playbook," written by the assistant. The assistant is now rate-limited per team, per day. The team found the limit at ${T(c, -10)}. It is ${T(c)}.`,
           'Marcus, beaming, in the channel: "big news — we have an approved assistant now! Every ticket needs a \'how AI helped\' field from today." Below it, from IT: "Reminder: the team token budget is shared. Please use it responsibly." Below that, Brad: "lol already out."',
           'A new required field on every ticket: "AI acceleration (describe)." A new banner in the assistant: "Your team has used 100% of today\'s budget." A new slide in the all-hands deck: "AI adoption: 100%." All three are true.',
         ],

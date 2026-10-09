@@ -4,6 +4,7 @@ import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { Desk } from './Desk.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
+import { tr } from '../../i18n/index.js';
 
 const SlackPing = ({ x, y }) => (
   <g transform={`translate(${x} ${y})`}>
@@ -14,9 +15,9 @@ const SlackPing = ({ x, y }) => (
 
 export const OfficeOverview = ({ activeArea, burnout = 0 }) => {
   const noiseLine =
-    burnout > 80 ? 'STATUS: STRAINED · NOISE FLOOR: HOSTILE · COFFEE: COLD' :
-    burnout > 50 ? 'STATUS: TENSE · NOISE FLOOR: HIGH · COFFEE: COLD' :
-    'STATUS: NORMAL · NOISE FLOOR: HIGH · COFFEE: COLD';
+    burnout > 80 ? tr`STATUS: STRAINED · NOISE FLOOR: HOSTILE · COFFEE: COLD` :
+    burnout > 50 ? tr`STATUS: TENSE · NOISE FLOOR: HIGH · COFFEE: COLD` :
+    tr`STATUS: NORMAL · NOISE FLOOR: HIGH · COFFEE: COLD`;
 
   return (
   <svg viewBox="0 0 600 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
@@ -26,12 +27,12 @@ export const OfficeOverview = ({ activeArea, burnout = 0 }) => {
       <rect x="2" y="2" width="596" height="176" fill={C.burnout} opacity={Math.min(0.08, (burnout - 60) / 500)}/>
     )}
 
-    <text x="10" y="13" fontSize="6" fontFamily={FONT} fill={C.textDimmer} letterSpacing="2">FLOOR 14 · "INNOVATION HUB" · OPEN PLAN</text>
+    <text x="10" y="13" fontSize="6" fontFamily={FONT} fill={C.textDimmer} letterSpacing="2">{tr`FLOOR 14 · "INNOVATION HUB" · OPEN PLAN`}</text>
     {/* Wall signage in the empty top strip between the floor label and the meeting rooms */}
     <g transform="translate(348 2)">
       <InitechLogo width={18}/>
     </g>
-    <text x="20" y="30" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">ENGINEERING POD</text>
+    <text x="20" y="30" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">{tr`ENGINEERING POD`}</text>
 
     <Desk x={55} y={70} you screen="code" label="JARED"/>
     <Desk x={130} y={70} label="Sarah"/>
@@ -50,7 +51,7 @@ export const OfficeOverview = ({ activeArea, burnout = 0 }) => {
     )}
 
     <rect x="280" y="22" width="140" height="60" fill="none" stroke={C.borderHi} strokeWidth="0.8" strokeDasharray="2 2"/>
-    <text x="285" y="32" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">ROOM A · "ASCEND"</text>
+    <text x="285" y="32" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">{tr`ROOM A · "ASCEND"`}</text>
     <ellipse cx="350" cy="57" rx="50" ry="13" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.8"/>
     {/* tiny figures around the table — perpetually occupied */}
     <Person x={310} y={57} type="generic" scale={0.45} seated/>
@@ -60,7 +61,7 @@ export const OfficeOverview = ({ activeArea, burnout = 0 }) => {
     <Person x={390} y={57} type="generic" scale={0.45} seated/>
 
     <rect x="280" y="98" width="140" height="60" fill="none" stroke={C.borderHi} strokeWidth="0.8" strokeDasharray="2 2"/>
-    <text x="285" y="108" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">ROOM B · "INNOVATE"</text>
+    <text x="285" y="108" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">{tr`ROOM B · "INNOVATE"`}</text>
     <ellipse cx="350" cy="133" rx="50" ry="13" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.8"/>
     {/* empty room — single figure refreshing tickets-down */}
     <Person x={350} y={133} type="engineer" scale={0.5} seated mood="tired"/>
@@ -69,17 +70,17 @@ export const OfficeOverview = ({ activeArea, burnout = 0 }) => {
     )}
 
     <rect x="440" y="22" width="140" height="65" fill="none" stroke={C.amberDim} strokeWidth="0.8"/>
-    <text x="445" y="33" fontSize="5" fontFamily={FONT} fill={C.amberDim} letterSpacing="1">EXECUTIVE WING</text>
+    <text x="445" y="33" fontSize="5" fontFamily={FONT} fill={C.amberDim} letterSpacing="1">{tr`EXECUTIVE WING`}</text>
     <Desk x={510} y={65}/>
     {/* "DO NOT DISTURB" placard */}
     <rect x="472" y="55" width="22" height="6" fill={C.amberDim}/>
-    <text x="483" y="60" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.bg} fontWeight="700">DO NOT</text>
+    <text x="483" y="60" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`DO NOT`}</text>
 
     <rect x="440" y="98" width="140" height="60" fill="none" stroke={C.borderHi} strokeWidth="0.8"/>
-    <text x="445" y="108" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">CAFE</text>
+    <text x="445" y="108" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">{tr`CAFE`}</text>
     <circle cx="500" cy="135" r="6" fill="none" stroke={C.borderHi} strokeWidth="0.6"/>
     <line x1="494" y1="135" x2="488" y2="135" stroke={C.borderHi} strokeWidth="0.6"/>
-    <text x="500" y="148" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDimmer}>cold</text>
+    <text x="500" y="148" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDimmer}>{tr`cold`}</text>
     {/* Doug perpetually at the espresso machine */}
     <Person x={476} y={142} type="doug" scale={0.6} mood="phone"/>
 

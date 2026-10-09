@@ -8,6 +8,7 @@ import { EVENTS } from '../data/events.js';
 import { CAST_POOLS } from '../data/cast.js';
 import { stageEvent } from './flow.js';
 import { spendTokens } from './mechanics.js';
+import { tr } from '../i18n/index.js';
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -33,22 +34,22 @@ export const applyAction = (prev, kind) => {
     const partner = pick(PAIR_POOL);
     s.pairPartner = partner;
     const pairFlavorsOffice = [
-      `Paired with ${partner} for 90 minutes. They rubber-ducked your weird race condition. You lost 1.5h but you're unstuck — and a little less alone.`,
-      `Paired with ${partner}. They spotted the off-by-one in 14 seconds. You both pretended not to know which of you wrote it.`,
-      `${partner} pulled up a chair. By minute 40 you'd both refactored a method neither of you was supposed to touch. Felt good.`,
-      `Pair session with ${partner}. Half the time was you explaining the thing; the other half was them gently asking why. The why was good.`,
+      tr`Paired with ${partner} for 90 minutes. They rubber-ducked your weird race condition. You lost 1.5h but you're unstuck — and a little less alone.`,
+      tr`Paired with ${partner}. They spotted the off-by-one in 14 seconds. You both pretended not to know which of you wrote it.`,
+      tr`${partner} pulled up a chair. By minute 40 you'd both refactored a method neither of you was supposed to touch. Felt good.`,
+      tr`Pair session with ${partner}. Half the time was you explaining the thing; the other half was them gently asking why. The why was good.`,
     ];
     const pairFlavorsHome = [
-      `Paired with ${partner} over a Slack huddle. Their mic picked up a dishwasher. Your screen share froze on the one file that mattered. Still: unstuck.`,
-      `Remote pairing with ${partner}. Twenty minutes of "can you see my screen?" Then 70 minutes of actual work. The ratio is considered good.`,
-      `Paired with ${partner} on a Zoom. The "pair programming" plugin the company bought needs a license nobody has. You shared your screen like animals. It worked.`,
-      `Pair session with ${partner}, cameras off. They found the bug by asking you to read the line aloud. You read it aloud. You heard it. 1.5h, one line.`,
+      tr`Paired with ${partner} over a Slack huddle. Their mic picked up a dishwasher. Your screen share froze on the one file that mattered. Still: unstuck.`,
+      tr`Remote pairing with ${partner}. Twenty minutes of "can you see my screen?" Then 70 minutes of actual work. The ratio is considered good.`,
+      tr`Paired with ${partner} on a Zoom. The "pair programming" plugin the company bought needs a license nobody has. You shared your screen like animals. It worked.`,
+      tr`Pair session with ${partner}, cameras off. They found the bug by asking you to read the line aloud. You read it aloud. You heard it. 1.5h, one line.`,
     ];
     s.dayLog = [...s.dayLog, pick(s.atHome ? pairFlavorsHome : pairFlavorsOffice)];
   } else if (kind === 'booth' && s.boothClosedToday && !s.atHome) {
     // Every booth is booked today. You can still walk over and check.
     s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.25);
-    s.dayLog = [...s.dayLog, 'You walked the floor. Every booth is booked, each by one person on a video call with their camera off. You stood outside one for a while. It did not help.'];
+    s.dayLog = [...s.dayLog, tr`You walked the floor. Every booth is booked, each by one person on a video call with their camera off. You stood outside one for a while. It did not help.`];
   } else if (kind === 'booth') {
     s.capital = Math.max(0, s.capital - 1);
     s.boothBonus = true;
@@ -56,12 +57,12 @@ export const applyAction = (prev, kind) => {
     s.focus = Math.min(100, s.focus + 25);
     s.morale = Math.min(100, s.morale + 4);
     const boothFlavorsHome = [
-      'You closed the door of the one room with a door. Slack snoozed, camera off, status set to "heads down" — which three people read as "available for a quick one." You did not answer. The next ticket will hit harder.',
-      'You set your status to 🔴 Focus time. Marcus replied to the status. You muted the thread. Headphones in. The next ticket will hit harder.',
+      tr`You closed the door of the one room with a door. Slack snoozed, camera off, status set to "heads down" — which three people read as "available for a quick one." You did not answer. The next ticket will hit harder.`,
+      tr`You set your status to 🔴 Focus time. Marcus replied to the status. You muted the thread. Headphones in. The next ticket will hit harder.`,
     ];
     s.dayLog = [...s.dayLog, s.atHome
       ? pick(boothFlavorsHome)
-      : 'You walked over to a phone booth and locked the door. Slack is on snooze. Headphones in. The next ticket will hit harder, and the office will be tolerable for a while.'];
+      : tr`You walked over to a phone booth and locked the door. Slack is on snooze. Headphones in. The next ticket will hit harder, and the office will be tolerable for a while.`];
   } else if (kind === 'lunch') {
     // A real lunch — leaving the building, sitting somewhere quiet, no laptop.
     // Costs an hour of focus-time but recovers significantly more than a coffee.
@@ -74,29 +75,29 @@ export const applyAction = (prev, kind) => {
     s.focus = Math.min(100, s.focus + 22 * recoveryMul);
     s.morale = Math.min(100, s.morale + 8 * recoveryMul);
     const lunchFlavorsFirst = [
-      'You walked four blocks and ate at the place with the good banh mi. You did not check Slack. The world kept going.',
-      'You sat at the park bench by the office. Your sandwich was unremarkable. The pigeons were content. You let yourself watch them for ten minutes.',
-      'You ate alone at the counter of the diner across the street. The coffee was bad. The booth was quiet. Nobody asked you anything.',
-      'You drove to the grocery store, bought a rotisserie chicken and two apples, ate them in your parked car listening to one full album.',
+      tr`You walked four blocks and ate at the place with the good banh mi. You did not check Slack. The world kept going.`,
+      tr`You sat at the park bench by the office. Your sandwich was unremarkable. The pigeons were content. You let yourself watch them for ten minutes.`,
+      tr`You ate alone at the counter of the diner across the street. The coffee was bad. The booth was quiet. Nobody asked you anything.`,
+      tr`You drove to the grocery store, bought a rotisserie chicken and two apples, ate them in your parked car listening to one full album.`,
     ];
     const lunchFlavorsSecond = [
-      'A SECOND lunch. Bold. The pigeons recognized you and approached without fear. You felt seen, then mildly judged.',
-      'You went out for lunch again. The barista at the second place noticed. They said nothing. They knew.',
-      'You ate twice. The second one was a "lunch lunch" and the first was retroactively reframed as "brunch."',
-      'Second lunch of the day. You\'re not hungry. You just don\'t want to be at your desk. The body knows.',
+      tr`A SECOND lunch. Bold. The pigeons recognized you and approached without fear. You felt seen, then mildly judged.`,
+      tr`You went out for lunch again. The barista at the second place noticed. They said nothing. They knew.`,
+      tr`You ate twice. The second one was a "lunch lunch" and the first was retroactively reframed as "brunch."`,
+      tr`Second lunch of the day. You're not hungry. You just don't want to be at your desk. The body knows.`,
     ];
     const lunchFlavorsThird = [
-      'A third lunch. You are no longer eating; you are just outside, away. Nobody stops you. There is freedom in this.',
-      'Lunch number three. The diner staff has stopped asking what you want — they just bring food. You have been adopted.',
+      tr`A third lunch. You are no longer eating; you are just outside, away. Nobody stops you. There is freedom in this.`,
+      tr`Lunch number three. The diner staff has stopped asking what you want — they just bring food. You have been adopted.`,
     ];
     const lunchFlavorsHome = [
-      'You ate at the kitchen table. Not the desk. The table. No laptop. The fridge hummed. It was the best meeting of the day.',
-      'You made the lunch you keep saying you will make. It took 25 minutes. You ate it on the back step. Slack sent eleven notifications to a phone in another room.',
-      'Lunch at home, standing at the counter at first, then sitting down on purpose. Nobody asked if you had "five minutes." They could not see you.',
+      tr`You ate at the kitchen table. Not the desk. The table. No laptop. The fridge hummed. It was the best meeting of the day.`,
+      tr`You made the lunch you keep saying you will make. It took 25 minutes. You ate it on the back step. Slack sent eleven notifications to a phone in another room.`,
+      tr`Lunch at home, standing at the counter at first, then sitting down on purpose. Nobody asked if you had "five minutes." They could not see you.`,
     ];
     const lunchFlavorsHomeAgain = [
-      'A second lunch at home. The fridge is now in a working relationship with you. Marcus\'s "quick one" sits unread on the other side of the house.',
-      'Lunch again. You are not hungry. You just do not want to open the laptop. The laptop is three meters away and it knows.',
+      tr`A second lunch at home. The fridge is now in a working relationship with you. Marcus's "quick one" sits unread on the other side of the house.`,
+      tr`Lunch again. You are not hungry. You just do not want to open the laptop. The laptop is three meters away and it knows.`,
     ];
     const pool = s.atHome
       ? (lunchN >= 2 ? lunchFlavorsHomeAgain : lunchFlavorsHome)
@@ -112,23 +113,23 @@ export const applyAction = (prev, kind) => {
     s.focus = Math.min(100, s.focus + 10 * walkMul);
     s.morale = Math.min(100, s.morale + 3 * walkMul);
     const walkFlavorsFirst = [
-      'You walked around the block. You noticed three things you had not noticed before. None of them were work.',
-      'You walked to the end of the parking lot and back. Your eyes adjusted to looking far. Your shoulders dropped a centimeter.',
-      'You walked through the lobby, around the building, and back. The security guard nodded at you. You nodded back. It was nice.',
+      tr`You walked around the block. You noticed three things you had not noticed before. None of them were work.`,
+      tr`You walked to the end of the parking lot and back. Your eyes adjusted to looking far. Your shoulders dropped a centimeter.`,
+      tr`You walked through the lobby, around the building, and back. The security guard nodded at you. You nodded back. It was nice.`,
     ];
     const walkFlavorsRepeat = [
-      'Another walk. Same block. Same security guard. They almost said something.',
-      'You walked again. The route is now familiar. You added a small detour just to make it feel different.',
-      'Second lap of the day. The third tree on the right has a small carving you missed earlier. You stared at it.',
+      tr`Another walk. Same block. Same security guard. They almost said something.`,
+      tr`You walked again. The route is now familiar. You added a small detour just to make it feel different.`,
+      tr`Second lap of the day. The third tree on the right has a small carving you missed earlier. You stared at it.`,
     ];
     const walkFlavorsHome = [
-      'You walked around your own block. Nobody from work saw you. Nobody from work was going to see you. You still walked fast.',
-      'A walk. Headphones in, no podcast. A neighbor waved. You waved. For eleven minutes you were not "available."',
-      'You walked to the end of the street and back. Your status went yellow. Two people noticed the yellow. Nobody noticed the walk.',
+      tr`You walked around your own block. Nobody from work saw you. Nobody from work was going to see you. You still walked fast.`,
+      tr`A walk. Headphones in, no podcast. A neighbor waved. You waved. For eleven minutes you were not "available."`,
+      tr`You walked to the end of the street and back. Your status went yellow. Two people noticed the yellow. Nobody noticed the walk.`,
     ];
     const walkFlavorsHomeRepeat = [
-      'Another lap of the block. The same neighbor. The same wave. The same yellow status. It helped slightly less, which is still helping.',
-      'You walked again. You added one street. The street had a cat. The cat did not have a standup.',
+      tr`Another lap of the block. The same neighbor. The same wave. The same yellow status. It helped slightly less, which is still helping.`,
+      tr`You walked again. You added one street. The street had a cat. The cat did not have a standup.`,
     ];
     const pool = s.atHome
       ? (walkN >= 2 ? walkFlavorsHomeRepeat : walkFlavorsHome)
@@ -151,19 +152,19 @@ export const applyAction = (prev, kind) => {
       s.burnout = Math.max(0, Math.min(100, s.burnout + caffeine.burnout));
     };
     const cup3Pool = [
-      'Third cup. The focus is sharp but jagged. Your jaw is doing a thing.',
-      'Third cup. You can feel your pulse in your eyelid.',
-      'Third cup. The tab count crossed 40 at some point you cannot pin down.',
-      'Third cup. The keyboard sounds louder than it is. You are typing fine. Your shoulders are not.',
+      tr`Third cup. The focus is sharp but jagged. Your jaw is doing a thing.`,
+      tr`Third cup. You can feel your pulse in your eyelid.`,
+      tr`Third cup. The tab count crossed 40 at some point you cannot pin down.`,
+      tr`Third cup. The keyboard sounds louder than it is. You are typing fine. Your shoulders are not.`,
     ];
     const cup4PlusPool = [
-      `Cup ${coffeeN}. Your hands aren't still. The headache starts behind your right eye.`,
-      `Cup ${coffeeN}. Your typing has become percussion. Someone two desks over glances over.`,
-      `Cup ${coffeeN}. You walked back from the kitchen and forgot what you were doing for a full eight seconds.`,
-      `Cup ${coffeeN}. You are sweating in a way that is not climate-related. A coworker asks if you're okay. You say "yes" three times.`,
-      `Cup ${coffeeN}. The room is humming. Or you are. Both are also possible.`,
-      `Cup ${coffeeN}. You read the same line of code four times. None of them counted.`,
-      `Cup ${coffeeN}. Your reflection in the dark monitor looks slightly wired. You don't dwell on it.`,
+      tr`Cup ${coffeeN}. Your hands aren't still. The headache starts behind your right eye.`,
+      tr`Cup ${coffeeN}. Your typing has become percussion. Someone two desks over glances over.`,
+      tr`Cup ${coffeeN}. You walked back from the kitchen and forgot what you were doing for a full eight seconds.`,
+      tr`Cup ${coffeeN}. You are sweating in a way that is not climate-related. A coworker asks if you're okay. You say "yes" three times.`,
+      tr`Cup ${coffeeN}. The room is humming. Or you are. Both are also possible.`,
+      tr`Cup ${coffeeN}. You read the same line of code four times. None of them counted.`,
+      tr`Cup ${coffeeN}. Your reflection in the dark monitor looks slightly wired. You don't dwell on it.`,
     ];
     const jitterFlavor = coffeeN >= 4 ? pick(cup4PlusPool) : coffeeN === 3 ? pick(cup3Pool) : null;
 
@@ -178,15 +179,15 @@ export const applyAction = (prev, kind) => {
       }
       applyCaffeine();
       const homeCoffeeFlavors = [
-        'You made coffee in your own kitchen. Nobody had a theory about the milk. The window faced a tree. The ten minutes were yours.',
-        'You stood at the counter while the kettle boiled. The light was good. You did not check Slack.',
-        'You drank coffee on the back step. A bird did something on a fence. You watched it for the whole song.',
+        tr`You made coffee in your own kitchen. Nobody had a theory about the milk. The window faced a tree. The ten minutes were yours.`,
+        tr`You stood at the counter while the kettle boiled. The light was good. You did not check Slack.`,
+        tr`You drank coffee on the back step. A bird did something on a fence. You watched it for the whole song.`,
       ];
       s.dayLog = [...s.dayLog, pick(homeCoffeeFlavors)];
       if (jitterFlavor) s.dayLog = [...s.dayLog, jitterFlavor];
       return s;
     }
-    s.dayLog = [...s.dayLog, 'You head to the kitchen for coffee.'];
+    s.dayLog = [...s.dayLog, tr`You head to the kitchen for coffee.`];
     // Headphones on and status red halve the odds of being intercepted.
     // Halve, not remove: the people who intercept you do not read statuses.
     const odds = s.dndToday ? 0.5 : 1;
@@ -196,11 +197,11 @@ export const applyAction = (prev, kind) => {
       s = fire(s, 'kitchen_karen');
     } else if (r < 0.6 * odds) {
       // On the way back, Brad rolls his chair to intercept — fire his dialog tree
-      s.dayLog = [...s.dayLog, 'On your way back, Brad rolled his chair into the aisle to intercept you.'];
+      s.dayLog = [...s.dayLog, tr`On your way back, Brad rolled his chair into the aisle to intercept you.`];
       s = fire(s, 'shoulder_tap');
     } else {
       // Clean break
-      s.dayLog = [...s.dayLog, 'A clean coffee break. The kitchen was empty. You stared out the window for 4 minutes. It helped.'];
+      s.dayLog = [...s.dayLog, tr`A clean coffee break. The kitchen was empty. You stared out the window for 4 minutes. It helped.`];
     }
     applyCaffeine();
     if (jitterFlavor) s.dayLog = [...s.dayLog, jitterFlavor];
@@ -216,8 +217,8 @@ export const applyAction = (prev, kind) => {
       !t.shipped && t.progress > 0 && t.progress < t.effort &&
       (t.type === 'bug' || t.effort >= 5));
     s.dayLog = [...s.dayLog, hard
-      ? `You stayed late chasing "${hard.title}". The fluorescent lights got worse. +2h, +8 burnout.`
-      : 'You stayed late. The office cleared out. The cleaners came. +2h, +8 burnout.'];
+      ? tr`You stayed late chasing "${hard.title}". The fluorescent lights got worse. +2h, +8 burnout.`
+      : tr`You stayed late. The office cleared out. The cleaners came. +2h, +8 burnout.`];
   } else if (kind === 'block') {
     // Block the afternoon as "Focus time". Everyone can see the block.
     // Most people treat it as availability.
@@ -226,17 +227,17 @@ export const applyAction = (prev, kind) => {
     if (Math.random() < 0.65) {
       s.capital = Math.max(0, s.capital - 0.5);
       s.dayLog = [...s.dayLog, pick([
-        'You blocked the afternoon as "Focus time." Eleven minutes later a meeting was booked over it, with a note: "saw you had a hold, assuming it\'s not a real meeting?" It is now a real meeting.',
-        'You blocked three hours. The block is visible to the whole org. Marcus booked the middle hour and wrote "grabbing this since you\'re free!" You were not free. You are now.',
-        'Focus time: booked. Marcus: "is this block movable? just need 15." It was movable. It moved. So did the 15, to 50.',
+        tr`You blocked the afternoon as "Focus time." Eleven minutes later a meeting was booked over it, with a note: "saw you had a hold, assuming it's not a real meeting?" It is now a real meeting.`,
+        tr`You blocked three hours. The block is visible to the whole org. Marcus booked the middle hour and wrote "grabbing this since you're free!" You were not free. You are now.`,
+        tr`Focus time: booked. Marcus: "is this block movable? just need 15." It was movable. It moved. So did the 15, to 50.`,
       ])];
       s = fire(s, 'quick_sync');
     } else {
       s.focus = Math.min(100, s.focus + 15);
       s.burnout = Math.max(0, s.burnout - 2);
       s.dayLog = [...s.dayLog, pick([
-        'You blocked the afternoon as "Focus time." Nobody booked over it. You keep checking the calendar to see if anyone has. That is most of the focus.',
-        'The block held. Three people messaged "are you free?" anyway. You were not. For once the calendar and the truth agreed.',
+        tr`You blocked the afternoon as "Focus time." Nobody booked over it. You keep checking the calendar to see if anyone has. That is most of the focus.`,
+        tr`The block held. Three people messaged "are you free?" anyway. You were not. For once the calendar and the truth agreed.`,
       ])];
     }
   } else if (kind === 'writeup') {
@@ -251,22 +252,22 @@ export const applyAction = (prev, kind) => {
     if (open.length > 0) {
       const { t, i } = open[0];
       s.sprintPlan[i] = { ...t, shielded: true };
-      s.dayLog = [...s.dayLog, `You wrote down what was decided on "${t.title}", who decided it, and when. A page, with a date. The next time someone "re-aligns" it, the page gets read aloud. Once.`];
+      s.dayLog = [...s.dayLog, tr`You wrote down what was decided on "${t.title}", who decided it, and when. A page, with a date. The next time someone "re-aligns" it, the page gets read aloud. Once.`];
     } else {
-      s.dayLog = [...s.dayLog, 'You opened a blank page to write the decision down. There is no decision to write down. You wrote "TBD" and a date. An hour.'];
+      s.dayLog = [...s.dayLog, tr`You opened a blank page to write the decision down. There is no decision to write down. You wrote "TBD" and a date. An hour.`];
     }
   } else if (kind === 'dnd') {
     // Headphones on, status red. Free. Mostly respected, by the people who
     // were not going to interrupt you anyway.
     s.dndToday = true;
-    s.dayLog = [...s.dayLog, 'Headphones on. Status: 🔴 Do not disturb. The office gets quieter, which is to say the interruptions now start with "sorry, I know you\'re heads-down."'];
+    s.dayLog = [...s.dayLog, tr`Headphones on. Status: 🔴 Do not disturb. The office gets quieter, which is to say the interruptions now start with "sorry, I know you're heads-down."`];
     if (Math.random() < 0.3) {
-      s.dayLog = [...s.dayLog, 'A tap on the shoulder anyway. Then: "oh, nice headphones! are those the noise-cancelling ones?"'];
+      s.dayLog = [...s.dayLog, tr`A tap on the shoulder anyway. Then: "oh, nice headphones! are those the noise-cancelling ones?"`];
       s = fire(s, 'shoulder_tap');
     }
     if (Math.random() < 0.2) {
       s.capital = Math.max(0, s.capital - 0.5);
-      s.dayLog = [...s.dayLog, 'Your manager, in DM, to the red status: "are you there? just checking you\'re online." You were. You are now also "hard to reach," in a 1:1 note.'];
+      s.dayLog = [...s.dayLog, tr`Your manager, in DM, to the red status: "are you there? just checking you're online." You were. You are now also "hard to reach," in a 1:1 note.`];
     }
   } else if (kind === 'vent') {
     // The private group chat. Fifteen minutes. Usually fine.
@@ -275,13 +276,13 @@ export const applyAction = (prev, kind) => {
     if (Math.random() < 0.1) {
       s.capital = Math.max(0, s.capital - 1.5);
       s.morale = Math.max(0, s.morale - 8);
-      s.dayLog = [...s.dayLog, 'You vented in the private chat. Someone screenshotted it "for context" into a channel Marcus is in. The context was your face. It is now a 1:1 agenda item.'];
+      s.dayLog = [...s.dayLog, tr`You vented in the private chat. Someone screenshotted it "for context" into a channel Marcus is in. The context was your face. It is now a 1:1 agenda item.`];
     } else {
       s.burnout = Math.max(0, s.burnout - 4);
       s.morale = Math.min(100, s.morale + 5);
       s.dayLog = [...s.dayLog, pick([
-        'Fifteen minutes in the private chat. Four people typed the same thing at once. It did not fix anything. It helped.',
-        'You vented. Someone replied with the exact GIF. Someone else replied "same." The sprint is unchanged. Your shoulders are not.',
+        tr`Fifteen minutes in the private chat. Four people typed the same thing at once. It did not fix anything. It helped.`,
+        tr`You vented. Someone replied with the exact GIF. Someone else replied "same." The sprint is unchanged. Your shoulders are not.`,
       ])];
     }
   } else if (kind === 'board') {
@@ -290,7 +291,7 @@ export const applyAction = (prev, kind) => {
     s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.5);
     s.morale = Math.max(0, s.morale - 2);
     s.boardAccurateUntilDay = (s.currentDay || 1) + 1;
-    s.dayLog = [...s.dayLog, 'You moved every card to its true column. The board is accurate for the first time this sprint. The velocity chart will not be asked about tomorrow. Nothing else changed.'];
+    s.dayLog = [...s.dayLog, tr`You moved every card to its true column. The board is accurate for the first time this sprint. The velocity chart will not be asked about tomorrow. Nothing else changed.`];
   } else if (kind === 'ask') {
     // Some days asking costs more: the colleague's tools are logged out too,
     // or the answer lives in a channel that no longer exists.
@@ -318,15 +319,15 @@ export const applyAction = (prev, kind) => {
       const bump = Math.min(3, Math.max(0, remaining - 1));
       if (bump > 0) {
         s.sprintPlan[i] = { ...stuck, progress: stuck.progress + bump };
-        s.dayLog = [...s.dayLog, `You walked over to ${helper}'s desk. Asked about "${stuck.title}". They pointed at one line and said "that's your bug." +${bump.toFixed(1)}h progress.`];
-        if (askTax > 0) s.dayLog = [...s.dayLog, `Getting to that line took an extra ${askTax.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}h: ${helper} had to log back in to three things, and the thread with the answer was in the old channel.`];
+        s.dayLog = [...s.dayLog, tr`You walked over to ${helper}'s desk. Asked about "${stuck.title}". They pointed at one line and said "that's your bug." +${bump.toFixed(1)}h progress.`];
+        if (askTax > 0) s.dayLog = [...s.dayLog, tr`Getting to that line took an extra ${askTax.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}h: ${helper} had to log back in to three things, and the thread with the answer was in the old channel.`];
       } else {
-        s.dayLog = [...s.dayLog, `You walked over to ${helper}'s desk. Asked about "${stuck.title}". They looked at it, nodded, and said "yeah, that's basically done." It is not done. The last hour is always yours.`];
+        s.dayLog = [...s.dayLog, tr`You walked over to ${helper}'s desk. Asked about "${stuck.title}". They looked at it, nodded, and said "yeah, that's basically done." It is not done. The last hour is always yours.`];
       }
     } else {
-      s.dayLog = [...s.dayLog, `You went to ask ${helper} for help. Nothing to ask about. You both stared at their screen for a polite minute.`];
+      s.dayLog = [...s.dayLog, tr`You went to ask ${helper} for help. Nothing to ask about. You both stared at their screen for a polite minute.`];
     }
-    if (noTokens > 0) s.dayLog = [...s.dayLog, `${helper} tried the assistant first. No tokens. They answered from memory, slower, with a story about 2019. An extra half hour.`];
+    if (noTokens > 0) s.dayLog = [...s.dayLog, tr`${helper} tried the assistant first. No tokens. They answered from memory, slower, with a story about 2019. An extra half hour.`];
   }
   return s;
 };

@@ -4,12 +4,13 @@ import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
 import { SkyPane } from './Sky.jsx';
+import { tr } from '../../i18n/index.js';
 
 export const ExecutiveScene = ({ clock = 10 * 60 }) => (
   <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
     {/* Office walls */}
     <rect x="20" y="20" width="360" height="140" fill={C.surface} stroke={C.amber} strokeWidth="1"/>
-    <text x="30" y="34" fontSize="5" fontFamily={FONT} fill={C.amberDim} letterSpacing="2">CEO'S CORNER OFFICE · 14F</text>
+    <text x="30" y="34" fontSize="5" fontFamily={FONT} fill={C.amberDim} letterSpacing="2">{tr`CEO'S CORNER OFFICE · 14F`}</text>
 
     {/* Wall plaque next to the door */}
     <g transform="translate(40 42)">
@@ -30,14 +31,14 @@ export const ExecutiveScene = ({ clock = 10 * 60 }) => (
     <g transform="translate(110 50)">
       <rect x="0" y="0" width="120" height="44" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.7"/>
       <rect x="0" y="0" width="120" height="7" fill={C.amberDim}/>
-      <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">SLACK · DRAFT TO #ENGINEERING</text>
-      <text x="4" y="14" fontSize="3" fontFamily={FONT} fill={C.amber}>cursor blinking · CEO is typing…</text>
+      <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`SLACK · DRAFT TO #ENGINEERING`}</text>
+      <text x="4" y="14" fontSize="3" fontFamily={FONT} fill={C.amber}>{tr`cursor blinking · CEO is typing…`}</text>
       <line x1="4" y1="18" x2="116" y2="18" stroke={C.border} strokeWidth="0.3"/>
       <rect x="4" y="22" width="92" height="2.2" fill={C.textDim} opacity="0.5"/>
       <rect x="4" y="26" width="110" height="2.2" fill={C.textDim} opacity="0.5"/>
       <rect x="4" y="30" width="74" height="2.2" fill={C.textDim} opacity="0.5"/>
       <rect x="4" y="34" width="56" height="2.2" fill={C.textDim} opacity="0.5"/>
-      <text x="114" y="40" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>by next week 🙏</text>
+      <text x="114" y="40" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>{tr`by next week 🙏`}</text>
     </g>
 
     {/* CEO seated behind the desk — drawn first, then the desk covers the body */}
@@ -67,16 +68,16 @@ export const ExecutiveScene = ({ clock = 10 * 60 }) => (
     </g>
 
     {/* CEO label below the desk */}
-    <text x="200" y="155" textAnchor="middle" fontSize="5" fontFamily={FONT} fill={C.amberDim} letterSpacing="0.5">CEO</text>
+    <text x="200" y="155" textAnchor="middle" fontSize="5" fontFamily={FONT} fill={C.amberDim} letterSpacing="0.5">{tr`CEO`}</text>
 
     {/* Brand poster on the side wall */}
     <g transform="translate(310 110)">
       <rect x="0" y="0" width="58" height="22" fill="#0a0a0a" stroke={C.amberDim} strokeWidth="0.4"/>
-      <text x="29" y="8" textAnchor="middle" fontSize="3.4" fontFamily={FONT} fill={C.amber} fontWeight="700">SHIP</text>
-      <text x="29" y="14" textAnchor="middle" fontSize="3.4" fontFamily={FONT} fill={C.amber} fontWeight="700">ANYWAY</text>
-      <text x="29" y="19" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>– our values</text>
+      <text x="29" y="8" textAnchor="middle" fontSize="3.4" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`SHIP`}</text>
+      <text x="29" y="14" textAnchor="middle" fontSize="3.4" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`ANYWAY`}</text>
+      <text x="29" y="19" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>{tr`– our values`}</text>
     </g>
 
-    <text x="30" y="170" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>SLACK PING · NEW IDEA · ROADMAP UPDATING</text>
+    <text x="30" y="170" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>{tr`SLACK PING · NEW IDEA · ROADMAP UPDATING`}</text>
   </svg>
 );

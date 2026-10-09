@@ -10,6 +10,7 @@ import { TicketCard } from '../common/TicketCard.jsx';
 import { BurnDown } from '../common/BurnDown.jsx';
 import { Btn } from '../common/Btn.jsx';
 import { Stage } from '../scene/Stage.jsx';
+import { tr } from '../../i18n/index.js';
 
 const CHARACTER_NAMES = [
   'Doug', 'Greg', 'Larry', 'Steve', 'Frank', 'Hank', 'Gary',
@@ -54,7 +55,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
         {/* Action area (scrollable on desktop, flows on mobile) */}
         <div className="flex-1 p-3 sm:p-6 lg:overflow-auto">
         <div className="text-xs tracking-[0.3em] mb-4" style={{ color: C.amberDim }}>
-          DAY {s.currentDay} OF 5 · {clockText(s).toUpperCase()} · {s.dayFocusRemaining.toFixed(1)}h FOCUS LEFT
+          {tr`DAY ${s.currentDay} OF 5 · ${clockText(s).toUpperCase()} · ${s.dayFocusRemaining.toFixed(1)}h FOCUS LEFT`}
         </div>
 
         {s.subPhase === 'event' && Ev && (() => {
@@ -64,12 +65,12 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
             {isStartNode && (
               <div className="flex items-center gap-3 mb-3">
                 {EvIcon && <EvIcon size={20} style={{ color: C.amber }}/>}
-                <div className="text-base font-semibold" style={{ color: C.text }}>{emphasizeNames(renderCast(Ev.title, s.eventCast))}</div>
+                <div className="text-base font-semibold" style={{ color: C.text }}>{emphasizeNames(renderCast(tr(Ev.title), s.eventCast))}</div>
               </div>
             )}
             {!isStartNode && (
               <div className="text-[10px] tracking-[0.3em] mb-2" style={{ color: C.amberDim }}>
-                {renderCast(Ev.title, s.eventCast).toUpperCase()} · CONTINUED
+                {tr`${renderCast(tr(Ev.title), s.eventCast).toUpperCase()} · CONTINUED`}
               </div>
             )}
             <div className="text-sm mb-6 leading-relaxed" style={{ color: C.textDim }}>
@@ -86,7 +87,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.amber; e.currentTarget.style.backgroundColor = C.surface; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = C.surface2; }}
                 >
-                  → {emphasizeNames(renderCast(c.label, s.eventCast))}{c.next ? ' …' : ''}
+                  → {emphasizeNames(renderCast(tr(c.label), s.eventCast))}{c.next ? ' …' : ''}
                 </button>
               ))}
             </div>
@@ -98,35 +99,35 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           <div>
             <div className="text-sm mb-4" style={{ color: C.textDim }}>
               {s.dayFocusRemaining > 0
-                ? `What do you want to do? ${s.dayFocusRemaining.toFixed(1)}h remaining.`
-                : 'No hours left. End the day.'}
+                ? tr`What do you want to do? ${s.dayFocusRemaining.toFixed(1)}h remaining.`
+                : tr`No hours left. End the day.`}
             </div>
             {s.dayFocusRemaining > 0 && (s.scheduledEvents || []).length > 0 && (
               <div className="text-xs mb-3" style={{ color: C.textDimmer }}>
-                📅 Something on your calendar at {minutesToClock(WORKDAY_START_MIN + s.scheduledEvents[0].at)}. The invite has no title.
-                {s.scheduledEvents.length > 1 ? ` Also ${s.scheduledEvents.length - 1} more after that.` : ''}
+                {tr`📅 Something on your calendar at ${minutesToClock(WORKDAY_START_MIN + s.scheduledEvents[0].at)}. The invite has no title.`}
+                {s.scheduledEvents.length > 1 ? tr` Also ${s.scheduledEvents.length - 1} more after that.` : ''}
               </div>
             )}
 
             {/* Active bonuses display */}
             {(s.pairBonus || s.boothBonus) && (
               <div className="text-xs mb-3 p-2" style={{ color: C.amber, backgroundColor: C.surface, border: `1px solid ${C.amberDim}` }}>
-                Active for next ticket work:
-                {s.pairBonus && <span className="ml-2">⊕ pairing{s.pairPartner ? ` with @${s.pairPartner}` : ''} +50%</span>}
-                {s.boothBonus && <span className="ml-2">⊕ focus mode +30%</span>}
+                {tr`Active for next ticket work:`}
+                {s.pairBonus && <span className="ml-2">{s.pairPartner ? tr`⊕ pairing with @${s.pairPartner} +50%` : tr`⊕ pairing +50%`}</span>}
+                {s.boothBonus && <span className="ml-2">{tr`⊕ focus mode +30%`}</span>}
               </div>
             )}
 
             {s.dayFocusRemaining > 0 && workableTickets.length > 0 && (
               <>
                 <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: C.textDimmer }}>
-                  {switchesToday > 0 ? 'Sit back down at your computer' : 'Sit down at your computer'}
+                  {switchesToday > 0 ? tr`Sit back down at your computer` : tr`Sit down at your computer`}
                 </div>
                 {switchCost && (
                   <div className="text-xs mb-2 p-2" style={{ color: canSwitch ? C.amber : C.rust, backgroundColor: C.surface, border: `1px solid ${canSwitch ? C.amberDim : C.rustDim}` }}>
                     {canSwitch
-                      ? `Context switch #${switchesToday}: −${switchCost.hours.toFixed(1)}h before the first keystroke, −${switchCost.focus} focus, +${switchCost.burnout} burnout. Not on the burn-down.`
-                      : `Not enough of the day left to switch tickets (a switch costs ${switchCost.hours.toFixed(1)}h). Take a break, or call it.`}
+                      ? tr`Context switch #${switchesToday}: −${switchCost.hours.toFixed(1)}h before the first keystroke, −${switchCost.focus} focus, +${switchCost.burnout} burnout. Not on the burn-down.`
+                      : tr`Not enough of the day left to switch tickets (a switch costs ${switchCost.hours.toFixed(1)}h). Take a break, or call it.`}
                   </div>
                 )}
                 <div className="space-y-2 mb-5">
@@ -136,7 +137,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                 </div>
 
                 <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: C.textDimmer }}>
-                  Or do something else
+                  {tr`Or do something else`}
                 </div>
                 <div className="grid grid-cols-1 gap-2 mb-6">
                   <button
@@ -147,8 +148,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>👥 Pair program with a teammate </span>
-                    <span style={{ color: C.textDim }}>· 1.5h, costs 0.5 capital · +50% on your next ticket work</span>
+                    <span style={{ color: C.amber }}>{tr`👥 Pair program with a teammate `}</span>
+                    <span style={{ color: C.textDim }}>{tr`· 1.5h, costs 0.5 capital · +50% on your next ticket work`}</span>
                   </button>
                   <button
                     onClick={() => onAction('booth')}
@@ -158,8 +159,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>🚪 Hide in a phone booth </span>
-                    <span style={{ color: C.textDim }}>{s.boothClosedToday && !s.atHome ? '· every booth is booked today' : '· 0h, costs 1 capital · +30% on your next ticket work'}</span>
+                    <span style={{ color: C.amber }}>{tr`🚪 Hide in a phone booth `}</span>
+                    <span style={{ color: C.textDim }}>{s.boothClosedToday && !s.atHome ? tr`· every booth is booked today` : tr`· 0h, costs 1 capital · +30% on your next ticket work`}</span>
                   </button>
                   <button
                     onClick={() => onAction('coffee')}
@@ -169,8 +170,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>☕ Take a coffee break </span>
-                    <span style={{ color: C.textDim }}>· 20 min · risk of small talk</span>
+                    <span style={{ color: C.amber }}>{tr`☕ Take a coffee break `}</span>
+                    <span style={{ color: C.textDim }}>{tr`· 20 min · risk of small talk`}</span>
                   </button>
                   <button
                     onClick={() => onAction('ask')}
@@ -180,8 +181,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>🙋 Ask a teammate for help </span>
-                    <span style={{ color: C.textDim }}>· 1h, costs 0.5 capital · unstick a stuck ticket (small progress boost)</span>
+                    <span style={{ color: C.amber }}>{tr`🙋 Ask a teammate for help `}</span>
+                    <span style={{ color: C.textDim }}>{tr`· 1h, costs 0.5 capital · unstick a stuck ticket (small progress boost)`}</span>
                   </button>
                   <button
                     onClick={() => onAction('lunch')}
@@ -191,8 +192,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>🥪 Take a real lunch </span>
-                    <span style={{ color: C.textDim }}>· 1h · −6 burnout, +22 focus, +8 morale</span>
+                    <span style={{ color: C.amber }}>{tr`🥪 Take a real lunch `}</span>
+                    <span style={{ color: C.textDim }}>{tr`· 1h · −6 burnout, +22 focus, +8 morale`}</span>
                   </button>
                   <button
                     onClick={() => onAction('walk')}
@@ -202,15 +203,15 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>🚶 Take a short walk </span>
-                    <span style={{ color: C.textDim }}>· 0.5h · −3 burnout, +10 focus, +3 morale</span>
+                    <span style={{ color: C.amber }}>{tr`🚶 Take a short walk `}</span>
+                    <span style={{ color: C.textDim }}>{tr`· 0.5h · −3 burnout, +10 focus, +3 morale`}</span>
                   </button>
                   {[
-                    { kind: 'block', icon: '📅', label: 'Block focus time on the calendar', hint: '· 15 min · everyone can see the block', disabled: !!s.actionsToday?.block || s.dayFocusRemaining < 0.25 },
-                    { kind: 'writeup', icon: '📝', label: 'Write the decision down', hint: '· 1h · a page with a date, for the next "re-alignment"', disabled: s.dayFocusRemaining < 1 || !s.sprintPlan.some(t => !t.shipped && t.progress > 0 && t.progress < t.effort && !t.shielded) },
-                    { kind: 'dnd', icon: '🎧', label: 'Headphones on, status red', hint: s.dndToday ? '· already on · people can see it' : '· free · fewer desk-side ambushes, probably', disabled: s.dndToday, hide: s.atHome },
-                    { kind: 'vent', icon: '💬', label: 'Vent in the private group chat', hint: '· 15 min · once a day · −4 burnout, +5 morale, usually', disabled: !!s.actionsToday?.vent || s.dayFocusRemaining < 0.25 },
-                    { kind: 'board', icon: '🗂', label: 'Update the board', hint: '· 0.5h · −2 morale · the cards become accurate; nothing else changes', disabled: s.dayFocusRemaining < 0.5 || (s.boardAccurateUntilDay || 0) > s.currentDay },
+                    { kind: 'block', icon: '📅', label: tr`Block focus time on the calendar`, hint: tr`· 15 min · everyone can see the block`, disabled: !!s.actionsToday?.block || s.dayFocusRemaining < 0.25 },
+                    { kind: 'writeup', icon: '📝', label: tr`Write the decision down`, hint: tr`· 1h · a page with a date, for the next "re-alignment"`, disabled: s.dayFocusRemaining < 1 || !s.sprintPlan.some(t => !t.shipped && t.progress > 0 && t.progress < t.effort && !t.shielded) },
+                    { kind: 'dnd', icon: '🎧', label: tr`Headphones on, status red`, hint: s.dndToday ? tr`· already on · people can see it` : tr`· free · fewer desk-side ambushes, probably`, disabled: s.dndToday, hide: s.atHome },
+                    { kind: 'vent', icon: '💬', label: tr`Vent in the private group chat`, hint: tr`· 15 min · once a day · −4 burnout, +5 morale, usually`, disabled: !!s.actionsToday?.vent || s.dayFocusRemaining < 0.25 },
+                    { kind: 'board', icon: '🗂', label: tr`Update the board`, hint: tr`· 0.5h · −2 morale · the cards become accurate; nothing else changes`, disabled: s.dayFocusRemaining < 0.5 || (s.boardAccurateUntilDay || 0) > s.currentDay },
                   ].filter(a => !a.hide).map(a => (
                     <button
                       key={a.kind}
@@ -240,7 +241,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               return (
                 <div className="mb-6">
                   <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: C.textDimmer }}>
-                    Push past the workday
+                    {tr`Push past the workday`}
                   </div>
                   <button
                     onClick={() => onAction('late')}
@@ -249,8 +250,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
                     onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.amber)}
                     onMouseLeave={(e) => (e.currentTarget.style.borderColor = C.border)}
                   >
-                    <span style={{ color: C.amber }}>🌙 Stay late on "{hard.title}" </span>
-                    <span style={{ color: C.textDim }}>· +2h tonight · +8 burnout, −2 morale · counts as a bad day</span>
+                    <span style={{ color: C.amber }}>{tr`🌙 Stay late on "${hard.title}" `}</span>
+                    <span style={{ color: C.textDim }}>{tr`· +2h tonight · +8 burnout, −2 morale · counts as a bad day`}</span>
                   </button>
                 </div>
               );
@@ -260,7 +261,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               <div className="text-sm italic p-4 text-center mb-4" style={{
                 color: C.textDimmer, border: `1px dashed ${C.border}`,
               }}>
-                {workableTickets.length === 0 ? 'All sprint tickets shipped or blocked.' : 'No focus left for today.'}
+                {workableTickets.length === 0 ? tr`All sprint tickets shipped or blocked.` : tr`No focus left for today.`}
               </div>
             )}
 
@@ -268,8 +269,8 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               <Btn onClick={onSkipWork} full>
                 <span className="flex items-center justify-center gap-2">
                   {s.dayFocusRemaining > 0 && workableTickets.length > 0
-                    ? `CALL IT A DAY (${s.dayFocusRemaining.toFixed(1)}H LEFT, NOBODY WILL ASK)`
-                    : 'WRAP UP DAY'} <ArrowRight size={14}/>
+                    ? tr`CALL IT A DAY (${s.dayFocusRemaining.toFixed(1)}H LEFT, NOBODY WILL ASK)`
+                    : tr`WRAP UP DAY`} <ArrowRight size={14}/>
                 </span>
               </Btn>
             )}
@@ -282,7 +283,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
               backgroundColor: C.surface, border: `1px solid ${C.border}`, padding: 20, marginBottom: 16,
             }}>
               <div className="text-xs tracking-wider uppercase mb-3" style={{ color: C.textDim }}>
-                Day {s.currentDay} log
+                {tr`Day ${s.currentDay} log`}
               </div>
               <ul className="text-sm space-y-3" style={{ color: C.text }}>
                 {s.dayLog.map((l, i) => {
@@ -298,7 +299,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
             </div>
             <Btn onClick={onNextDay} full>
               <span className="flex items-center justify-center gap-2">
-                {s.currentDay >= 5 ? 'END SPRINT' : `BEGIN DAY ${s.currentDay + 1}`} <ArrowRight size={14}/>
+                {s.currentDay >= 5 ? tr`END SPRINT` : tr`BEGIN DAY ${s.currentDay + 1}`} <ArrowRight size={14}/>
               </span>
             </Btn>
           </div>
@@ -316,7 +317,7 @@ export const ExecutionPhase = ({ s, onChoose, onWork, onNextDay, onSkipWork, onA
           dayBudget={s.dayFocus || 9}
         />
         <div className="text-xs tracking-wider uppercase mb-3" style={{ color: C.textDim }}>
-          Sprint Plan
+          {tr`Sprint Plan`}
         </div>
         <div className="space-y-2">
           {s.sprintPlan.map(t => <TicketCard key={t.id} t={t} compact />)}

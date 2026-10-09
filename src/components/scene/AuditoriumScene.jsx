@@ -3,32 +3,36 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { InitechLogo } from './InitechLogo.jsx';
+import { tr } from '../../i18n/index.js';
+
+// A slide's lines are translated together, one string with | between lines.
+const lines = (text) => text.split('|');
 
 export const AuditoriumScene = ({ event }) => {
   const eid = event?.id;
 
   const slideText =
-    eid === 'town_hall' ? ['OUR Q3', 'IS STRONG'] :
-    eid === 'all_hands' ? ['WE ARE', 'DISRUPTING'] :
-    eid === 'values_refresh' ? ['BOLD', 'FRUGAL', 'BIAS FOR', 'ACTION'] :
-    eid === 'compliance' ? ['PHISHING', 'AWARENESS', 'Q3'] :
-    eid === 'inclusion_workshop' ? ['INCLUSION', 'THROUGH', 'ACTION'] :
-    eid === 'mental_health' ? ['RESILIENCE', '&', 'WELLBEING'] :
-    eid === 'reorg' ? ['CONTINUED', 'ALIGNMENT'] :
-    eid === 'engagement_survey' ? ['YOUR', 'VOICE', 'MATTERS'] :
-    eid === 'dev_summit' ? ['WE ❤', 'DEVELOPERS'] :
-    ['UPDATE'];
+    eid === 'town_hall' ? lines(tr`OUR Q3|IS STRONG`) :
+    eid === 'all_hands' ? lines(tr`WE ARE|DISRUPTING`) :
+    eid === 'values_refresh' ? lines(tr`BOLD|FRUGAL|BIAS FOR|ACTION`) :
+    eid === 'compliance' ? lines(tr`PHISHING|AWARENESS|Q3`) :
+    eid === 'inclusion_workshop' ? lines(tr`INCLUSION|THROUGH|ACTION`) :
+    eid === 'mental_health' ? lines(tr`RESILIENCE|&|WELLBEING`) :
+    eid === 'reorg' ? lines(tr`CONTINUED|ALIGNMENT`) :
+    eid === 'engagement_survey' ? lines(tr`YOUR|VOICE|MATTERS`) :
+    eid === 'dev_summit' ? lines(tr`WE ❤|DEVELOPERS`) :
+    lines(tr`UPDATE`);
 
   const slideNo =
-    eid === 'town_hall' ? 'SLIDE 47 / 89' :
-    eid === 'all_hands' ? 'SLIDE 22 / 41' :
-    eid === 'values_refresh' ? 'SLIDE 14 / 38' :
-    eid === 'compliance' ? 'MODULE 2 / 7' :
-    eid === 'inclusion_workshop' ? 'SLIDE 9 / 94' :
-    eid === 'mental_health' ? 'SLIDE 11 / 78' :
-    eid === 'reorg' ? 'NO SLIDE COUNT' :
-    eid === 'dev_summit' ? 'SLIDE 1 / 1' :
-    'SLIDE — / —';
+    eid === 'town_hall' ? tr`SLIDE 47 / 89` :
+    eid === 'all_hands' ? tr`SLIDE 22 / 41` :
+    eid === 'values_refresh' ? tr`SLIDE 14 / 38` :
+    eid === 'compliance' ? tr`MODULE 2 / 7` :
+    eid === 'inclusion_workshop' ? tr`SLIDE 9 / 94` :
+    eid === 'mental_health' ? tr`SLIDE 11 / 78` :
+    eid === 'reorg' ? tr`NO SLIDE COUNT` :
+    eid === 'dev_summit' ? tr`SLIDE 1 / 1` :
+    tr`SLIDE — / —`;
 
   return (
     <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%' }}>
@@ -81,8 +85,8 @@ export const AuditoriumScene = ({ event }) => {
         {/* Speaker notes / next-slide preview to the right */}
         <rect x="262" y="26" width="76" height="58" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.4"/>
         <rect x="266" y="29" width="68" height="20" fill="#0a0a0a"/>
-        <text x="300" y="40" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amberDim}>NEXT SLIDE</text>
-        <text x="300" y="44" textAnchor="middle" fontSize="2.5" fontFamily={FONT} fill={C.textDim}>(another vibe)</text>
+        <text x="300" y="40" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amberDim}>{tr`NEXT SLIDE`}</text>
+        <text x="300" y="44" textAnchor="middle" fontSize="2.5" fontFamily={FONT} fill={C.textDim}>{tr`(another vibe)`}</text>
         {/* Notes lines */}
         {[53, 56, 59, 62, 65, 68, 71].map((y, i) => (
           <rect key={i} x="266" y={y} width="68" height="1.5" fill={C.textDim} opacity="0.5"/>
@@ -93,7 +97,7 @@ export const AuditoriumScene = ({ event }) => {
         <circle cx="335" cy="22" r="1.5" fill={C.rust}>
           <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
         </circle>
-        <text x="332" y="23.5" fontSize="2.5" fontFamily={FONT} fill={C.rust} textAnchor="end">LIVE</text>
+        <text x="332" y="23.5" fontSize="2.5" fontFamily={FONT} fill={C.rust} textAnchor="end">{tr`LIVE`}</text>
       </g>
 
       {/* Stage spotlights overhead */}
@@ -107,12 +111,12 @@ export const AuditoriumScene = ({ event }) => {
       {/* Exit signs */}
       <g transform="translate(8 30)">
         <rect x="0" y="0" width="22" height="9" fill={C.sage} opacity="0.85"/>
-        <text x="11" y="6" textAnchor="middle" fontSize="4.5" fontFamily={FONT} fill="#000" fontWeight="700">EXIT</text>
+        <text x="11" y="6" textAnchor="middle" fontSize="4.5" fontFamily={FONT} fill="#000" fontWeight="700">{tr`EXIT`}</text>
         <polygon points="22,0 26,4.5 22,9" fill={C.sage} opacity="0.85"/>
       </g>
       <g transform="translate(370 30)">
         <rect x="0" y="0" width="22" height="9" fill={C.sage} opacity="0.85"/>
-        <text x="11" y="6" textAnchor="middle" fontSize="4.5" fontFamily={FONT} fill="#000" fontWeight="700">EXIT</text>
+        <text x="11" y="6" textAnchor="middle" fontSize="4.5" fontFamily={FONT} fill="#000" fontWeight="700">{tr`EXIT`}</text>
         <polygon points="0,0 -4,4.5 0,9" fill={C.sage} opacity="0.85"/>
       </g>
 
@@ -121,7 +125,7 @@ export const AuditoriumScene = ({ event }) => {
         <g>
           <rect x="252" y="50" width="14" height="22" fill={C.surface2} stroke={C.amber} strokeWidth="0.8"/>
           <Person x={259} y={52} type="ceo" scale={0.9}/>
-          <text x="259" y="80" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.amberDim}>CEO</text>
+          <text x="259" y="80" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.amberDim}>{tr`CEO`}</text>
         </g>
       )}
 
@@ -139,11 +143,11 @@ export const AuditoriumScene = ({ event }) => {
           <g transform="translate(228 32)">
             <rect x="0" y="0" width="118" height="38" fill={C.surface} stroke={C.rust} strokeWidth="0.8"/>
             <polygon points="-6,18 0,12 0,24" fill={C.surface} stroke={C.rust} strokeWidth="0.8"/>
-            <text x="6" y="13" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.5">DEVELOPERS!</text>
-            <text x="6" y="22" fontSize="7" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.6">DEVELOPERS!!</text>
-            <text x="6" y="32" fontSize="9" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.8">DEVELOPERS!!!</text>
+            <text x="6" y="13" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.5">{tr`DEVELOPERS!`}</text>
+            <text x="6" y="22" fontSize="7" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.6">{tr`DEVELOPERS!!`}</text>
+            <text x="6" y="32" fontSize="9" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="0.8">{tr`DEVELOPERS!!!`}</text>
           </g>
-          <text x="200" y="96" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.rust}>GUEST KEYNOTE</text>
+          <text x="200" y="96" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.rust}>{tr`GUEST KEYNOTE`}</text>
         </g>
       )}
 
@@ -184,8 +188,8 @@ export const AuditoriumScene = ({ event }) => {
         ))}
       </g>
 
-      <text x="10" y="14" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">MAIN AUDITORIUM · MANDATORY ATTENDANCE · DOORS NOTED</text>
-      <text x="395" y="172" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>{slideNo} · CHAT IS MODERATED</text>
+      <text x="10" y="14" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">{tr`MAIN AUDITORIUM · MANDATORY ATTENDANCE · DOORS NOTED`}</text>
+      <text x="395" y="172" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>{tr`${slideNo} · CHAT IS MODERATED`}</text>
     </svg>
   );
 };

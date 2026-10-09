@@ -3,15 +3,16 @@
 import { C, FONT } from '../../data/theme.js';
 import { Person } from './Person.jsx';
 import { SpeechBubble } from '../common/SpeechBubble.jsx';
+import { tr } from '../../i18n/index.js';
 
 export const PlanningScene = ({ sprint }) => {
   const marcusLines = [
-    '"Capacity check?"',
-    '"Anyone see risks?"',
-    '"Are we committing?"',
-    '"Quick parking lot?"',
-    '"Let\'s timebox this..."',
-    '"Going once... twice..."',
+    tr`"Capacity check?"`,
+    tr`"Anyone see risks?"`,
+    tr`"Are we committing?"`,
+    tr`"Quick parking lot?"`,
+    tr`"Let's timebox this..."`,
+    tr`"Going once... twice..."`,
   ];
   const marcusLine = marcusLines[((sprint || 1) - 1) % marcusLines.length];
   return (
@@ -21,17 +22,17 @@ export const PlanningScene = ({ sprint }) => {
 
       {/* Header / footer text */}
       <text x="30" y="34" fontSize="5" fontFamily={FONT} fill={C.textDimmer} letterSpacing="1">
-        ROOM A · "ASCEND" · SPRINT {sprint} PLANNING · 47 MINUTES IN
+        {tr`ROOM A · "ASCEND" · SPRINT ${sprint} PLANNING · 47 MINUTES IN`}
       </text>
       <text x="570" y="172" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>
-        RUNNING 17 MINUTES OVER · NEXT MEETING IN 0
+        {tr`RUNNING 17 MINUTES OVER · NEXT MEETING IN 0`}
       </text>
 
       {/* Whiteboard / kanban with sticky notes */}
       <g transform="translate(180 42)">
         <rect x="0" y="0" width="240" height="50" fill="#0d0e10" stroke={C.borderHi} strokeWidth="0.8"/>
         <text x="120" y="11" textAnchor="middle" fontSize="4.5" fontFamily={FONT} fill={C.amber} fontWeight="700" letterSpacing="2">
-          SPRINT {sprint} BACKLOG
+          {tr`SPRINT ${sprint} BACKLOG`}
         </text>
 
         {/* Sticky notes */}
@@ -57,8 +58,8 @@ export const PlanningScene = ({ sprint }) => {
 
         {/* "Urgent" sticky with CEO star */}
         <rect x="202" y="17" width="34" height="26" fill={C.rust} opacity="0.55" stroke={C.rust} strokeWidth="0.5" strokeDasharray="2 1"/>
-        <text x="219" y="27" textAnchor="middle" fontSize="3" fontFamily={FONT} fill="#000" fontWeight="700">URGENT</text>
-        <text x="219" y="35" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill="#000">CEO ★</text>
+        <text x="219" y="27" textAnchor="middle" fontSize="3" fontFamily={FONT} fill="#000" fontWeight="700">{tr`URGENT`}</text>
+        <text x="219" y="35" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill="#000">{tr`CEO ★`}</text>
       </g>
 
       {/* You standing presenting at the board */}
@@ -98,8 +99,8 @@ export const PlanningScene = ({ sprint }) => {
         <rect x="-3" y="-2" width="6" height="9" fill="#0a0a0a" stroke={C.amberDim} strokeWidth="0.5"/>
         <rect x="-2.5" y="-1" width="5" height="6" fill={C.surface}/>
         <text x="0" y="1" textAnchor="middle" fontSize="1.6" fontFamily={FONT} fill={C.amber}>r/pickleball</text>
-        <text x="0" y="3" textAnchor="middle" fontSize="1.4" fontFamily={FONT} fill={C.text}>Stefan tutorial</text>
-        <text x="0" y="4.5" textAnchor="middle" fontSize="1.4" fontFamily={FONT} fill={C.textDimmer}>↑1.2k · 47 cmts</text>
+        <text x="0" y="3" textAnchor="middle" fontSize="1.4" fontFamily={FONT} fill={C.text}>{tr`Stefan tutorial`}</text>
+        <text x="0" y="4.5" textAnchor="middle" fontSize="1.4" fontFamily={FONT} fill={C.textDimmer}>{tr`↑1.2k · 47 cmts`}</text>
       </g>
 
       {/* Sarah's laptop showing code */}

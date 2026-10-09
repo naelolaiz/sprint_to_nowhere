@@ -4,21 +4,22 @@ import { Award, RotateCcw } from 'lucide-react';
 import { C } from '../../data/theme.js';
 import { Btn } from '../common/Btn.jsx';
 import { AI_VICTORY_LINE } from '../../data/aiFlavors.js';
+import { tr } from '../../i18n/index.js';
 
 export const VictoryPhase = ({ s, onRestart }) => (
   <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
     <div className="max-w-lg text-center">
       <Award size={64} className="mx-auto mb-6" style={{ color: C.sage }}/>
-      <div className="text-xs tracking-[0.4em] mb-3" style={{ color: C.sageDim }}>STATISTICALLY IMPROBABLE</div>
+      <div className="text-xs tracking-[0.4em] mb-3" style={{ color: C.sageDim }}>{tr`STATISTICALLY IMPROBABLE`}</div>
       <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: C.text, letterSpacing: '-0.02em' }}>
-        Healthy Codebase
+        {tr`Healthy Codebase`}
       </h1>
       <div className="text-sm mb-8" style={{ color: C.textDim, lineHeight: 1.7 }}>
-        After {s.sprint} sprints, the tech debt is below 15. The tests pass. The docs are accurate. New hires understand the deployment process.<br/><br/>
-        This has never happened before. Someone is filming a documentary.
-        {s.aiMandate && (<><br/><br/>{AI_VICTORY_LINE}</>)}
+        {tr`After ${s.sprint} sprints, the tech debt is below 15. The tests pass. The docs are accurate. New hires understand the deployment process.`}<br/><br/>
+        {tr`This has never happened before. Someone is filming a documentary.`}
+        {s.aiMandate && (<><br/><br/>{tr(AI_VICTORY_LINE)}</>)}
       </div>
-      <Btn onClick={onRestart}><span className="flex items-center gap-2"><RotateCcw size={14}/>PLAY AGAIN</span></Btn>
+      <Btn onClick={onRestart}><span className="flex items-center gap-2"><RotateCcw size={14}/>{tr`PLAY AGAIN`}</span></Btn>
     </div>
   </div>
 );

@@ -7,6 +7,7 @@ import { InitechLogo } from './InitechLogo.jsx';
 import { SkyPane } from './Sky.jsx';
 import { skyFor } from './sky.js';
 import { minutesToClock } from '../../game/clock.js';
+import { tr } from '../../i18n/index.js';
 
 export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 10 * 60 }) => {
   const eid = event?.id;
@@ -99,7 +100,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
         {/* Daylight spill on the wall under the window */}
         {!isLate && <rect x="18" y="82" width="86" height="6" fill={sky.bottom} opacity="0.08"/>}
         <text x="61" y="92" textAnchor="middle" fontSize="4" fontFamily={FONT} fill={C.textDimmer}>
-          {isLate ? 'IT IS DARK NOW' : isDusk ? 'GOLDEN HOUR, ALLEGEDLY' : 'SOUTH FACING'}
+          {isLate ? tr`IT IS DARK NOW` : isDusk ? tr`GOLDEN HOUR, ALLEGEDLY` : tr`SOUTH FACING`}
         </text>
       </g>
 
@@ -107,7 +108,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
       <g transform="translate(112 24)">
         <rect x="0" y="0" width="40" height="32" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.4"/>
         <rect x="0" y="0" width="40" height="6" fill={C.amberDim}/>
-        <text x="20" y="4.5" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.bg} fontWeight="700">Q3 — SPRINT</text>
+        <text x="20" y="4.5" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`Q3 — SPRINT`}</text>
         {/* 5x5 day grid */}
         {[0, 1, 2, 3, 4].map(r => (
           [0, 1, 2, 3, 4].map(c => (
@@ -129,10 +130,10 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
       <g transform="translate(160 22)">
         <rect x="0" y="0" width="46" height="34" fill={C.surface2} stroke={C.borderHi} strokeWidth="0.4"/>
         <rect x="2" y="2" width="42" height="22" fill="#0a0a0a"/>
-        <text x="23" y="11" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">SHIP</text>
-        <text x="23" y="16" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">ANYWAY</text>
-        <text x="23" y="21" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>– our values</text>
-        <text x="23" y="29" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>(Q3 refresh)</text>
+        <text x="23" y="11" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`SHIP`}</text>
+        <text x="23" y="16" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`ANYWAY`}</text>
+        <text x="23" y="21" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill={C.textDimmer}>{tr`– our values`}</text>
+        <text x="23" y="29" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>{tr`(Q3 refresh)`}</text>
       </g>
 
       {/* ----- Cubicle wall on the right with a coworker visible ----- */}
@@ -145,8 +146,8 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
         {/* Sticky note pinned to the cubicle wall */}
         <g transform="translate(360 75)">
           <rect x="0" y="0" width="14" height="11" fill={C.amber} opacity="0.7" transform="rotate(-3)"/>
-          <text x="2" y="5" fontSize="1.8" fontFamily={FONT} fill="#000" transform="rotate(-3 2 5)">DEPLOY:</text>
-          <text x="2" y="8" fontSize="1.8" fontFamily={FONT} fill="#000" transform="rotate(-3 2 8)">FRIDAY 4PM</text>
+          <text x="2" y="5" fontSize="1.8" fontFamily={FONT} fill="#000" transform="rotate(-3 2 5)">{tr`DEPLOY:`}</text>
+          <text x="2" y="8" fontSize="1.8" fontFamily={FONT} fill="#000" transform="rotate(-3 2 8)">{tr`FRIDAY 4PM`}</text>
         </g>
         {/* Adjacent dev's monitor peeking over the wall */}
         <rect x="360" y="100" width="32" height="14" fill="#0a0a0a" stroke={C.border} strokeWidth="0.4"/>
@@ -164,7 +165,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
         <path d="M 0 0 C -5 -8 -4 -16 0 -18 C 4 -16 5 -8 0 0" fill="none" stroke={moraleLow ? C.amberDim : C.sageDim} strokeWidth="0.7"/>
         <path d="M -2 -2 C -6 -10 -5 -14 -3 -15" fill="none" stroke={moraleLow ? C.amberDim : C.sageDim} strokeWidth="0.5"/>
         <path d="M 2 -2 C 6 -10 5 -14 3 -15" fill="none" stroke={moraleLow ? C.amberDim : C.sageDim} strokeWidth="0.5"/>
-        {moraleLow && <text x="0" y="14" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>(thirsty)</text>}
+        {moraleLow && <text x="0" y="14" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>{tr`(thirsty)`}</text>}
       </g>
 
       {/* ----- Company plaque on the empty wall between the poster and the cubicle, hung at window height ----- */}
@@ -175,10 +176,10 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
       {/* ----- Whiteboard sliver visible on the back wall (between window and poster) ----- */}
       <g transform="translate(108 60)">
         <rect x="0" y="0" width="48" height="20" fill="#0d0e10" stroke={C.borderHi} strokeWidth="0.4"/>
-        <text x="24" y="6" textAnchor="middle" fontSize="2.8" fontFamily={FONT} fill={C.amber} fontWeight="700">SPRINT</text>
-        <text x="3" y="11" fontSize="1.8" fontFamily={FONT} fill={C.text}>· auth refactor</text>
-        <text x="3" y="14" fontSize="1.8" fontFamily={FONT} fill={C.text}>· export feature</text>
-        <text x="3" y="17" fontSize="1.8" fontFamily={FONT} fill={C.rust}>· "tiny tweak"</text>
+        <text x="24" y="6" textAnchor="middle" fontSize="2.8" fontFamily={FONT} fill={C.amber} fontWeight="700">{tr`SPRINT`}</text>
+        <text x="3" y="11" fontSize="1.8" fontFamily={FONT} fill={C.text}>{tr`· auth refactor`}</text>
+        <text x="3" y="14" fontSize="1.8" fontFamily={FONT} fill={C.text}>{tr`· export feature`}</text>
+        <text x="3" y="17" fontSize="1.8" fontFamily={FONT} fill={C.rust}>{tr`· "tiny tweak"`}</text>
       </g>
 
       {/* ----- Soft floor shadow under your desk for grounding ----- */}
@@ -246,7 +247,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
       {canCount >= 3 && (
         <g transform="translate(170 132)">
           <rect x="0" y="-6" width="3" height="6" fill={C.surface2} stroke={C.burnout} strokeWidth="0.4"/>
-          <text x="1.5" y="-1" textAnchor="middle" fontSize="1.5" fontFamily={FONT} fill={C.burnout}>3rd</text>
+          <text x="1.5" y="-1" textAnchor="middle" fontSize="1.5" fontFamily={FONT} fill={C.burnout}>{tr`3rd`}</text>
         </g>
       )}
 
@@ -274,7 +275,7 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
             <animate attributeName="opacity" values="0.55;0.85;0.55" dur="1.4s" repeatCount="indefinite"/>
           </circle>
           <text x="200" y="50" textAnchor="middle" fontSize="20" fill={C.rust}>⚠</text>
-          <text x="200" y="66" textAnchor="middle" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="2">PRODUCTION INCIDENT</text>
+          <text x="200" y="66" textAnchor="middle" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="2">{tr`PRODUCTION INCIDENT`}</text>
         </>
       )}
 
@@ -285,9 +286,9 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
           <rect x="-14" y="-18" width="28" height="22" fill={C.surface2} stroke={C.rust} strokeWidth="1.2"/>
           <line x1="-14" y1="-9" x2="14" y2="-9" stroke={C.rust} strokeWidth="0.6"/>
           <line x1="0" y1="-18" x2="0" y2="4" stroke={C.rust} strokeWidth="0.6"/>
-          <text x="0" y="-12" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.rust} fontWeight="700">FROM HQ</text>
-          <text x="0" y="-3" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDim}>"FRAGILE"</text>
-          <text x="0" y="2" textAnchor="middle" fontSize="2" fontFamily={FONT} fill={C.textDim}>this side up ↑</text>
+          <text x="0" y="-12" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.rust} fontWeight="700">{tr`FROM HQ`}</text>
+          <text x="0" y="-3" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDim}>{tr`"FRAGILE"`}</text>
+          <text x="0" y="2" textAnchor="middle" fontSize="2" fontFamily={FONT} fill={C.textDim}>{tr`this side up ↑`}</text>
         </g>
       )}
 
@@ -297,13 +298,13 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
           <rect x="-2" y="-2" width="174" height="42" fill="#000" opacity="0.25"/>
           <rect x="0" y="0" width="170" height="38" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.7"/>
           <rect x="0" y="0" width="170" height="7" fill={C.amberDim}/>
-          <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">SLACK · DM FROM CEO</text>
-          <text x="4" y="15" fontSize="3" fontFamily={FONT} fill={C.amber}>CEO · 1:23 AM</text>
+          <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`SLACK · DM FROM CEO`}</text>
+          <text x="4" y="15" fontSize="3" fontFamily={FONT} fill={C.amber}>{tr`CEO · 1:23 AM`}</text>
           <line x1="4" y1="20" x2="166" y2="20" stroke={C.border} strokeWidth="0.3"/>
           <rect x="4" y="23" width="120" height="2.5" fill={C.textDim} opacity="0.5"/>
           <rect x="4" y="27" width="148" height="2.5" fill={C.textDim} opacity="0.5"/>
           <rect x="4" y="31" width="92" height="2.5" fill={C.textDim} opacity="0.5"/>
-          <text x="166" y="34" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>1 unread · 🙏</text>
+          <text x="166" y="34" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>{tr`1 unread · 🙏`}</text>
           {/* blinking notification dot */}
           <circle cx="167" cy="3.5" r="1.6" fill={C.rust}>
             <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
@@ -317,11 +318,11 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
           <rect x="-2" y="-2" width="90" height="38" fill="#000" opacity="0.25"/>
           <rect x="0" y="0" width="86" height="34" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.6"/>
           <rect x="0" y="0" width="86" height="6" fill={C.amberDim}/>
-          <text x="43" y="4.5" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">CALENDAR INVITE</text>
-          <text x="4" y="13" fontSize="3.2" fontFamily={FONT} fill={C.text}>[hold for chat]</text>
-          <text x="4" y="19" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>30 min · 8 attendees</text>
-          <text x="4" y="25" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>agenda: TBD</text>
-          <text x="4" y="31" fontSize="2.5" fontFamily={FONT} fill={C.amber}>STARTS IN 4 MIN</text>
+          <text x="43" y="4.5" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`CALENDAR INVITE`}</text>
+          <text x="4" y="13" fontSize="3.2" fontFamily={FONT} fill={C.text}>{tr`[hold for chat]`}</text>
+          <text x="4" y="19" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>{tr`30 min · 8 attendees`}</text>
+          <text x="4" y="25" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>{tr`agenda: TBD`}</text>
+          <text x="4" y="31" fontSize="2.5" fontFamily={FONT} fill={C.amber}>{tr`STARTS IN 4 MIN`}</text>
         </g>
       )}
 
@@ -329,9 +330,9 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
       {eid === 'tickets_down' && (
         <g transform="translate(330 50)">
           <rect x="-22" y="-14" width="44" height="20" fill={C.amber} opacity="0.7" transform="rotate(2)"/>
-          <text x="0" y="-7" textAnchor="middle" fontSize="3" fontFamily={FONT} fill="#000" fontWeight="700" transform="rotate(2 0 -7)">JIRA DOWN</text>
-          <text x="0" y="-2" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill="#000" transform="rotate(2 0 -2)">"investigating"</text>
-          <text x="0" y="3" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill="#000" transform="rotate(2 0 3)">— 3 hrs ago</text>
+          <text x="0" y="-7" textAnchor="middle" fontSize="3" fontFamily={FONT} fill="#000" fontWeight="700" transform="rotate(2 0 -7)">{tr`JIRA DOWN`}</text>
+          <text x="0" y="-2" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill="#000" transform="rotate(2 0 -2)">{tr`"investigating"`}</text>
+          <text x="0" y="3" textAnchor="middle" fontSize="2.2" fontFamily={FONT} fill="#000" transform="rotate(2 0 3)">{tr`— 3 hrs ago`}</text>
         </g>
       )}
 
@@ -341,22 +342,22 @@ export const DeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock = 1
           <path d="M -8 -2 Q 0 -10 8 -2" fill="none" stroke={C.rust} strokeWidth="1.2"/>
           <path d="M -5 1 Q 0 -4 5 1" fill="none" stroke={C.rustDim} strokeWidth="1"/>
           <line x1="-9" y1="-9" x2="9" y2="3" stroke={C.rust} strokeWidth="1.4"/>
-          <text x="0" y="13" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.rust}>WIFI: ✗</text>
+          <text x="0" y="13" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.rust}>{tr`WIFI: ✗`}</text>
         </g>
       )}
 
       {/* ----- Title strip ----- */}
       <text x="395" y="14" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>
-        JARED'S DESK · OPEN PLAN · {minutesToClock(clock)}
+        {tr`JARED'S DESK · OPEN PLAN · ${minutesToClock(clock)}`}
       </text>
       {debtCritical && (
         <text x="10" y="172" fontSize="4.5" fontFamily={FONT} fill={C.rust} letterSpacing="1">
-          CODEBASE STATUS: FRAGILE
+          {tr`CODEBASE STATUS: FRAGILE`}
         </text>
       )}
       {burnout > 80 && (
         <text x="395" y="172" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.burnout} letterSpacing="1">
-          BURNOUT: CRITICAL
+          {tr`BURNOUT: CRITICAL`}
         </text>
       )}
     </svg>

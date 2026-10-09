@@ -6,15 +6,19 @@
 // opener quotes, the time the scene window shows and the time a calendar
 // item lands are all the same clock.
 
+import { getLocale } from '../i18n/index.js';
+
 export const WORKDAY_START_MIN = 9 * 60;
 
+// "2:05 PM" in English; Spanish reads the clock in 24 hours ("14:05").
 export const minutesToClock = (totalMinutesSinceMidnight) => {
   const m = ((Math.round(totalMinutesSinceMidnight) % (24 * 60)) + 24 * 60) % (24 * 60);
   const hour24 = Math.floor(m / 60);
-  const minute = m % 60;
+  const minute = String(m % 60).padStart(2, '0');
+  if (getLocale() === 'es') return `${hour24}:${minute}`;
   const isPM = hour24 >= 12;
   const hour12 = ((hour24 + 11) % 12) + 1;
-  return `${hour12}:${String(minute).padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
+  return `${hour12}:${minute} ${isPM ? 'PM' : 'AM'}`;
 };
 
 // Minutes of the day's budget already spent.

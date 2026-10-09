@@ -17,6 +17,7 @@ import { applyTeammateContributions } from './team.js';
 import { applyAction } from './actions.js';
 import { usedMinutes, clockText, scheduleMinute } from './clock.js';
 import { whenOf } from '../data/schedule.js';
+import { tr } from '../i18n/index.js';
 
 // Events that open the day, in the order pickDayEvents slots them. Everything
 // else the roll produces is given a minute on the clock instead.
@@ -32,7 +33,7 @@ export const stageEvent = (s, ev, prefix = '— ') => {
     currentEvent: ev,
     dialogNode: ev.start || 'start',
     eventCast: cast,
-    dayLog: [...(s.dayLog || []), `${prefix}${renderCast(ev.title, cast)}`],
+    dayLog: [...(s.dayLog || []), `${prefix}${renderCast(tr(ev.title), cast)}`],
     recentEventIds: pushRecentEvent(s.recentEventIds || [], ev.id),
     recentDescIdx: pushRecentDesc(s.recentDescIdx || {}, ev.id, cast?._descIdx),
     onceFired: ev.once && !(s.onceFired || []).includes(ev.id)
@@ -141,7 +142,7 @@ export const startSprint = (prev) => {
         { urgent: !!c.urgent, legacy: c.type === 'legacy' },
       );
       plan = [...plan, t];
-      initialLog.push(`📋 Carry-over from a previous sprint: "${t.title}" (${t.effort}h). Forced into the sprint.`);
+      initialLog.push(tr`📋 Carry-over from a previous sprint: "${t.title}" (${t.effort}h). Forced into the sprint.`);
     }
   }
   // You committed to 20% more last sprint. Here is the 20%: one more ticket
@@ -152,7 +153,7 @@ export const startSprint = (prev) => {
     if (spare.length > 0) {
       const extra = { ...spare[Math.floor(Math.random() * spare.length)] };
       plan = [...plan, extra];
-      initialLog.push(`📋 You committed to 20% more. Here is the 20%: "${extra.title}" (${extra.effort}h). "We believe in you."`);
+      initialLog.push(tr`📋 You committed to 20% more. Here is the 20%: "${extra.title}" (${extra.effort}h). "We believe in you."`);
     }
   }
   // 35% chance management forces a strategic initiative into the sprint
@@ -160,7 +161,7 @@ export const startSprint = (prev) => {
     const tpl = STRATEGIC_INITIATIVES[Math.floor(Math.random() * STRATEGIC_INITIATIVES.length)];
     const init = mkTicket(tpl, 'feature', { strategic: true, urgent: true });
     plan = [...plan, init];
-    initialLog.push(`📋 Management added "${init.title}" to your sprint. "It's a top priority."`);
+    initialLog.push(tr`📋 Management added "${init.title}" to your sprint. "It's a top priority."`);
   }
   const startHours = totalRemaining(plan);
   const dayBudget = dailyFocusBudget(prev.burnout, prev.badDayStreak);
@@ -211,7 +212,7 @@ export const chooseEvent = (prev, choice) => {
   }
   if (queue.length > 0) {
     const [nextEv, ...rest] = queue;
-    return { ...stageEvent(newState, nextEv, '— and then: '), eventQueue: rest };
+    return { ...stageEvent(newState, nextEv, tr`— and then: `), eventQueue: rest };
   }
   // Otherwise, back to the desk: whatever the clock has reached fires now.
   // If you were on your way out, the summary is where you were going.
@@ -235,7 +236,7 @@ export const work = (prev, id) => {
       return {
         ...prev,
         subPhase: 'day-summary',
-        dayLog: [...prev.dayLog, 'You opened the next ticket, read the description twice, and the day was over. It will still be there tomorrow. So will the description.'],
+        dayLog: [...prev.dayLog, tr`You opened the next ticket, read the description twice, and the day was over. It will still be there tomorrow. So will the description.`],
       };
     }
     s = applyContextSwitch(prev, switches);
@@ -244,7 +245,7 @@ export const work = (prev, id) => {
   const cap = nextAt == null ? Infinity : Math.max(0, (nextAt - usedMinutes(s)) / 60);
   if (cap <= 0) {
     // The switch ate the time before the next item. It lands as you sit.
-    return fireDue({ ...s, resumeTicketId: id, dayLog: [...s.dayLog, 'You sat down. Before the first keystroke:'] });
+    return fireDue({ ...s, resumeTicketId: id, dayLog: [...s.dayLog, tr`You sat down. Before the first keystroke:`] });
   }
   const before = s.dayFocusRemaining;
   s = workOnTicket(s, id, cap);
@@ -255,7 +256,7 @@ export const work = (prev, id) => {
     s = { ...s };
     if (spendTokens(s, 10) === 0) {
       s.dayFocusRemaining = Math.max(0, s.dayFocusRemaining - 0.25);
-      s.dayLog = [...s.dayLog, '🪙 No tokens left, so you wrote the "how AI helped" field by hand. The form rejected "n/a." A quarter hour.'];
+      s.dayLog = [...s.dayLog, tr`🪙 No tokens left, so you wrote the "how AI helped" field by hand. The form rejected "n/a." A quarter hour.`];
     }
   }
   const t = s.sprintPlan.find(x => x.id === id);
@@ -286,7 +287,7 @@ export const skipWork = (prev) => {
     ...prev,
     leaving: true,
     dayFocusRemaining: Math.max(0, prev.dayFocusRemaining - spent),
-    dayLog: [...(prev.dayLog || []), 'You started packing up. The calendar had other plans.'],
+    dayLog: [...(prev.dayLog || []), tr`You started packing up. The calendar had other plans.`],
   };
   return fireDue(out);
 };
@@ -322,7 +323,7 @@ export const nextDay = (prev) => {
   const planAfterNight = team.sprintPlan.map(t => {
     if (!t.shielded || t.shipped) return t;
     if (Math.random() < 0.4) {
-      archiveLog.push(`Overnight: the page you wrote for "${t.title}" was moved to "Archive (2019)" during a wiki tidy-up. The decision is still made. Nobody can find it.`);
+      archiveLog.push(tr`Overnight: the page you wrote for "${t.title}" was moved to "Archive (2019)" during a wiki tidy-up. The decision is still made. Nobody can find it.`);
       return { ...t, shielded: false };
     }
     return t;

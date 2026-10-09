@@ -6,6 +6,7 @@ import { Desk } from './Desk.jsx';
 import { SkyPane } from './Sky.jsx';
 import { skyFor } from './sky.js';
 import { minutesToClock } from '../../game/clock.js';
+import { tr } from '../../i18n/index.js';
 
 // Working-from-home variant of DeskScene. Same player + same screen vocabulary,
 // different surroundings: warm wall, kitchen counter behind the desk, a
@@ -100,10 +101,10 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock
       <g transform="translate(168 26)">
         <rect x="0" y="0" width="50" height="36" fill="#2a1f14" stroke="#5a3a20" strokeWidth="0.6"/>
         <rect x="2" y="2" width="46" height="28" fill="#0d0a06"/>
-        <text x="25" y="13" textAnchor="middle" fontSize="3.6" fontFamily={FONT} fill={C.amber} fontWeight="700" letterSpacing="1">HOME</text>
-        <text x="25" y="20" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDim}>(no commute)</text>
-        <text x="25" y="26" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>— a personal value</text>
-        <text x="25" y="34" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>v1, do not refresh</text>
+        <text x="25" y="13" textAnchor="middle" fontSize="3.6" fontFamily={FONT} fill={C.amber} fontWeight="700" letterSpacing="1">{tr`HOME`}</text>
+        <text x="25" y="20" textAnchor="middle" fontSize="3" fontFamily={FONT} fill={C.textDim}>{tr`(no commute)`}</text>
+        <text x="25" y="26" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>{tr`— a personal value`}</text>
+        <text x="25" y="34" textAnchor="middle" fontSize="2.4" fontFamily={FONT} fill={C.textDimmer}>{tr`v1, do not refresh`}</text>
       </g>
 
       {/* ----- Bookshelf to the right ----- */}
@@ -195,7 +196,7 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock
             <animate attributeName="opacity" values="0.55;0.85;0.55" dur="1.4s" repeatCount="indefinite"/>
           </circle>
           <text x="200" y="50" textAnchor="middle" fontSize="20" fill={C.rust}>⚠</text>
-          <text x="200" y="66" textAnchor="middle" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="2">PRODUCTION INCIDENT</text>
+          <text x="200" y="66" textAnchor="middle" fontSize="6" fontFamily={FONT} fill={C.rust} fontWeight="700" letterSpacing="2">{tr`PRODUCTION INCIDENT`}</text>
         </>
       )}
 
@@ -205,11 +206,11 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock
           <rect x="-2" y="-2" width="90" height="38" fill="#000" opacity="0.25"/>
           <rect x="0" y="0" width="86" height="34" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.6"/>
           <rect x="0" y="0" width="86" height="6" fill={C.amberDim}/>
-          <text x="43" y="4.5" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">CALENDAR INVITE</text>
-          <text x="4" y="13" fontSize="3.2" fontFamily={FONT} fill={C.text}>[hold for chat]</text>
-          <text x="4" y="19" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>30 min · 8 attendees</text>
-          <text x="4" y="25" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>agenda: TBD</text>
-          <text x="4" y="31" fontSize="2.5" fontFamily={FONT} fill={C.amber}>STARTS IN 4 MIN</text>
+          <text x="43" y="4.5" textAnchor="middle" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`CALENDAR INVITE`}</text>
+          <text x="4" y="13" fontSize="3.2" fontFamily={FONT} fill={C.text}>{tr`[hold for chat]`}</text>
+          <text x="4" y="19" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>{tr`30 min · 8 attendees`}</text>
+          <text x="4" y="25" fontSize="2.8" fontFamily={FONT} fill={C.textDim}>{tr`agenda: TBD`}</text>
+          <text x="4" y="31" fontSize="2.5" fontFamily={FONT} fill={C.amber}>{tr`STARTS IN 4 MIN`}</text>
         </g>
       )}
 
@@ -219,13 +220,13 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock
           <rect x="-2" y="-2" width="174" height="42" fill="#000" opacity="0.25"/>
           <rect x="0" y="0" width="170" height="38" fill={C.surface2} stroke={C.amberDim} strokeWidth="0.7"/>
           <rect x="0" y="0" width="170" height="7" fill={C.amberDim}/>
-          <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">SLACK · DM FROM CEO</text>
-          <text x="4" y="15" fontSize="3" fontFamily={FONT} fill={C.amber}>CEO · 1:23 AM</text>
+          <text x="4" y="5" fontSize="3.5" fontFamily={FONT} fill={C.bg} fontWeight="700">{tr`SLACK · DM FROM CEO`}</text>
+          <text x="4" y="15" fontSize="3" fontFamily={FONT} fill={C.amber}>{tr`CEO · 1:23 AM`}</text>
           <line x1="4" y1="20" x2="166" y2="20" stroke={C.border} strokeWidth="0.3"/>
           <rect x="4" y="23" width="120" height="2.5" fill={C.textDim} opacity="0.5"/>
           <rect x="4" y="27" width="148" height="2.5" fill={C.textDim} opacity="0.5"/>
           <rect x="4" y="31" width="92" height="2.5" fill={C.textDim} opacity="0.5"/>
-          <text x="166" y="34" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>1 unread · 🙏</text>
+          <text x="166" y="34" textAnchor="end" fontSize="2.6" fontFamily={FONT} fill={C.amber}>{tr`1 unread · 🙏`}</text>
           <circle cx="167" cy="3.5" r="1.6" fill={C.rust}>
             <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
           </circle>
@@ -238,21 +239,21 @@ export const HomeDeskScene = ({ event, debt = 0, burnout = 0, morale = 70, clock
         <circle cx="3" cy="-1.5" r="1.6" fill={C.sage}>
           <animate attributeName="opacity" values="0.4;1;0.4" dur="2.2s" repeatCount="indefinite"/>
         </circle>
-        <text x="8" y="0.5" fontSize="4.2" fontFamily={FONT} fill={C.amber} fontWeight="700" letterSpacing="1">WFH · LIVE</text>
+        <text x="8" y="0.5" fontSize="4.2" fontFamily={FONT} fill={C.amber} fontWeight="700" letterSpacing="1">{tr`WFH · LIVE`}</text>
       </g>
 
       {/* ----- Title strip ----- */}
       <text x="395" y="14" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.textDimmer}>
-        JARED'S APARTMENT · {minutesToClock(clock)} · COMMUTE: 0M
+        {tr`JARED'S APARTMENT · ${minutesToClock(clock)} · COMMUTE: 0M`}
       </text>
       {debtCritical && (
         <text x="10" y="172" fontSize="4.5" fontFamily={FONT} fill={C.rust} letterSpacing="1">
-          CODEBASE STATUS: FRAGILE
+          {tr`CODEBASE STATUS: FRAGILE`}
         </text>
       )}
       {burnout > 80 && (
         <text x="395" y="172" textAnchor="end" fontSize="4.5" fontFamily={FONT} fill={C.burnout} letterSpacing="1">
-          BURNOUT: CRITICAL
+          {tr`BURNOUT: CRITICAL`}
         </text>
       )}
     </svg>
