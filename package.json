@@ -19,7 +19,7 @@
     "i18n:check": "node scripts/i18n.mjs check es"
   },
   "dependencies": {
-    "lucide-react": "^1.52.0",
+    "lucide-react": "^1.55.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
